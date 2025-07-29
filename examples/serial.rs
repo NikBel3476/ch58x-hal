@@ -4,6 +4,9 @@
 use core::arch::{asm, global_asm};
 use core::fmt::Write;
 use core::writeln;
+use ch58x_hal::gpio::Pin;
+use embassy_executor::Spawner;
+use embassy_time::{Duration, Timer};
 use qingke::riscv;
 
 use embedded_hal_1::delay::DelayNs;
@@ -16,15 +19,30 @@ use hal::sysctl::Config;
 use hal::uart::UartTx;
 use hal::{pac, peripherals, Peripherals};
 use {ch58x_hal as hal, panic_halt as _};
+use hal::embassy::time_driver_impl::{COUNT, NEXT, NEXT_ALARM};
 
-#[qingke_rt::entry]
-fn main() -> ! {
+#[embassy_executor::task]
+async fn blink(pin: AnyPin) {
+    let mut led = Output::new(pin, Level::Low, OutputDrive::_5mA);
+
+    loop {
+        led.set_high();
+        Timer::after_millis(1000).await;
+        led.set_low();
+        Timer::after_millis(1000).await;
+    }
+}
+
+#[embassy_executor::main(entry = "qingke_rt::entry")]
+async fn main(spawner: Spawner) -> ! {
     let mut config = hal::Config::default();
-    config.clock.use_pll_60mhz().enable_lse();
+    config.clock.use_pll_80mhz().enable_lse();
     let p = hal::init(config);
 
+    hal::embassy::init();
+
     // LED PA8
-    let mut blue_led = Output::new(p.PA8, Level::Low, OutputDrive::_5mA);
+    // let mut blue_led = Output::new(p.PA8, Level::Low, OutputDrive::_5mA);
 
     let mut serial = UartTx::new(p.UART1, p.PA9, Default::default()).unwrap();
     //let mut serial = UartTx::new(p.UART3, p.PA5, Default::default()).unwrap();
@@ -56,28 +74,55 @@ fn main() -> ! {
     writeln!(serial, "marchid: 0x{:08x?}", marchid.bits());
     let mias = riscv::register::misa::read().unwrap();
     writeln!(serial, "mias: 0x{:08x?}", mias.bits());
+    let systick = unsafe { &*pac::SYSTICK::PTR };
+
+    spawner.spawn(blink(p.PA8.degrade())).unwrap();
 
     loop {
-        blue_led.toggle();
+        // blue_led.toggle();
 
         // writeln!(uart, "day {:?}", rtc.counter_day()).unwrap();
         // writeln!(uart, "2s {:?}", rtc.counter_2s()).unwrap();
 
         //  writeln!(uart, "tick! {}", SysTick::now()).unwrap();
-        hal::delay_ms(1000);
+        // hal::delay_ms(1000);
 
         let now = rtc.now();
-        writeln!(
-            serial,
-            "{}:  button: download={} reset={}",
-            now,
-            // now.isoweekday(),
-            download_button.is_low(),
-            reset_button.is_low()
-        )
+        let systick_value = systick.cnt().read().bits();
+        unsafe {
+            write!(
+                serial,
+                "{}: COUNT={} NEXT={} systick={} sr={} NEXT_ALARM={}\n",
+                now,
+                COUNT,
+                NEXT,
+                systick_value,
+                systick.sr().read().bits(),
+                NEXT_ALARM
+            )
+        }
         .unwrap();
+
+        Timer::after_millis(1000).await;
+
+        // unsafe {
+        //     write!(
+        //         serial,
+        //         "{}: COUNT={} NEXT={} systick={} sr={} NEXT_ALARM={}\n",
+        //         now,
+        //         COUNT,
+        //         NEXT,
+        //         systick_value,
+        //         systick.sr().read().bits(),
+        //         NEXT_ALARM
+        //     )
+        // }
+        // .unwrap();
+
         // serial.blocking_flush();
         //writeln!(serial, "Current time: {} weekday={}", now, now.isoweekday()).unwrap();
         //writeln!(serial, "button: {} {}", ).unwrap();
+
+        // Timer::after_ticks(1000).await;
     }
 }
