@@ -12,11 +12,6 @@ use qingke_rt::interrupt;
 
 use crate::pac;
 
-pub static mut COUNT: u64 = 0;
-pub static mut NEXT: u64 = 0;
-pub static mut NEXT_ALARM: u64 = 0;
-pub static mut SW_NEXT: u64 = 0;
-
 pub struct SystickDriver {
     cnt_per_tick: AtomicU32,
     queue: Mutex<CriticalSectionRawMutex, RefCell<Queue>>,
@@ -66,10 +61,8 @@ impl SystickDriver {
 
     fn trigger_alarm(&self, cs: CriticalSection) {
         let mut next = self.queue.borrow(cs).borrow_mut().next_expiration(self.raw_cnt());
-        unsafe { NEXT = next };
         while !self.set_alarm(cs, next) {
             next = self.queue.borrow(cs).borrow_mut().next_expiration(self.raw_cnt());
-            unsafe { NEXT = next };
         }
     }
 
@@ -79,24 +72,26 @@ impl SystickDriver {
         rb.cnt().read().bits()
     }
 
-    fn set_alarm(&self, _cs: critical_section::CriticalSection, next_alarm_cnt: u64) -> bool {
-        let rb = unsafe { &*pac::SYSTICK::PTR };
+    fn set_alarm(&self, cs: critical_section::CriticalSection, next_alarm_cnt: u64) -> bool {
+        critical_section::with(|cs| {
+            let rb = unsafe { &*pac::SYSTICK::PTR };
 
-        if next_alarm_cnt <= self.raw_cnt() {
-            return false;
-        }
+            if next_alarm_cnt <= self.raw_cnt() {
+                return false;
+            }
 
-        rb.cmp().write(|w| unsafe { w.bits(next_alarm_cnt) });
-        rb.ctlr().modify(|_, w| w.stie().set_bit());
-        rb.sr().write(|w| w.cntif().clear_bit());
-
-        if next_alarm_cnt <= self.raw_cnt() {
-            rb.ctlr().modify(|_, w| w.stie().clear_bit());
+            rb.cmp().write(|w| unsafe { w.bits(next_alarm_cnt) });
+            rb.ctlr().modify(|_, w| w.stie().set_bit());
             rb.sr().write(|w| w.cntif().clear_bit());
-            return false;
-        }
 
-        true
+            if next_alarm_cnt <= self.raw_cnt() {
+                rb.ctlr().modify(|_, w| w.stie().clear_bit());
+                rb.sr().write(|w| w.cntif().clear_bit());
+                return false;
+            }
+
+            true
+        })
     }
 }
 
@@ -106,9 +101,10 @@ impl Driver for SystickDriver {
     }
 
     fn schedule_wake(&self, ticks: u64, waker: &core::task::Waker) {
+        // let cnt_per_tick = self.cnt_per_tick.load(Ordering::Relaxed) as u64;
         critical_section::with(|cs| {
             let mut queue = self.queue.borrow(cs).borrow_mut();
-            if queue.schedule_wake(ticks, waker) {
+            if queue.schedule_wake(ticks /* * cnt_per_tick */, waker) {
                 let mut next = queue.next_expiration(self.raw_cnt());
                 while !self.set_alarm(cs, next) {
                     next = queue.next_expiration(self.raw_cnt());
@@ -120,7 +116,6 @@ impl Driver for SystickDriver {
 
 #[interrupt(core)]
 fn SysTick() {
-    unsafe { COUNT += 1 };
     DRIVER.on_interrupt();
 }
 
