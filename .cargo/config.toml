@@ -5,7 +5,7 @@ target = "riscv32imc-unknown-none-elf"
 run-demo = "run --release --example"
 
 [target.riscv32imc-unknown-none-elf]
-runner = "wchisp flash"
+# runner = "wchisp flash"
 # runner = "wlink -v flash --dry-run"
 runner = "wlink -v flash"
 # runner = "wlink -v flash --watch-serial"
