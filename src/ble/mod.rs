@@ -134,7 +134,7 @@ const HAL_PA_INIT_EVENT: u16 = 0x1000;
 const HAL_TMOS_TASK_INTERVAL: u32 = (120000) * 1000 / 625;
 
 unsafe extern "C" fn hal_tmos_task(task_id: u8, events: u16) -> u16 {
-    if events & SYS_EVENT_MSG != 0 {
+    if events & SYS_EVENT_MSG as u16 != 0 {
         let msg = tmos_msg_receive(task_id);
         if !msg.is_null() {
             let event = TmosEvent(msg as _);
@@ -142,14 +142,14 @@ unsafe extern "C" fn hal_tmos_task(task_id: u8, events: u16) -> u16 {
             // Dealloc in Drop
             // let _ = tmos_msg_deallocate(msg);
         }
-        return events ^ SYS_EVENT_MSG;
+        return events ^ SYS_EVENT_MSG as u16;
     } else if events & HAL_REG_INIT_EVENT != 0 {
         BLE_RegInit();
 
         tmos_start_task(task_id, HAL_REG_INIT_EVENT, HAL_TMOS_TASK_INTERVAL);
         return events ^ HAL_REG_INIT_EVENT;
     } else if events & HAL_PA_INIT_EVENT != 0 {
-        BLE_PAControlInit(&PA_CONFIG);
+        BLE_PAControlInit(&mut PA_CONFIG as *mut blePaControlConfig_t);
 
         return events ^ HAL_PA_INIT_EVENT;
     } else {
@@ -166,12 +166,12 @@ unsafe extern "C" fn hal_tmos_task(task_id: u8, events: u16) -> u16 {
 pub fn init(
     config: Config,
 ) -> Result<(u8, Subscriber<'static, CriticalSectionRawMutex, TmosEvent, 4, 2, 2>), NonZeroU8> {
-    use ffi::{bleConfig_t, BLE_LibInit, TMOS_ProcessEventRegister, TMOS_TimerInit, LL_TX_POWEER_6_DBM};
+    use ffi::{bleConfig_t, BLE_LibInit, TMOS_ProcessEventRegister, TMOS_TimerInit, LL_TX_POWEER_4_DBM};
 
     const BLE_TX_NUM_EVENT: u8 = 1;
     const BLE_BUFF_NUM: u8 = 5;
     const BLE_BUFF_MAX_LEN: u16 = 27;
-    const BLE_TX_POWER: u8 = LL_TX_POWEER_6_DBM;
+    const BLE_TX_POWER: u8 = LL_TX_POWEER_4_DBM as u8;
     const PERIPHERAL_MAX_CONNECTION: u8 = 1;
     const CENTRAL_MAX_CONNECTION: u8 = 3;
 
@@ -187,7 +187,7 @@ pub fn init(
 
     // No SNV (SNVAddr, SNVBlock, SNVNum, readFlashCB, writeFlashCB)
 
-    cfg.SelRTCClock = 0; // use LSE: ( 0 外部(32768Hz)，默认:1：内部(32000Hz)，2：内部(32768Hz)
+    // cfg.SelRTCClock = 0; // use LSE: ( 0 外部(32768Hz)，默认:1：内部(32000Hz)，2：内部(32768Hz)
 
     cfg.ConnectNumber = (PERIPHERAL_MAX_CONNECTION & 3) | (CENTRAL_MAX_CONNECTION << 2);
 
@@ -201,9 +201,11 @@ pub fn init(
     cfg.MacAddr = config.mac_addr.0;
 
     unsafe {
-        BLE_LibInit(&cfg)?;
+        let init_result = BLE_LibInit(&mut cfg as *mut bleConfig_t);
+        println!("init result: {init_result}");
 
-        TMOS_TimerInit(core::ptr::null_mut())?;
+        let timer_init_result = TMOS_TimerInit(core::ptr::null_mut());
+        println!("timer init result: {init_result}");
 
         // regeister HAL tmos task
         let hal_task_id = TMOS_ProcessEventRegister(Some(hal_tmos_task));

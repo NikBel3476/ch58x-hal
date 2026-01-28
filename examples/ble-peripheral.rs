@@ -5,7 +5,6 @@
 use core::ffi::c_void;
 use core::mem::size_of_val;
 
-use qingke_rt::highcode;
 use ch58x_hal as hal;
 use embassy_executor::Spawner;
 use embassy_time::{Delay, Duration, Instant, Timer};
@@ -18,12 +17,13 @@ use hal::prelude::*;
 use hal::rtc::Rtc;
 use hal::uart::UartTx;
 use hal::{ble, peripherals, println};
+use qingke_rt::highcode;
 
 // GAP - SCAN RSP data (max size = 31 bytes)
 static mut SCAN_RSP_DATA: &[u8] = &[
     // complete name
     0x12, // length of this data
-    GAP_ADTYPE_LOCAL_NAME_COMPLETE,
+    GAP_ADTYPE_LOCAL_NAME_COMPLETE as u8,
     b'S',
     b'i',
     b'm',
@@ -43,18 +43,18 @@ static mut SCAN_RSP_DATA: &[u8] = &[
     b'l',
     // Tx power level
     0x02, // length of this data
-    GAP_ADTYPE_POWER_LEVEL,
+    GAP_ADTYPE_POWER_LEVEL as u8,
     0, // 0dBm
 ];
 // GAP - Advertisement data (max size = 31 bytes, though this is
 // best kept short to conserve power while advertisting)
 static mut ADVERT_DATA: &[u8] = &[
     0x02, // length of this data
-    GAP_ADTYPE_FLAGS,
-    GAP_ADTYPE_FLAGS_BREDR_NOT_SUPPORTED,
+    GAP_ADTYPE_FLAGS as u8,
+    GAP_ADTYPE_FLAGS_BREDR_NOT_SUPPORTED as u8,
     // https://www.bluetooth.com/specifications/assigned-numbers/
-    0x04,                             // length of this data including the data type byte
-    GAP_ADTYPE_MANUFACTURER_SPECIFIC, // manufacturer specific advertisement data type
+    0x04,                                   // length of this data including the data type byte
+    GAP_ADTYPE_MANUFACTURER_SPECIFIC as u8, // manufacturer specific advertisement data type
     0xD7,
     0x07, // 0x07D7, Nanjing Qinheng Microelectronics Co., Ltd.
     0x01,
@@ -83,21 +83,25 @@ fn peripheral_init() {
         const MAX_INTERVAL: u16 = 100; // 100*1.25 = 125ms
 
         // Set the GAP Role Parameters
-        GAPRole_SetParameter(GAPROLE_ADVERT_ENABLED, 1, &true as *const _ as _);
+        GAPRole_SetParameter(GAPROLE_ADVERT_ENABLED as u16, 1, &true as *const _ as _);
         GAPRole_SetParameter(
-            GAPROLE_SCAN_RSP_DATA,
+            GAPROLE_SCAN_RSP_DATA as u16,
             SCAN_RSP_DATA.len() as _,
             SCAN_RSP_DATA.as_ptr() as _,
         );
-        GAPRole_SetParameter(GAPROLE_ADVERT_DATA, ADVERT_DATA.len() as _, ADVERT_DATA.as_ptr() as _);
-        GAPRole_SetParameter(GAPROLE_MIN_CONN_INTERVAL, 2, &MIN_INTERVAL as *const _ as _);
-        GAPRole_SetParameter(GAPROLE_MAX_CONN_INTERVAL, 2, &MAX_INTERVAL as *const _ as _);
+        GAPRole_SetParameter(
+            GAPROLE_ADVERT_DATA as u16,
+            ADVERT_DATA.len() as _,
+            ADVERT_DATA.as_ptr() as _,
+        );
+        GAPRole_SetParameter(GAPROLE_MIN_CONN_INTERVAL as u16, 2, &MIN_INTERVAL as *const _ as _);
+        GAPRole_SetParameter(GAPROLE_MAX_CONN_INTERVAL as u16, 2, &MAX_INTERVAL as *const _ as _);
     }
 
     // Set the GAP Characteristics
     unsafe {
         GGS_SetParameter(
-            GGS_DEVICE_NAME_ATT,
+            GGS_DEVICE_NAME_ATT as u8,
             ATT_DEVICE_NAME.len() as _,
             ATT_DEVICE_NAME.as_ptr() as _,
         );
@@ -108,11 +112,11 @@ fn peripheral_init() {
         const ADVERTISING_INTERVAL: u16 = 80;
 
         // Set advertising interval
-        GAP_SetParamValue(TGAP_DISC_ADV_INT_MIN, ADVERTISING_INTERVAL);
-        GAP_SetParamValue(TGAP_DISC_ADV_INT_MAX, ADVERTISING_INTERVAL);
+        GAP_SetParamValue(TGAP_DISC_ADV_INT_MIN as u16, ADVERTISING_INTERVAL);
+        GAP_SetParamValue(TGAP_DISC_ADV_INT_MAX as u16, ADVERTISING_INTERVAL);
 
         // Enable scan req notify
-        GAP_SetParamValue(TGAP_ADV_SCAN_REQ_NOTIFY, 1);
+        GAP_SetParamValue(TGAP_ADV_SCAN_REQ_NOTIFY as u16, 1);
     }
 
     // Setup the GAP Bond Manager
@@ -123,20 +127,20 @@ fn peripheral_init() {
         let bonding = true;
         let io_cap = GAPBOND_IO_CAP_DISPLAY_ONLY;
         GAPBondMgr_SetParameter(
-            GAPBOND_PERI_DEFAULT_PASSCODE,
+            GAPBOND_PERI_DEFAULT_PASSCODE as u16,
             size_of_val(&passkey) as _,
             &passkey as *const _ as _,
         );
-        GAPBondMgr_SetParameter(GAPBOND_PERI_PAIRING_MODE, 1, &pair_mode as *const _ as _);
-        GAPBondMgr_SetParameter(GAPBOND_PERI_MITM_PROTECTION, 1, &mitm as *const _ as _);
-        GAPBondMgr_SetParameter(GAPBOND_PERI_IO_CAPABILITIES, 1, &io_cap as *const _ as _);
-        GAPBondMgr_SetParameter(GAPBOND_PERI_BONDING_ENABLED, 1, &bonding as *const _ as _);
+        GAPBondMgr_SetParameter(GAPBOND_PERI_PAIRING_MODE as u16, 1, &pair_mode as *const _ as _);
+        GAPBondMgr_SetParameter(GAPBOND_PERI_MITM_PROTECTION as u16, 1, &mitm as *const _ as _);
+        GAPBondMgr_SetParameter(GAPBOND_PERI_IO_CAPABILITIES as u16, 1, &io_cap as *const _ as _);
+        GAPBondMgr_SetParameter(GAPBOND_PERI_BONDING_ENABLED as u16, 1, &bonding as *const _ as _);
     }
 
     // Initialize GATT attributes
     unsafe {
-        GGS_AddService(GATT_ALL_SERVICES).unwrap(); // GAP
-        GATTServApp::add_service(GATT_ALL_SERVICES).unwrap(); // GATT attributes
+        GGS_AddService(GATT_ALL_SERVICES); // GAP
+        GATTServApp::add_service(GATT_ALL_SERVICES); // GATT attributes
     }
 
     // Setup the SimpleProfile Characteristic Values
@@ -144,11 +148,11 @@ fn peripheral_init() {
 
     // Register receive scan request callback
     unsafe {
-        static CB: gapRolesBroadcasterCBs_t = gapRolesBroadcasterCBs_t {
+        static mut CB: gapRolesBroadcasterCBs_t = gapRolesBroadcasterCBs_t {
             pfnScanRecv: None,
             pfnStateChange: None,
         };
-        GAPRole_BroadcasterSetCB(&CB);
+        GAPRole_BroadcasterSetCB(&mut CB);
     }
 }
 
@@ -166,16 +170,16 @@ async fn peripheral(task_id: u8, subscriber: ble::EventSubscriber) {
                 println!("advertising..");
             }
             GAPROLE_WAITING => {
-                if event.gap.opcode == GAP_END_DISCOVERABLE_DONE_EVENT {
+                if event.gap.opcode == GAP_END_DISCOVERABLE_DONE_EVENT as u8 {
                     println!("waiting for advertising..");
-                } else if event.gap.opcode == GAP_LINK_TERMINATED_EVENT {
+                } else if event.gap.opcode == GAP_LINK_TERMINATED_EVENT as u8 {
                     println!("  disconnected .. reason {:x}", event.linkTerminate.reason);
                     // restart advertising here
                     let mut ret: u32 = 0;
-                    GAPRole_GetParameter(GAPROLE_ADVERT_ENABLED, &mut ret as *mut _ as *mut c_void).unwrap();
+                    GAPRole_GetParameter(GAPROLE_ADVERT_ENABLED as u16, &mut ret as *mut _ as *mut c_void);
                     println!("GAPROLE_ADVERT_ENABLED: {}", ret);
 
-                    GAPRole_SetParameter(GAPROLE_ADVERT_ENABLED, 1, &true as *const _ as _).unwrap();
+                    GAPRole_SetParameter(GAPROLE_ADVERT_ENABLED as u16, 1, &true as *const _ as _);
                 } else {
                     println!("unknown event: {}", event.gap.opcode);
                 }
@@ -202,7 +206,7 @@ async fn peripheral(task_id: u8, subscriber: ble::EventSubscriber) {
     }
 
     unsafe {
-        static BOND_MGR_CB: gapBondCBs_t = gapBondCBs_t {
+        static mut BOND_MGR_CB: gapBondCBs_t = gapBondCBs_t {
             passcodeCB: None,
             pairStateCB: None,
             oobCB: None,
@@ -210,13 +214,13 @@ async fn peripheral(task_id: u8, subscriber: ble::EventSubscriber) {
 
         // peripheralStateNotificationCB
 
-        static APP_CB: gapRolesCBs_t = gapRolesCBs_t {
+        static mut APP_CB: gapRolesCBs_t = gapRolesCBs_t {
             pfnStateChange: Some(on_state_change),
             pfnRssiRead: Some(on_rssi_read),
             pfnParamUpdate: Some(on_param_update),
         };
         // Start the Device
-        GAPRole_PeripheralStartDevice(task_id, &BOND_MGR_CB, &APP_CB).unwrap();
+        GAPRole_PeripheralStartDevice(task_id, &mut BOND_MGR_CB, &mut APP_CB);
     }
 }
 
@@ -278,6 +282,7 @@ async fn main(spawner: Spawner) -> ! {
 async fn mainloop() -> ! {
     loop {
         Timer::after(Duration::from_micros(300)).await;
+        println!("loop");
         unsafe {
             TMOS_SystemProcess();
         }

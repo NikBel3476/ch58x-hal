@@ -1,518 +1,5645 @@
-#![allow(non_camel_case_types, non_snake_case, non_upper_case_globals)]
+// #![allow(non_camel_case_types, non_snake_case, non_upper_case_globals)]
 
-use core::num::NonZeroU8;
+// use core::num::NonZeroU8;
 
+// // pub type bStatus_t = u8;
+// // SUCCESS(0x00):指令按预期执行。
+// // INVALIDPARAMETER(0x02):无效的连接句柄或请求字段。
+// // MSG_BUFFER_NOT_AVAIL (0x04):HCI 缓冲区不可用。请稍后重试。
+// // bleNotConnected(0x14):设备未连接。
+// // blePending(0x17):
+// // 当返回到客户端功能时，服务器或 GATT 子过程正在进行中，有待处理的响应。
+// // 返回服务器功能时，来自客户端的确认待处理。
+// // bleTimeout(0x16):上一个事务超时。重新连接之前，无法发送 ATT 或 GATT 消息。
+// // bleMemAllocError(0x13):发生内存分配错误
+// // bleLinkEncrypted(0x19):链接已加密。不要在加密的链接上发送包含身份验证签
+// /*
+// #define FAILURE                         0x01   //!< Failure
+// #define INVALIDPARAMETER                0x02   //!< Invalid request field
+// #define INVALID_TASK                    0x03   //!< Task ID isn't setup properly
+// #define MSG_BUFFER_NOT_AVAIL            0x04   //!< No buffer is available.
+// #define INVALID_MSG_POINTER             0x05   //!< No message pointer.
+// #define INVALID_EVENT_ID                0x06   //!< Invalid event id.
+// #define INVALID_TIMEOUT                 0x07   //!< Invalid timeout.
+// #define NO_TIMER_AVAIL                  0x08   //!< No event is available.
+// #define NV_OPER_FAILED                  0x0A   //!< read a data item to NV failed.
+// #define INVALID_MEM_SIZE                0x0B   //!< The tokens take up too much space and don't fit into Advertisement data and Scan Response Data
+
+// #define bleInvalidTaskID                INVALID_TASK  //!< Task ID isn't setup properly
+// #define bleEecKeyRequestRejected        0x06   //!< key missing
+// #define bleNotReady                     0x10   //!< Not ready to perform task
+// #define bleAlreadyInRequestedMode       0x11   //!< Already performing that task
+// #define bleIncorrectMode                0x12   //!< Not setup properly to perform that task
+// #define bleMemAllocError                0x13   //!< Memory allocation error occurred
+// #define bleNotConnected                 0x14   //!< Can't perform function when not in a connection
+// #define bleNoResources                  0x15   //!< There are no resource available
+// #define blePending                      0x16   //!< Waiting
+// #define bleTimeout                      0x17   //!< Timed out performing function
+// #define bleInvalidRange                 0x18   //!< A parameter is out of range
+// #define bleLinkEncrypted                0x19   //!< The link is already encrypted
+// #define bleProcedureComplete            0x1A   //!< The Procedure is completed
+// #define bleInvalidMtuSize               0x1B   //!< SDU size is larger than peer MTU.
+//  */
+// // UNSAFE: size_of is 1
+// #[allow(improper_ctypes)]
+// pub type bStatus_t = Result<(), NonZeroU8>;
+
+// pub type tmosTaskID = u8;
+// pub type tmosEvents = u16;
+// pub type tmosTimer = u32;
+// pub type BOOL = u8;
+
+// /*** Opcode fields: bitmasks ***/
+// /// Size of 16-bit Bluetooth UUID
+// pub const ATT_BT_UUID_SIZE: u8 = 2;
+// /// Size of 128-bit UUID
+// pub const ATT_UUID_SIZE: u8 = 16;
+
+// /* Tx_POWER define(Accuracy:±2dBm) */
+// pub const LL_TX_POWEER_MINUS_16_DBM: u8 = 0x01;
+// pub const LL_TX_POWEER_MINUS_12_DBM: u8 = 0x02;
+// pub const LL_TX_POWEER_MINUS_8_DBM: u8 = 0x04;
+// pub const LL_TX_POWEER_MINUS_5_DBM: u8 = 0x07;
+// pub const LL_TX_POWEER_MINUS_3_DBM: u8 = 0x09;
+// pub const LL_TX_POWEER_MINUS_1_DBM: u8 = 0x0B;
+// pub const LL_TX_POWEER_0_DBM: u8 = 0x0D;
+// pub const LL_TX_POWEER_1_DBM: u8 = 0x0F;
+// pub const LL_TX_POWEER_2_DBM: u8 = 0x13;
+// pub const LL_TX_POWEER_3_DBM: u8 = 0x17;
+// pub const LL_TX_POWEER_4_DBM: u8 = 0x1D;
+// pub const LL_TX_POWEER_5_DBM: u8 = 0x29;
+// pub const LL_TX_POWEER_6_DBM: u8 = 0x3D;
+
+// /// BLE library config struct
+// /// Library initialization call BLE_LibInit function
+// #[repr(C)]
+// #[derive(Debug, Copy, Clone)]
+// pub struct bleConfig_t {
+//     /// library memory start address
+//     pub MEMAddr: u32,
+//     /// library memory size, > 4k
+//     pub MEMLen: u16,
+//     /// SNV flash start address( if NULL,bonding information will not be saved )
+//     pub SNVAddr: u32,
+//     /// SNV flash block size ( default 256 )
+//     pub SNVBlock: u16,
+//     /// SNV flash block number ( default 1 )
+//     pub SNVNum: u8,
+//     /// Maximum number of sent and received packages cached by the controller( default 5 )
+//     /// Must be greater than the number of connections.
+//     pub BufNumber: u8,
+//     /// Maximum length (in octets) of the data portion of each HCI data packet( default 27 )
+//     // SC enable,must be greater than 69
+//     // ATT_MTU = BufMaxLen-4,Range[23,ATT_MAX_MTU_SIZE]
+//     pub BufMaxLen: u16,
+//     /// Maximum number of TX data in a connection event ( default 1 )
+//     pub TxNumEvent: u8,
+//     /// Maximum number of RX data in a connection event ( default equal to BufNumber )
+//     pub RxNumEvent: u8,
+//     /// Transmit power level( default LL_TX_POWEER_0_DBM(0dBm) )
+//     pub TxPower: u8,
+//     /// Wake up time value in one system count
+//     pub WakeUpTime: u8,
+//     /// system clock select
+//     /// bit0-1 00: LSE(32768Hz) 01:LSI(32000Hz) 10:LSI(32768Hz)
+//     /// bit7:  1: ble timer(HSE)(must disable sleep)
+//     pub SelRTCClock: u8,
+//     /// Connect number,lower two bits are peripheral number,followed by central number
+//     pub ConnectNumber: u8,
+//     /// Wait rf start window(us)
+//     pub WindowWidening: u8,
+//     /// Wait event arrive window in one system clock
+//     pub WaitWindow: u8,
+//     /// MAC address, little-endian
+//     pub MacAddr: [u8; 6usize],
+//     /// Register a program that generate a random seed
+//     /// SYS_GetSysTickCnt
+//     pub srandCB: Option<unsafe extern "C" fn() -> u32>,
+//     /// Register a program that set idle
+//     pub sleepCB: Option<unsafe extern "C" fn(arg1: u32) -> u32>,
+//     /// Register a program that read the current temperature,determine whether calibration is need
+//     /// HAL_GetInterTempValue
+//     pub tsCB: Option<unsafe extern "C" fn() -> u16>,
+//     /// Register a program that LSI clock calibration
+//     /// Lib_Calibration_LSI
+//     pub rcCB: Option<unsafe extern "C" fn()>,
+//     /// Register a program that library status callback
+//     pub staCB: Option<unsafe extern "C" fn(code: u8, status: u32)>,
+//     /// Register a program that read flash
+//     pub readFlashCB: Option<unsafe extern "C" fn(addr: u32, num: u32, pBuf: *mut u32) -> u32>,
+//     /// Register a program that write flash
+//     pub writeFlashCB: Option<unsafe extern "C" fn(addr: u32, num: u32, pBuf: *mut u32) -> u32>,
+// }
+
+// #[repr(C)]
+// #[derive(Debug, Copy, Clone)]
+// pub struct bleClockConfig_t {
+//     pub getClockValue: Option<unsafe extern "C" fn() -> u32>,
+//     /// The maximum count value
+//     pub ClockMaxCount: u32,
+//     /// The timing clock frequency(Hz)
+//     pub ClockFrequency: u16,
+//     /// The timing clock accuracy(ppm)
+//     pub ClockAccuracy: u16,
+//     pub irqEnable: u8,
+// }
+
+// pub const LLE_MODE_BASIC: u8 = 0;
+// pub const LLE_MODE_AUTO: u8 = 1;
+
+// pub const LLE_WHITENING_ON: u8 = 0;
+// pub const LLE_WHITENING_OFF: u8 = 2;
+
+// pub const LLE_MODE_PHY_MODE_MASK: u8 = 48;
+// pub const LLE_MODE_PHY_1M: u8 = 0;
+// pub const LLE_MODE_PHY_2M: u8 = 16;
+// pub const LLE_MODE_PHY_CODED_S8: u8 = 32;
+// pub const LLE_MODE_PHY_CODED_S2: u8 = 48;
+// pub const LLE_MODE_EX_CHANNEL: u8 = 64;
+
+// pub const LLE_MODE_NON_RSSI: u8 = 128;
+
+// // `sta` in rfStatusCB
+// // RF_Tx
+// pub const TX_MODE_TX_FINISH: u32 = 1;
+// pub const TX_MODE_TX_FAIL: u32 = 17;
+// pub const TX_MODE_TX_TIMEOUT: u32 = 17;
+// /// auto tx mode receive data(ack) and enter idle state
+// pub const TX_MODE_RX_DATA: u32 = 2;
+// pub const TX_MODE_RX_TIMEOUT: u32 = 18;
+// pub const TX_MODE_HOP_SHUT: u32 = 34;
+
+// // RF_Rx
+// /// basic or auto rx mode receive data
+// pub const RX_MODE_RX_DATA: u32 = 3;
+// /// auto rx mode sends data(ack) successfully and enters idle state
+// pub const RX_MODE_TX_FINISH: u32 = 4;
+// /// auto rx mode fail to send data and enter idle state
+// pub const RX_MODE_TX_FAIL: u32 = 20;
+// pub const RX_MODE_TX_TIMEOUT: u32 = 20;
+// pub const RX_MODE_HOP_SHUT: u32 = 36;
+
+// #[repr(C)]
+// #[derive(Debug, Copy, Clone)]
+// pub struct rfConfig_t {
+//     #[doc = "!< BIT0   0=basic, 1=auto def@LLE_MODE_TYPE\n!< BIT1   0=whitening on, 1=whitening off def@LLE_WHITENING_TYPE\n!< BIT4-5 00-1M  01-2M  10-coded(S8) 11-coded(S2) def@LLE_PHY_TYPE\n!< BIT6   0=data channel(0-39)\n!<        1=rf frequency (2400000kHz-2483500kHz)\n!< BIT7   0=the first byte of the receive buffer is rssi\n!<        1=the first byte of the receive buffer is package type"]
+//     pub LLEMode: u8,
+//     #[doc = "!< rf channel(0-39)"]
+//     pub Channel: u8,
+//     #[doc = "!< rf frequency (2400000kHz-2483500kHz)"]
+//     pub Frequency: u32,
+//     #[doc = "!< access address,32bit PHY address"]
+//     pub accessAddress: u32,
+//     #[doc = "!< crc initial value"]
+//     pub CRCInit: u32,
+//     #[doc = "!< status call back"]
+//     pub rfStatusCB: Option<unsafe extern "C" fn(sta: u8, rsr: u8, rxBuf: *mut u8)>,
+//     #[doc = "!< indicating  Used and Unused data channels.Every channel is represented with a\n!< bit positioned as per the data channel index,The LSB represents data channel index 0"]
+//     pub ChannelMap: u32,
+//     pub _Resv: u8,
+//     #[doc = "!< The heart package interval shall be an integer multiple of 100ms"]
+//     pub HeartPeriod: u8,
+//     #[doc = "!< hop period( T=32n*RTC clock ),default is 8"]
+//     pub HopPeriod: u8,
+//     #[doc = "!< indicate the hopIncrement used in the data channel selection algorithm,default is 17"]
+//     pub HopIndex: u8,
+//     #[doc = "!< Maximum data length received in rf-mode(default 251)"]
+//     pub RxMaxlen: u8,
+//     #[doc = "!< Maximum data length transmit in rf-mode(default 251)"]
+//     pub TxMaxlen: u8,
+// }
+
+// #[repr(C)]
+// #[derive(Debug, Copy, Clone)]
+// pub struct blePaControlConfig_t {
+//     pub txEnableGPIO: u32,
+//     pub txDisableGPIO: u32,
+//     pub tx_pin: u32,
+//     pub rxEnableGPIO: u32,
+//     pub rxDisableGPIO: u32,
+//     pub rx_pin: u32,
+// }
+
+// // #[link(name = "CH58xBLE")]
+// #[link(name = "CH59xBLE")]
+// extern "C" {
+//     /// "CH58x_BLE_LIB_V1.9"
+//     pub static VER_LIB: [core::ffi::c_char; 0];
+
+//     #[doc = " @brief   Init BLE lib. RTC will be occupied at the same time.\n\n @param   pCfg - config of BLE lib\n\n @return  0-success. error defined @ ERR_LIB_INIT"]
+//     pub fn BLE_LibInit(pCfg: *const bleConfig_t) -> bStatus_t;
+
+//     #[doc = " @brief   ble register reset and rf calibration\n\n @param   None\n\n @return  None"]
+//     pub fn BLE_RegInit();
+
+//     #[doc = " @brief   generate a valid access address\n\n @param   None.\n\n @return  access address\n the Access Address meets the following requirements:\n It shall have no more than six consecutive zeros or ones.\n It shall not be t he advertising channel packets�� Access Address.\n It shall not be a sequence that differ s from the advertising channel packets' Access Address by only one bit.\n It shall not have all four octets equal.\n It shall have no more  than 24 transitions.\n It shall have a minimum of two transitions in the most significant six bits."]
+//     pub fn BLE_AccessAddressGenerate() -> u32;
+
+//     // lifetime: 'static
+//     #[doc = " @brief   pa control init\n\n @note    Can't be called until  role Init\n\n @param   paControl - pa control parameters(global variable)\n\n @return  Command Status."]
+//     pub fn BLE_PAControlInit(paControl: &'static blePaControlConfig_t);
+
+//     #[doc = " @brief   read rssi\n\n @param   None.\n\n @return  the value of rssi."]
+//     pub fn BLE_ReadRssi() -> i8;
+
+//     #[doc = " @brief   read cfo\n\n @param   None.\n\n @return  the value of cfo."]
+//     pub fn BLE_ReadCfo() -> i16;
+// }
+
+// // RF
+// extern "C" {
+//     #[doc = " @brief   RF_PHY Profile Task initialization function.\n\n @param   None.\n\n @return  0 - success."]
+//     pub fn RF_RoleInit() -> bStatus_t;
+//     #[doc = " @brief   rf config.\n\n @param   pConfig - rf config parameters\n\n @return  0 - success."]
+//     pub fn RF_Config(pConfig: *mut rfConfig_t) -> bStatus_t;
+//     #[doc = " @brief   rx mode.\n\n @param   txBuf - rx mode tx data\n @param   txLen - rx mode tx length(0-251)\n @param   pktRxType - rx mode rx package type\n                      broadcast type(0xFF):receive all matching types,\n                      others:receive match type or broadcast type\n @param   pktTxType - rx mode tx package type(auto mode)\n                      broadcast type(0xFF):received by all matching types;\n                      others:only received by matching type\n\n @return  0 - success. 1-access address error 2-busy"]
+//     pub fn RF_Rx(txBuf: *mut u8, txLen: u8, pktRxType: u8, pktTxType: u8) -> bStatus_t;
+//     #[doc = " @brief   tx mode.\n\n @param   txBuf - tx mode tx data\n @param   txLen - tx mode tx length(0-251)\n @param   pktTxType - tx mode tx package type\n                      broadcast type(0xFF):received by all matching types;\n                      others:only received by matching type\n @param   pktRxType - tx mode rx package type(auto mode)\n                      broadcast type(0xFF):receive all matching types,\n                      others:receive match type or broadcast type\n\n @return  0 - success. 1-access address error 2-busy"]
+//     pub fn RF_Tx(txBuf: *mut u8, txLen: u8, pktTxType: u8, pktRxType: u8) -> bStatus_t;
+//     #[doc = " @brief   shut down,stop tx/rx mode.\n\n @param   None.\n\n @return  0 - success."]
+//     pub fn RF_Shut() -> bStatus_t;
+//     #[doc = " @brief   rf mode set radio channel/frequency.\n\n @param   channel.\n\n @return  0 - success."]
+//     pub fn RF_SetChannel(channel: u32);
+//     #[doc = " @brief   shut down rf frequency hopping\n\n @param   None.\n\n @return  None."]
+//     pub fn RF_FrequencyHoppingShut();
+//     #[doc = " @brief\n\n @param   resendCount - Maximum count of sending HOP_TX pdu,0 = unlimited.\n\n @return  0 - success."]
+//     pub fn RF_FrequencyHoppingTx(resendCount: u8) -> u8;
+//     #[doc = " @brief\n\n @param   timeoutMS - Maximum time to wait for receiving HOP_TX pdu(Time = n * 1mSec),0 = unlimited.\n\n @return  0 - success.1-fail.2-LLEMode error(shall AUTO)"]
+//     pub fn RF_FrequencyHoppingRx(timeoutMS: u32) -> u8;
+//     #[doc = " @brief   Erase FH bonded device\n\n @param   None.\n\n @return  None."]
+//     pub fn RF_BondingErase();
+// }
+
+// #[repr(C)]
+// #[derive(Debug, Copy, Clone)]
+// pub struct tmos_event_hdr_t {
+//     pub event: u8,
+//     pub status: u8,
+// }
+
+// /// A message is waiting event
+// pub const SYS_EVENT_MSG: u16 = 0x8000;
+
+// /// Task ID isn't setup properly
+// pub const INVALID_TASK_ID: u8 = 0xFF;
+// pub const TASK_NO_TASK: u8 = 0xFF;
+
+// // TMOS
+// extern "C" {
+
+//     // tmos
+//     // tmosTaskID, u8
+//     // tmosEvents, u16
+
+//     #[doc = " @brief   register process event callback function\n\n @param   eventCb-events callback function\n\n @return  0xFF - error,others-task id"]
+//     pub fn TMOS_ProcessEventRegister(
+//         eventCb: Option<unsafe extern "C" fn(taskID: tmosTaskID, event: tmosEvents) -> tmosEvents>,
+//     ) -> tmosTaskID;
+
+//     #[doc = " @brief   tmos system timer initialization\n\n @note    must initialization before call tmos task\n\n @param   fnGetClock - 0:system clock select RTC timer\n                   valid:system clock select extend input\n\n @return  SUCCESS if successful, FAILURE if failed."]
+//     pub fn TMOS_TimerInit(pClockConfig: *const bleClockConfig_t) -> bStatus_t;
+
+//     #[doc = " @brief   start a event after period of time\n\n @param   taskID - task ID to set event for\n @param   event - event to be notified with\n @param   time - timeout value\n\n @return  TRUE,FALSE."]
+//     pub fn tmos_start_task(taskID: tmosTaskID, event: tmosEvents, time: tmosTimer) -> BOOL;
+
+//     #[doc = " @brief   receive a msg\n\n @param   taskID  - task ID of task need to receive msg\n\n @return *uint8_t - message information or NULL if no message"]
+//     pub fn tmos_msg_receive(taskID: tmosTaskID) -> *mut u8;
+
+//     #[doc = " @brief   delete a msg\n\n @param  *msg_ptr - point of msg\n\n @return  SUCCESS."]
+//     pub fn tmos_msg_deallocate(msg_ptr: *mut u8) -> bStatus_t;
+
+//     #[doc = " @brief   Process system\n\n @param   None.\n\n @return  None."]
+//     pub fn TMOS_SystemProcess();
+
+//     #[doc = " @brief   Get current system clock\n\n @param   None.\n\n @return  current system clock (in 0.625ms)"]
+//     pub fn TMOS_GetSystemClock() -> u32;
+// }
+
+// // GAP Role
+
+// // GAPRole_SetParameter() parameters
+// // GAPROLE_PROFILE_PARAMETERS GAP Role Manager Parameters
+// pub const GAPROLE_PROFILEROLE: u16 = 768;
+// pub const GAPROLE_IRK: u16 = 769;
+// pub const GAPROLE_SRK: u16 = 770;
+// pub const GAPROLE_SIGNCOUNTER: u16 = 771;
+// pub const GAPROLE_BD_ADDR: u16 = 772;
+// pub const GAPROLE_ADVERT_ENABLED: u16 = 773;
+// pub const GAPROLE_ADVERT_DATA: u16 = 774;
+// pub const GAPROLE_SCAN_RSP_DATA: u16 = 775;
+// pub const GAPROLE_ADV_EVENT_TYPE: u16 = 776;
+// pub const GAPROLE_ADV_DIRECT_TYPE: u16 = 777;
+// pub const GAPROLE_ADV_DIRECT_ADDR: u16 = 778;
+// pub const GAPROLE_ADV_CHANNEL_MAP: u16 = 779;
+// pub const GAPROLE_ADV_FILTER_POLICY: u16 = 780;
+// pub const GAPROLE_STATE: u16 = 781;
+// pub const GAPROLE_MAX_SCAN_RES: u16 = 782;
+// pub const GAPROLE_MIN_CONN_INTERVAL: u16 = 785;
+// pub const GAPROLE_MAX_CONN_INTERVAL: u16 = 786;
+// // v5.x
+// pub const GAPROLE_PHY_TX_SUPPORTED: u16 = 787;
+// pub const GAPROLE_PHY_RX_SUPPORTED: u16 = 788;
+// pub const GAPROLE_PERIODIC_ADVERT_DATA: u16 = 789;
+// /// bit0:Enable/Disable Periodic Advertising. Read/Write. Size is uint8_t. Default is FALSE=Disable.
+// /// bit1:Include the ADI field in AUX_SYNC_IND PDUs
+// pub const GAPROLE_PERIODIC_ADVERT_ENABLED: u16 = 790;
+// pub const GAPROLE_CTE_CONNECTIONLESS_ENABLED: u16 = 791;
+
+// pub const TGAP_GEN_DISC_ADV_MIN: u16 = 0;
+// pub const TGAP_LIM_ADV_TIMEOUT: u16 = 1;
+// pub const TGAP_DISC_SCAN: u16 = 2;
+// pub const TGAP_DISC_ADV_INT_MIN: u16 = 3;
+// pub const TGAP_DISC_ADV_INT_MAX: u16 = 4;
+// pub const TGAP_DISC_SCAN_INT: u16 = 5;
+// pub const TGAP_DISC_SCAN_WIND: u16 = 6;
+// pub const TGAP_CONN_EST_INT_MIN: u16 = 7;
+// pub const TGAP_CONN_EST_INT_MAX: u16 = 8;
+// pub const TGAP_CONN_EST_SCAN_INT: u16 = 9;
+// pub const TGAP_CONN_EST_SCAN_WIND: u16 = 10;
+// pub const TGAP_CONN_EST_HIGH_SCAN_INT: u16 = 11;
+// pub const TGAP_CONN_EST_HIGH_SCAN_WIND: u16 = 12;
+// pub const TGAP_CONN_EST_SUPERV_TIMEOUT: u16 = 13;
+// pub const TGAP_CONN_EST_LATENCY: u16 = 14;
+// pub const TGAP_CONN_EST_MIN_CE_LEN: u16 = 15;
+// pub const TGAP_CONN_EST_MAX_CE_LEN: u16 = 16;
+// pub const TGAP_PRIVATE_ADDR_INT: u16 = 17;
+// pub const TGAP_SM_TIMEOUT: u16 = 18;
+// pub const TGAP_SM_MIN_KEY_LEN: u16 = 19;
+// pub const TGAP_SM_MAX_KEY_LEN: u16 = 20;
+// pub const TGAP_FILTER_ADV_REPORTS: u16 = 21;
+// pub const TGAP_SCAN_RSSI_MIN: u16 = 22;
+// pub const TGAP_REJECT_CONN_PARAMS: u16 = 23;
+// pub const TGAP_AUTH_TASK_ID: u16 = 24;
+// pub const TGAP_ADV_TX_POWER: u16 = 25;
+// pub const TGAP_ADV_PRIMARY_PHY: u16 = 26;
+// pub const TGAP_ADV_SECONDARY_PHY: u16 = 27;
+// pub const TGAP_ADV_SECONDARY_MAX_SKIP: u16 = 28;
+// pub const TGAP_ADV_ADVERTISING_SID: u16 = 29;
+// pub const TGAP_ADV_SCAN_REQ_NOTIFY: u16 = 30;
+// pub const TGAP_ADV_ADVERTISING_DURATION: u16 = 31;
+// pub const TGAP_ADV_MAX_EVENTS: u16 = 32;
+// pub const TGAP_DISC_SCAN_PHY: u16 = 33;
+// pub const TGAP_DISC_SCAN_CODED_INT: u16 = 34;
+// pub const TGAP_DISC_SCAN_CODED_WIND: u16 = 35;
+// pub const TGAP_DISC_SCAN_DURATION: u16 = 36;
+// pub const TGAP_DISC_SCAN_PERIOD: u16 = 37;
+// pub const TGAP_CONN_EST_INT_PHY: u16 = 38;
+// pub const TGAP_CONN_EST_2M_INT_MIN: u16 = 39;
+// pub const TGAP_CONN_EST_2M_INT_MAX: u16 = 40;
+// pub const TGAP_CONN_EST_2M_SUPERV_TIMEOUT: u16 = 41;
+// pub const TGAP_CONN_EST_2M_LATENCY: u16 = 42;
+// pub const TGAP_CONN_EST_2M_MIN_CE_LEN: u16 = 43;
+// pub const TGAP_CONN_EST_2M_MAX_CE_LEN: u16 = 44;
+// pub const TGAP_CONN_EST_CODED_INT_MIN: u16 = 45;
+// pub const TGAP_CONN_EST_CODED_INT_MAX: u16 = 46;
+// pub const TGAP_CONN_EST_CODED_SCAN_INT: u16 = 47;
+// pub const TGAP_CONN_EST_CODED_SCAN_WIND: u16 = 48;
+// pub const TGAP_CONN_EST_CODED_HIGH_SCAN_INT: u16 = 49;
+// pub const TGAP_CONN_EST_CODED_HIGH_SCAN_WIND: u16 = 50;
+// pub const TGAP_CONN_EST_CODED_SUPERV_TIMEOUT: u16 = 51;
+// pub const TGAP_CONN_EST_CODED_LATENCY: u16 = 52;
+// pub const TGAP_CONN_EST_CODED_MIN_CE_LEN: u16 = 53;
+// pub const TGAP_CONN_EST_CODED_MAX_CE_LEN: u16 = 54;
+// pub const TGAP_PERIODIC_ADV_INT_MIN: u16 = 55;
+// pub const TGAP_PERIODIC_ADV_INT_MAX: u16 = 56;
+// pub const TGAP_PERIODIC_ADV_PROPERTIES: u16 = 57;
+// pub const TGAP_SCAN_MAX_LENGTH: u16 = 58;
+// pub const TGAP_AFH_CHANNEL_MDOE: u16 = 59;
+// pub const TGAP_CTE_TYPE: u16 = 60;
+// pub const TGAP_CTE_LENGTH: u16 = 61;
+// pub const TGAP_CTE_COUNT: u16 = 62;
+// pub const TGAP_LENGTH_OF_SWITCHING_PATTERN: u16 = 63;
+// pub const TGAP_ADV_PRIMARY_PHY_OPTIONS: u16 = 64;
+// pub const TGAP_ADV_SECONDARY_PHY_OPTIONS: u16 = 65;
+// pub const TGAP_PARAMID_MAX: u16 = 66;
+
+// // GAPROLE_SCAN_RSP_DATA
+// // GAP_ADTYPE_DEFINES GAP Advertisement Data Types
+// pub const GAP_ADTYPE_FLAGS: u8 = 1;
+// pub const GAP_ADTYPE_16BIT_MORE: u8 = 2;
+// pub const GAP_ADTYPE_16BIT_COMPLETE: u8 = 3;
+// pub const GAP_ADTYPE_32BIT_MORE: u8 = 4;
+// pub const GAP_ADTYPE_32BIT_COMPLETE: u8 = 5;
+// pub const GAP_ADTYPE_128BIT_MORE: u8 = 6;
+// /// Service: Complete list of 128-bit UUIDs
+// pub const GAP_ADTYPE_128BIT_COMPLETE: u8 = 7;
+// /// Shortened local name
+// pub const GAP_ADTYPE_LOCAL_NAME_SHORT: u8 = 8;
+// pub const GAP_ADTYPE_LOCAL_NAME_COMPLETE: u8 = 9;
+// /// TX Power Level: -127 to +127 dBm
+// pub const GAP_ADTYPE_POWER_LEVEL: u8 = 10;
+// pub const GAP_ADTYPE_OOB_CLASS_OF_DEVICE: u8 = 13;
+// pub const GAP_ADTYPE_OOB_SIMPLE_PAIRING_HASHC: u8 = 14;
+// pub const GAP_ADTYPE_OOB_SIMPLE_PAIRING_RANDR: u8 = 15;
+// pub const GAP_ADTYPE_SM_TK: u8 = 16;
+// pub const GAP_ADTYPE_SM_OOB_FLAG: u8 = 17;
+// /// Min and Max values of the connection interval (2 octets Min, 2 octets Max) (0xFFFF indicates no conn interval min or max)
+// pub const GAP_ADTYPE_SLAVE_CONN_INTERVAL_RANGE: u8 = 18;
+// pub const GAP_ADTYPE_SIGNED_DATA: u8 = 19;
+// pub const GAP_ADTYPE_SERVICES_LIST_16BIT: u8 = 20;
+// pub const GAP_ADTYPE_SERVICES_LIST_128BIT: u8 = 21;
+// pub const GAP_ADTYPE_SERVICE_DATA: u8 = 22;
+// pub const GAP_ADTYPE_PUBLIC_TARGET_ADDR: u8 = 23;
+// pub const GAP_ADTYPE_RANDOM_TARGET_ADDR: u8 = 24;
+// pub const GAP_ADTYPE_APPEARANCE: u8 = 25;
+// pub const GAP_ADTYPE_ADV_INTERVAL: u8 = 26;
+// pub const GAP_ADTYPE_LE_BD_ADDR: u8 = 27;
+// pub const GAP_ADTYPE_LE_ROLE: u8 = 28;
+// pub const GAP_ADTYPE_SIMPLE_PAIRING_HASHC_256: u8 = 29;
+// pub const GAP_ADTYPE_SIMPLE_PAIRING_RANDR_256: u8 = 30;
+// pub const GAP_ADTYPE_SERVICE_DATA_32BIT: u8 = 32;
+// pub const GAP_ADTYPE_SERVICE_DATA_128BIT: u8 = 33;
+// pub const GAP_ADTYPE_LE_SC_CONFIRMATION_VALUE: u8 = 34;
+// pub const GAP_ADTYPE_LE_SC_RANDOM_VALUE: u8 = 35;
+// pub const GAP_ADTYPE_URI: u8 = 36;
+// pub const GAP_ADTYPE_INDOOR_POSITION: u8 = 37;
+// pub const GAP_ADTYPE_TRAN_DISCOVERY_DATA: u8 = 38;
+// pub const GAP_ADTYPE_SUPPORTED_FEATURES: u8 = 39;
+// pub const GAP_ADTYPE_CHANNEL_MAP_UPDATE: u8 = 40;
+// pub const GAP_ADTYPE_PB_ADV: u8 = 41;
+// pub const GAP_ADTYPE_MESH_MESSAGE: u8 = 42;
+// pub const GAP_ADTYPE_MESH_BEACON: u8 = 43;
+// pub const GAP_ADTYPE_BIG_INFO: u8 = 44;
+// pub const GAP_ADTYPE_BROADCAST_CODE: u8 = 45;
+// pub const GAP_ADTYPE_RSL_SET_IDENT: u8 = 46;
+// pub const GAP_ADTYPE_ADV_INTERVAL_LONG: u8 = 47;
+// pub const GAP_ADTYPE_BROADCAST_NAME: u8 = 48;
+// pub const GAP_ADTYPE_ENCRYPTED_ADV_DATA: u8 = 49;
+// pub const GAP_ADTYPE_PERI_ADV_RSP_TIMING_INFO: u8 = 50;
+// pub const GAP_ADTYPE_ELECTRONIC_SHELF_LABEL: u8 = 52;
+// pub const GAP_ADTYPE_3D_INFO_DATA: u8 = 61;
+// /// Manufacturer Specific Data: first 2 octets contain the Company Identifier Code followed by the additional manufacturer specific data.
+// pub const GAP_ADTYPE_MANUFACTURER_SPECIFIC: u8 = 255;
+
+// /// GAP_ADTYPE_FLAGS_MODES GAP ADTYPE Flags Discovery Modes
+// pub const GAP_ADTYPE_FLAGS_LIMITED: u8 = 1;
+// pub const GAP_ADTYPE_FLAGS_GENERAL: u8 = 2;
+// pub const GAP_ADTYPE_FLAGS_BREDR_NOT_SUPPORTED: u8 = 4;
+
+// // GAP_ADVERTISEMENT_TYPE_DEFINES GAP Advertising Event Types
+// pub const GAP_ADTYPE_ADV_IND: u8 = 0;
+// pub const GAP_ADTYPE_ADV_HDC_DIRECT_IND: u8 = 1;
+// pub const GAP_ADTYPE_ADV_SCAN_IND: u8 = 2;
+// pub const GAP_ADTYPE_ADV_NONCONN_IND: u8 = 3;
+// pub const GAP_ADTYPE_ADV_LDC_DIRECT_IND: u8 = 4;
+// //v5.x
+// pub const GAP_ADTYPE_EXT_CONN_DIRECT: u8 = 5;
+// pub const GAP_ADTYPE_EXT_SCAN_UNDIRECT: u8 = 6;
+// pub const GAP_ADTYPE_EXT_NONCONN_NONSCAN_UNDIRECT: u8 = 7;
+// pub const GAP_ADTYPE_EXT_CONN_UNDIRECT: u8 = 8;
+// pub const GAP_ADTYPE_EXT_SCAN_DIRECT: u8 = 9;
+// pub const GAP_ADTYPE_EXT_NONCONN_NONSCAN_DIRECT: u8 = 10;
+
+// // GAP_ADVERTISEMENT_TYPE_DEFINES GAP Advertising PHY VAL TYPE(GAP_PHY_VAL_TYPE)
+// pub const GAP_PHY_VAL_LE_1M: u16 = 1;
+// pub const GAP_PHY_VAL_LE_2M: u16 = 2;
+// pub const GAP_PHY_VAL_LE_CODED: u16 = 3;
+
+// // GAP_ADVERTISEMENT_TYPE_DEFINES GAP Scan PHY VAL TYPE(GAP_PHY_BIT_TYPE)
+// pub const GAP_PHY_BIT_LE_1M: u16 = 1;
+// pub const GAP_PHY_BIT_LE_2M: u16 = 2;
+// pub const GAP_PHY_BIT_LE_CODED: u16 = 4;
+// pub const GAP_PHY_BIT_ALL: u16 = 7;
+// pub const GAP_PHY_BIT_LE_CODED_S2: u16 = 8;
+
+// // PHY_OPTIONS preferred coding when transmitting on the LE Coded PHY
+// pub const GAP_PHY_OPTIONS_NOPRE: u32 = 0;
+// pub const GAP_PHY_OPTIONS_S2: u32 = 1;
+// pub const GAP_PHY_OPTIONS_S8: u32 = 2;
+// pub const GAP_PHY_OPTIONS_S2_REQUIRES: u32 = 3;
+// pub const GAP_PHY_OPTIONS_S8_REQUIRES: u32 = 4;
+
+// // GAP_ADVERTISEMENT_TYPE_DEFINES GAP Periodic Advertising Properties
+// pub const GAP_PERI_PROPERTIES_INCLUDE_TXPOWER: u16 = 64;
+
+// // gapRole_States_t
+// pub const GAPROLE_STATE_ADV_MASK: u32 = 15;
+// pub const GAPROLE_STATE_ADV_SHIFT: u32 = 0;
+// pub const GAPROLE_INIT: u32 = 0;
+// pub const GAPROLE_STARTED: u32 = 1;
+// pub const GAPROLE_ADVERTISING: u32 = 2;
+// pub const GAPROLE_WAITING: u32 = 3;
+// pub const GAPROLE_CONNECTED: u32 = 4;
+// pub const GAPROLE_CONNECTED_ADV: u32 = 5;
+// pub const GAPROLE_ERROR: u32 = 6;
+// pub const GAPROLE_STATE_PERIODIC_MASK: u32 = 240;
+// pub const GAPROLE_STATE_PERIODIC_SHIFT: u32 = 4;
+// pub const GAPROLE_PERIODIC_INVALID: u32 = 0;
+// pub const GAPROLE_PERIODIC_ENABLE: u32 = 16;
+// pub const GAPROLE_PERIODIC_WAIT: u32 = 32;
+// pub const GAPROLE_PERIODIC_ERROR: u32 = 48;
+// pub const GAPROLE_STATE_CTE_MASK: u32 = 3840;
+// pub const GAPROLE_STATE_CTE_SHIFT: u32 = 8;
+// pub const GAPROLE_CONNECTIONLESS_CTE_INVALID: u32 = 0;
+// pub const GAPROLE_CONNECTIONLESS_CTE_ENABLE: u32 = 256;
+// pub const GAPROLE_CONNECTIONLESS_CTE_WAIT: u32 = 512;
+// pub const GAPROLE_CONNECTIONLESS_CTE_ERROR: u32 = 768;
+// pub const GAPROLE_PERIODIC_STATE_VALID: u32 = 16777216;
+// pub const GAPROLE_CTE_T_STATE_VALID: u32 = 33554432;
+
+// // GAP_DEVDISC_MODE_DEFINES GAP Device Discovery Modes
+// /// No discoverable setting.
+// pub const DEVDISC_MODE_NONDISCOVERABLE: u8 = 0x00;
+// /// General Discoverable devices.
+// pub const DEVDISC_MODE_GENERAL: u8 = 0x01;
+// /// Limited Discoverable devices.
+// pub const DEVDISC_MODE_LIMITED: u8 = 0x02;
+// /// Not filtered.
+// pub const DEVDISC_MODE_ALL: u8 = 0x03;
+
+// pub type pfnEcc_key_t = Option<unsafe extern "C" fn(pub_: *mut u8, priv_: *mut u8) -> ::core::ffi::c_int>;
+// pub type pfnEcc_dhkey_t = Option<
+//     unsafe extern "C" fn(
+//         peer_pub_key_x: *mut u8,
+//         peer_pub_key_y: *mut u8,
+//         our_priv_key: *mut u8,
+//         out_dhkey: *mut u8,
+//     ) -> ::core::ffi::c_int,
+// >;
+// pub type pfnEcc_alg_f4_t = Option<
+//     unsafe extern "C" fn(u: *mut u8, v: *mut u8, x: *mut u8, z: u8, out_enc_data: *mut u8) -> ::core::ffi::c_int,
+// >;
+// pub type pfnEcc_alg_g2_t = Option<
+//     unsafe extern "C" fn(u: *mut u8, v: *mut u8, x: *mut u8, y: *mut u8, passkey: *mut u32) -> ::core::ffi::c_int,
+// >;
+// pub type pfnEcc_alg_f5_t = Option<
+//     unsafe extern "C" fn(
+//         w: *mut u8,
+//         n1: *mut u8,
+//         n2: *mut u8,
+//         a1t: u8,
+//         a1: *mut u8,
+//         a2t: u8,
+//         a2: *mut u8,
+//         mackey: *mut u8,
+//         ltk: *mut u8,
+//     ) -> ::core::ffi::c_int,
+// >;
+// pub type pfnEcc_alg_f6_t = Option<
+//     unsafe extern "C" fn(
+//         w: *mut u8,
+//         n1: *mut u8,
+//         n2: *mut u8,
+//         r: *mut u8,
+//         iocap: *mut u8,
+//         a1t: u8,
+//         a1: *mut u8,
+//         a2t: u8,
+//         a2: *mut u8,
+//         check: *mut u8,
+//     ) -> ::core::ffi::c_int,
+// >;
+// #[doc = " Callback Registration Structure"]
+// #[repr(C)]
+// #[derive(Debug, Copy, Clone)]
+// pub struct gapEccCBs_t {
+//     pub gen_key_pair: pfnEcc_key_t,
+//     pub gen_dhkey: pfnEcc_dhkey_t,
+//     #[doc = "!< LE Secure Connections confirm value generation function f4"]
+//     pub alg_f4: pfnEcc_alg_f4_t,
+//     #[doc = "!< LE Secure Connections numeric comparison value generation function g2"]
+//     pub alg_g2: pfnEcc_alg_g2_t,
+//     #[doc = "!< LE Secure Connect ions key generation function  f5"]
+//     pub alg_f5: pfnEcc_alg_f5_t,
+//     #[doc = "!< LE Secure  Connections check value generation function  f6"]
+//     pub alg_f6: pfnEcc_alg_f6_t,
+// }
+
+// pub const GAPBOND_PERI_PAIRING_MODE: u16 = 1024;
+// pub const GAPBOND_PERI_MITM_PROTECTION: u16 = 1025;
+// pub const GAPBOND_PERI_IO_CAPABILITIES: u16 = 1026;
+// pub const GAPBOND_PERI_OOB_ENABLED: u16 = 1027;
+// pub const GAPBOND_PERI_OOB_DATA: u16 = 1028;
+// pub const GAPBOND_PERI_BONDING_ENABLED: u16 = 1029;
+// pub const GAPBOND_PERI_KEY_DIST_LIST: u16 = 1030;
+// pub const GAPBOND_PERI_DEFAULT_PASSCODE: u16 = 1031;
+// pub const GAPBOND_CENT_PAIRING_MODE: u16 = 1032;
+// pub const GAPBOND_CENT_MITM_PROTECTION: u16 = 1033;
+// pub const GAPBOND_CENT_IO_CAPABILITIES: u16 = 1034;
+// pub const GAPBOND_CENT_OOB_ENABLED: u16 = 1035;
+// pub const GAPBOND_CENT_OOB_DATA: u16 = 1036;
+// pub const GAPBOND_CENT_BONDING_ENABLED: u16 = 1037;
+// pub const GAPBOND_CENT_KEY_DIST_LIST: u16 = 1038;
+// pub const GAPBOND_CENT_DEFAULT_PASSCODE: u16 = 1039;
+// pub const GAPBOND_ERASE_ALLBONDS: u16 = 1040;
+// pub const GAPBOND_AUTO_FAIL_PAIRING: u16 = 1041;
+// pub const GAPBOND_AUTO_FAIL_REASON: u16 = 1042;
+// pub const GAPBOND_KEYSIZE: u16 = 1043;
+// pub const GAPBOND_AUTO_SYNC_WL: u16 = 1044;
+// pub const GAPBOND_BOND_COUNT: u16 = 1045;
+// pub const GAPBOND_BOND_FAIL_ACTION: u16 = 1046;
+// pub const GAPBOND_ERASE_SINGLEBOND: u16 = 1047;
+// pub const GAPBOND_BOND_AUTO: u16 = 1048;
+// pub const GAPBOND_BOND_UPDATE: u16 = 1049;
+// pub const GAPBOND_DISABLE_SINGLEBOND: u16 = 1050;
+// pub const GAPBOND_ENABLE_SINGLEBOND: u16 = 1051;
+// pub const GAPBOND_DISABLE_ALLBONDS: u16 = 1052;
+// pub const GAPBOND_ENABLE_ALLBONDS: u16 = 1053;
+// pub const GAPBOND_ERASE_AUTO: u16 = 1054;
+// pub const GAPBOND_AUTO_SYNC_RL: u16 = 1055;
+// pub const GAPBOND_SET_ENC_PARAMS: u16 = 1056;
+// pub const GAPBOND_PERI_SC_PROTECTION: u16 = 1057;
+// pub const GAPBOND_CENT_SC_PROTECTION: u16 = 1058;
+
+// pub const GAPBOND_PAIRING_MODE_NO_PAIRING: u8 = 0;
+// pub const GAPBOND_PAIRING_MODE_WAIT_FOR_REQ: u8 = 1;
+// pub const GAPBOND_PAIRING_MODE_INITIATE: u8 = 2;
+
+// // GAPBOND_IO_CAP_DEFINES GAP Bond Manager I/O Capabilities
+// pub const GAPBOND_IO_CAP_DISPLAY_ONLY: u8 = 0;
+// pub const GAPBOND_IO_CAP_DISPLAY_YES_NO: u8 = 1;
+// pub const GAPBOND_IO_CAP_KEYBOARD_ONLY: u8 = 2;
+// pub const GAPBOND_IO_CAP_NO_INPUT_NO_OUTPUT: u8 = 3;
+// pub const GAPBOND_IO_CAP_KEYBOARD_DISPLAY: u8 = 4;
+
+// pub const GAPBOND_KEYDIST_SENCKEY: u16 = 1;
+// pub const GAPBOND_KEYDIST_SIDKEY: u16 = 2;
+// pub const GAPBOND_KEYDIST_SSIGN: u16 = 4;
+// pub const GAPBOND_KEYDIST_SLINK: u16 = 8;
+// pub const GAPBOND_KEYDIST_MENCKEY: u16 = 16;
+// pub const GAPBOND_KEYDIST_MIDKEY: u16 = 32;
+// pub const GAPBOND_KEYDIST_MSIGN: u16 = 64;
+// pub const GAPBOND_KEYDIST_MLINK: u16 = 128;
+// pub const GAPBOND_PAIRING_STATE_STARTED: u16 = 0;
+// pub const GAPBOND_PAIRING_STATE_COMPLETE: u16 = 1;
+// pub const GAPBOND_PAIRING_STATE_BONDED: u16 = 2;
+// pub const GAPBOND_PAIRING_STATE_BOND_SAVED: u16 = 3;
+
+// extern "C" {
+//     #[doc = " @brief       Set a GAP Bond Manager parameter.\n\n @note    You can call this function with a GAP Parameter ID and it will set the GAP Parameter.\n\n @param   param - Profile parameter ID: @ref GAPBOND_PROFILE_PARAMETERS\n @param   len - length of data to write\n @param   pValue - pointer to data to write.  This is dependent on\n          the parameter ID and WILL be cast to the appropriate\n          data type (example: data type of uint16_t will be cast to\n          uint16_t pointer).\n\n @return      SUCCESS or INVALIDPARAMETER (invalid paramID)"]
+//     pub fn GAPBondMgr_SetParameter(param: u16, len: u8, pValue: *const ::core::ffi::c_void) -> bStatus_t;
+
+//     #[doc = " @brief   Get a GAP Bond Manager parameter.\n\n @note    You can call this function with a GAP Parameter ID and it will get a GAP Parameter.\n\n @param   param - Profile parameter ID: @ref GAPBOND_PROFILE_PARAMETERS\n @param   pValue - pointer to location to get the value.  This is dependent on\n          the parameter ID and WILL be cast to the appropriate data type.\n          (example: data type of uint16_t will be cast to uint16_t pointer)\n\n @return      SUCCESS or INVALIDPARAMETER (invalid paramID)"]
+//     pub fn GAPBondMgr_GetParameter(param: u16, pValue: *mut ::core::ffi::c_void) -> bStatus_t;
+
+//     #[doc = " @brief   Respond to a passcode request.\n\n @param   connectionHandle - connection handle of the connected device or 0xFFFF if all devices in database.\n @param   status - SUCCESS if passcode is available, otherwise see @ref SMP_PAIRING_FAILED_DEFINES.\n @param   passcode - integer value containing the passcode.\n\n @return  SUCCESS - bond record found and changed\n          bleIncorrectMode - Link not found."]
+//     pub fn GAPBondMgr_PasscodeRsp(connectionHandle: u16, status: u8, passcode: u32) -> bStatus_t;
+
+//     #[doc = " @brief   Respond to a passcode request.\n\n @param   connHandle - connection handle of the connected device or 0xFFFF if all devices in database.\n @param   status - SUCCESS if oob data is available, otherwise see @ref SMP_PAIRING_FAILED_DEFINES.\n @param   oob - containing the oob data.\n @param   c_peer - containing the peer confirm.\n\n @return  SUCCESS - bond record found and changed\n          bleIncorrectMode - Link not found."]
+//     pub fn GAPBondMgr_OobRsp(connHandle: u16, status: u8, oob: *mut u8, c_peer: *mut u8) -> bStatus_t;
+
+//     #[doc = " @brief   Initialization function for the ecc-function callback.\n\n @param   pEcc - callback registration Structure @ref gapEccCBs_t.\n\n @return  null."]
+//     pub fn GAPBondMgr_EccInit(pEcc: *mut gapEccCBs_t);
+
+//     #[doc = " @brief   Send a security request\n\n @param   connHandle - connection handle\n\n @return  SUCCESS: will send\n          bleNotConnected: Link not found\n          bleIncorrectMode: wrong GAP role, must be a Peripheral Role"]
+//     pub fn GAPBondMgr_PeriSecurityReq(connHandle: u16) -> bStatus_t;
+// }
+
+// // LL
+// extern "C" {
+//     #[doc = " @brief   set tx power level\n\n @param   power - tx power level\n\n @return  Command Status."]
+//     pub fn LL_SetTxPowerLevel(power: u8) -> bStatus_t;
+
+// }
+
+// // GAP GATT Server Parameters used with GGS Get/Set Parameter and Application's Callback functions
+// // uint8_t[GAP_DEVICE_NAME_LEN]
+// pub const GGS_DEVICE_NAME_ATT: u8 = 0;
+// pub const GGS_APPEARANCE_ATT: u8 = 1;
+// pub const GGS_PERI_PRIVACY_FLAG_ATT: u8 = 2;
+// pub const GGS_RECONNCT_ADDR_ATT: u8 = 3;
+// pub const GGS_PERI_CONN_PARAM_ATT: u8 = 4;
+// pub const GGS_PERI_PRIVACY_FLAG_PROPS: u8 = 5;
+// pub const GGS_W_PERMIT_DEVICE_NAME_ATT: u8 = 6;
+// pub const GGS_W_PERMIT_APPEARANCE_ATT: u8 = 7;
+// pub const GGS_W_PERMIT_PRIVACY_FLAG_ATT: u8 = 8;
+// pub const GGS_CENT_ADDR_RES_ATT: u8 = 9;
+// pub const GGS_ENC_DATA_KEY_MATERIAL: u8 = 11;
+// pub const GGS_LE_GATT_SEC_LEVELS: u8 = 12;
+
+// // GAP GATT Service
+// extern "C" {
+//     #[doc = " @brief   Set a GAP GATT Server parameter.\n\n @param   param - Profile parameter ID<BR>\n @param   len - length of data to right\n @param   value - pointer to data to write.  This is dependent on\n          the parameter ID and WILL be cast to the appropriate\n          data type (example: data type of uint16_t will be cast to\n          uint16_t pointer).<BR>\n\n @return  bStatus_t"]
+//     pub fn GGS_SetParameter(param: u8, len: u8, value: *mut ::core::ffi::c_void) -> bStatus_t;
+
+//     #[doc = " @brief   Get a GAP GATT Server parameter.\n\n @param   param - Profile parameter ID<BR>\n @param   value - pointer to data to put.  This is dependent on\n          the parameter ID and WILL be cast to the appropriate\n          data type (example: data type of uint16_t will be cast to\n          uint16_t pointer).<BR>\n\n @return  bStatus_t"]
+//     pub fn GGS_GetParameter(param: u8, value: *mut ::core::ffi::c_void) -> bStatus_t;
+
+//     #[doc = " @brief   Add function for the GAP GATT Service.\n\n @param   services - services to add. This is a bit map and can\n                     contain more than one service.\n\n @return  SUCCESS: Service added successfully.<BR>\n          INVALIDPARAMETER: Invalid service field.<BR>\n          FAILURE: Not enough attribute handles available.<BR>\n          bleMemAllocError: Memory allocation error occurred.<BR>"]
+//     pub fn GGS_AddService(services: u32) -> bStatus_t;
+// }
+
+// // Special case connection handles
+// /// Invalid connection handle, used for no connection handle
+// pub const INVALID_CONNHANDLE: u16 = 0xFFFF;
+// /// Loopback connection handle, used to loopback a message
+// pub const LOOPBACK_CONNHANDLE: u16 = 0xFFFE;
+
+/* automatically generated by rust-bindgen 0.72.1 */
+
+// ==================================================
+
+// pub const _STDINT_H: u32 = 1;
+// pub const _FEATURES_H: u32 = 1;
+// pub const _DEFAULT_SOURCE: u32 = 1;
+// pub const __GLIBC_USE_ISOC2Y: u32 = 0;
+// pub const __GLIBC_USE_ISOC23: u32 = 0;
+// pub const __USE_ISOC11: u32 = 1;
+// pub const __USE_ISOC99: u32 = 1;
+// pub const __USE_ISOC95: u32 = 1;
+// pub const __USE_POSIX_IMPLICITLY: u32 = 1;
+// pub const _POSIX_SOURCE: u32 = 1;
+// pub const _POSIX_C_SOURCE: u32 = 200809;
+// pub const __USE_POSIX: u32 = 1;
+// pub const __USE_POSIX2: u32 = 1;
+// pub const __USE_POSIX199309: u32 = 1;
+// pub const __USE_POSIX199506: u32 = 1;
+// pub const __USE_XOPEN2K: u32 = 1;
+// pub const __USE_XOPEN2K8: u32 = 1;
+// pub const _ATFILE_SOURCE: u32 = 1;
+// pub const __WORDSIZE: u32 = 64;
+// pub const __WORDSIZE_TIME64_COMPAT32: u32 = 1;
+// pub const __SYSCALL_WORDSIZE: u32 = 64;
+// pub const __TIMESIZE: u32 = 64;
+// pub const __USE_TIME_BITS64: u32 = 1;
+// pub const __USE_MISC: u32 = 1;
+// pub const __USE_ATFILE: u32 = 1;
+// pub const __USE_FORTIFY_LEVEL: u32 = 0;
+// pub const __GLIBC_USE_DEPRECATED_GETS: u32 = 0;
+// pub const __GLIBC_USE_DEPRECATED_SCANF: u32 = 0;
+// pub const __GLIBC_USE_C23_STRTOL: u32 = 0;
+// pub const _STDC_PREDEF_H: u32 = 1;
+// pub const __STDC_IEC_559__: u32 = 1;
+// pub const __STDC_IEC_60559_BFP__: u32 = 201404;
+// pub const __STDC_IEC_559_COMPLEX__: u32 = 1;
+// pub const __STDC_IEC_60559_COMPLEX__: u32 = 201404;
+// pub const __STDC_ISO_10646__: u32 = 201706;
+// pub const __GNU_LIBRARY__: u32 = 6;
+// pub const __GLIBC__: u32 = 2;
+// pub const __GLIBC_MINOR__: u32 = 42;
+// pub const _SYS_CDEFS_H: u32 = 1;
+// pub const __glibc_c99_flexarr_available: u32 = 1;
+// pub const __LDOUBLE_REDIRECTS_TO_FLOAT128_ABI: u32 = 0;
+// pub const __HAVE_GENERIC_SELECTION: u32 = 1;
+// pub const __GLIBC_USE_LIB_EXT2: u32 = 0;
+// pub const __GLIBC_USE_IEC_60559_BFP_EXT: u32 = 0;
+// pub const __GLIBC_USE_IEC_60559_BFP_EXT_C23: u32 = 0;
+// pub const __GLIBC_USE_IEC_60559_EXT: u32 = 0;
+// pub const __GLIBC_USE_IEC_60559_FUNCS_EXT: u32 = 0;
+// pub const __GLIBC_USE_IEC_60559_FUNCS_EXT_C23: u32 = 0;
+// pub const __GLIBC_USE_IEC_60559_TYPES_EXT: u32 = 0;
+// pub const _BITS_TYPES_H: u32 = 1;
+// pub const _BITS_TYPESIZES_H: u32 = 1;
+// pub const __OFF_T_MATCHES_OFF64_T: u32 = 1;
+// pub const __INO_T_MATCHES_INO64_T: u32 = 1;
+// pub const __RLIM_T_MATCHES_RLIM64_T: u32 = 1;
+// pub const __STATFS_MATCHES_STATFS64: u32 = 1;
+// pub const __KERNEL_OLD_TIMEVAL_MATCHES_TIMEVAL64: u32 = 1;
+// pub const __FD_SETSIZE: u32 = 1024;
+// pub const _BITS_TIME64_H: u32 = 1;
+// pub const _BITS_WCHAR_H: u32 = 1;
+// pub const _BITS_STDINT_INTN_H: u32 = 1;
+// pub const _BITS_STDINT_UINTN_H: u32 = 1;
+// pub const _BITS_STDINT_LEAST_H: u32 = 1;
+// pub const INT8_MIN: i32 = -128;
+// pub const INT16_MIN: i32 = -32768;
+// pub const INT32_MIN: i32 = -2147483648;
+// pub const INT8_MAX: u32 = 127;
+// pub const INT16_MAX: u32 = 32767;
+// pub const INT32_MAX: u32 = 2147483647;
+// pub const UINT8_MAX: u32 = 255;
+// pub const UINT16_MAX: u32 = 65535;
+// pub const UINT32_MAX: u32 = 4294967295;
+// pub const INT_LEAST8_MIN: i32 = -128;
+// pub const INT_LEAST16_MIN: i32 = -32768;
+// pub const INT_LEAST32_MIN: i32 = -2147483648;
+// pub const INT_LEAST8_MAX: u32 = 127;
+// pub const INT_LEAST16_MAX: u32 = 32767;
+// pub const INT_LEAST32_MAX: u32 = 2147483647;
+// pub const UINT_LEAST8_MAX: u32 = 255;
+// pub const UINT_LEAST16_MAX: u32 = 65535;
+// pub const UINT_LEAST32_MAX: u32 = 4294967295;
+// pub const INT_FAST8_MIN: i32 = -128;
+// pub const INT_FAST16_MIN: i64 = -9223372036854775808;
+// pub const INT_FAST32_MIN: i64 = -9223372036854775808;
+// pub const INT_FAST8_MAX: u32 = 127;
+// pub const INT_FAST16_MAX: u64 = 9223372036854775807;
+// pub const INT_FAST32_MAX: u64 = 9223372036854775807;
+// pub const UINT_FAST8_MAX: u32 = 255;
+// pub const UINT_FAST16_MAX: i32 = -1;
+// pub const UINT_FAST32_MAX: i32 = -1;
+// pub const INTPTR_MIN: i64 = -9223372036854775808;
+// pub const INTPTR_MAX: u64 = 9223372036854775807;
+// pub const UINTPTR_MAX: i32 = -1;
+// pub const PTRDIFF_MIN: i64 = -9223372036854775808;
+// pub const PTRDIFF_MAX: u64 = 9223372036854775807;
+// pub const SIG_ATOMIC_MIN: i32 = -2147483648;
+// pub const SIG_ATOMIC_MAX: u32 = 2147483647;
+// pub const SIZE_MAX: i32 = -1;
+// pub const WINT_MIN: u32 = 0;
+// pub const WINT_MAX: u32 = 4294967295;
+// pub const TRUE: u32 = 1;
+// pub const FALSE: u32 = 0;
+// pub const NULL: u32 = 0;
+// pub const SUCCESS: u32 = 0;
+// pub const SYS_EVENT_MSG: u32 = 32768;
+// pub const INVALID_TASK_ID: u32 = 255;
+// pub const TASK_NO_TASK: u32 = 255;
+// pub const VER_FILE: &[u8; 19] = b"CH59x_BLE_LIB_V1.4\0";
+// pub const SYSTEM_TIME_MICROSEN: u32 = 625;
+// pub const TMOS_TIME_VALID: u32 = 30000000;
+// pub const LL_TX_PWR_MINUS_20_DBM: u32 = 1;
+// pub const LL_TX_PWR_MINUS_15_DBM: u32 = 3;
+// pub const LL_TX_PWR_MINUS_10_DBM: u32 = 5;
+// pub const LL_TX_PWR_MINUS_8_DBM: u32 = 7;
+// pub const LL_TX_PWR_MINUS_5_DBM: u32 = 11;
+// pub const LL_TX_PWR_MINUS_3_DBM: u32 = 15;
+// pub const LL_TX_PWR_MINUS_1_DBM: u32 = 19;
+// pub const LL_TX_PWR_0_DBM: u32 = 21;
+// pub const LL_TX_PWR_1_DBM: u32 = 27;
+// pub const LL_TX_PWR_2_DBM: u32 = 35;
+// pub const LL_TX_PWR_3_DBM: u32 = 43;
+// pub const LL_TX_PWR_4_DBM: u32 = 59;
+// pub const LL_TX_PWR_9_DBM: u32 = 191;
+// pub const ERR_LLE_IRQ_HANDLE: u32 = 1;
+// pub const ERR_MEM_ALLOCATE_SIZE: u32 = 2;
+// pub const ERR_SET_MAC_ADDR: u32 = 3;
+// pub const ERR_GAP_ROLE_CONFIG: u32 = 4;
+// pub const ERR_CONNECT_NUMBER_CONFIG: u32 = 5;
+// pub const ERR_SNV_ADDR_CONFIG: u32 = 6;
+// pub const ERR_CLOCK_SELECT_CONFIG: u32 = 7;
+// pub const B_ADDR_LEN: u32 = 6;
+// pub const B_RANDOM_NUM_SIZE: u32 = 8;
+// pub const KEYLEN: u32 = 16;
+// pub const PUBLIC_KEY_LEN: u32 = 64;
+// pub const B_MAX_ADV_LEN: u32 = 31;
+// pub const B_MAX_ADV_EXT_LEN: u32 = 460;
+// pub const B_MAX_ADV_PERIODIC_LEN: u32 = 460;
+// pub const FAILURE: u32 = 1;
+// pub const INVALIDPARAMETER: u32 = 2;
+// pub const INVALID_TASK: u32 = 3;
+// pub const MSG_BUFFER_NOT_AVAIL: u32 = 4;
+// pub const INVALID_MSG_POINTER: u32 = 5;
+// pub const INVALID_EVENT_ID: u32 = 6;
+// pub const INVALID_TIMEOUT: u32 = 7;
+// pub const NO_TIMER_AVAIL: u32 = 8;
+// pub const NV_OPER_FAILED: u32 = 10;
+// pub const INVALID_MEM_SIZE: u32 = 11;
+// pub const bleInvalidTaskID: u32 = 3;
+// pub const bleEecKeyRequestRejected: u32 = 6;
+// pub const bleNotReady: u32 = 16;
+// pub const bleAlreadyInRequestedMode: u32 = 17;
+// pub const bleIncorrectMode: u32 = 18;
+// pub const bleMemAllocError: u32 = 19;
+// pub const bleNotConnected: u32 = 20;
+// pub const bleNoResources: u32 = 21;
+// pub const blePending: u32 = 22;
+// pub const bleTimeout: u32 = 23;
+// pub const bleInvalidRange: u32 = 24;
+// pub const bleLinkEncrypted: u32 = 25;
+// pub const bleProcedureComplete: u32 = 26;
+// pub const bleInvalidMtuSize: u32 = 27;
+// pub const INVALID_CONNHANDLE: u32 = 65535;
+// pub const LOOPBACK_CONNHANDLE: u32 = 65534;
+// pub const LINK_NOT_CONNECTED: u32 = 0;
+// pub const LINK_CONNECTED: u32 = 1;
+// pub const LINK_AUTHENTICATED: u32 = 2;
+// pub const LINK_BOUND: u32 = 4;
+// pub const LINK_ENCRYPTED: u32 = 16;
+// pub const LINKDB_STATUS_UPDATE_NEW: u32 = 0;
+// pub const LINKDB_STATUS_UPDATE_REMOVED: u32 = 1;
+// pub const LINKDB_STATUS_UPDATE_STATEFLAGS: u32 = 2;
+// pub const GAP_SERVICE_UUID: u32 = 6144;
+// pub const GATT_SERVICE_UUID: u32 = 6145;
+// pub const GATT_PRIMARY_SERVICE_UUID: u32 = 10240;
+// pub const GATT_SECONDARY_SERVICE_UUID: u32 = 10241;
+// pub const GATT_INCLUDE_UUID: u32 = 10242;
+// pub const GATT_CHARACTER_UUID: u32 = 10243;
+// pub const GATT_CHAR_EXT_PROPS_UUID: u32 = 10496;
+// pub const GATT_CHAR_USER_DESC_UUID: u32 = 10497;
+// pub const GATT_CLIENT_CHAR_CFG_UUID: u32 = 10498;
+// pub const GATT_SERV_CHAR_CFG_UUID: u32 = 10499;
+// pub const GATT_CHAR_FORMAT_UUID: u32 = 10500;
+// pub const GATT_CHAR_AGG_FORMAT_UUID: u32 = 10501;
+// pub const GATT_VALID_RANGE_UUID: u32 = 10502;
+// pub const GATT_EXT_REPORT_REF_UUID: u32 = 10503;
+// pub const GATT_REPORT_REF_UUID: u32 = 10504;
+// pub const DEVICE_NAME_UUID: u32 = 10752;
+// pub const APPEARANCE_UUID: u32 = 10753;
+// pub const PERI_PRIVACY_FLAG_UUID: u32 = 10754;
+// pub const RECONNECT_ADDR_UUID: u32 = 10755;
+// pub const PERI_CONN_PARAM_UUID: u32 = 10756;
+// pub const SERVICE_CHANGED_UUID: u32 = 10757;
+// pub const CENTRAL_ADDRESS_RESOLUTION_UUID: u32 = 10918;
+// pub const IMMEDIATE_ALERT_SERV_UUID: u32 = 6146;
+// pub const LINK_LOSS_SERV_UUID: u32 = 6147;
+// pub const TX_PWR_LEVEL_SERV_UUID: u32 = 6148;
+// pub const CURRENT_TIME_SERV_UUID: u32 = 6149;
+// pub const REF_TIME_UPDATE_SERV_UUID: u32 = 6150;
+// pub const NEXT_DST_CHANGE_SERV_UUID: u32 = 6151;
+// pub const GLUCOSE_SERV_UUID: u32 = 6152;
+// pub const THERMOMETER_SERV_UUID: u32 = 6153;
+// pub const DEVINFO_SERV_UUID: u32 = 6154;
+// pub const NWA_SERV_UUID: u32 = 6155;
+// pub const HEARTRATE_SERV_UUID: u32 = 6157;
+// pub const PHONE_ALERT_STS_SERV_UUID: u32 = 6158;
+// pub const BATT_SERV_UUID: u32 = 6159;
+// pub const BLOODPRESSURE_SERV_UUID: u32 = 6160;
+// pub const ALERT_NOTIF_SERV_UUID: u32 = 6161;
+// pub const HID_SERV_UUID: u32 = 6162;
+// pub const SCAN_PARAM_SERV_UUID: u32 = 6163;
+// pub const RSC_SERV_UUID: u32 = 6164;
+// pub const CSC_SERV_UUID: u32 = 6166;
+// pub const CYCPWR_SERV_UUID: u32 = 6168;
+// pub const LOC_NAV_SERV_UUID: u32 = 6169;
+// pub const ALERT_LEVEL_UUID: u32 = 10758;
+// pub const TX_PWR_LEVEL_UUID: u32 = 10759;
+// pub const DATE_TIME_UUID: u32 = 10760;
+// pub const DAY_OF_WEEK_UUID: u32 = 10761;
+// pub const DAY_DATE_TIME_UUID: u32 = 10762;
+// pub const EXACT_TIME_256_UUID: u32 = 10764;
+// pub const DST_OFFSET_UUID: u32 = 10765;
+// pub const TIME_ZONE_UUID: u32 = 10766;
+// pub const LOCAL_TIME_INFO_UUID: u32 = 10767;
+// pub const TIME_WITH_DST_UUID: u32 = 10769;
+// pub const TIME_ACCURACY_UUID: u32 = 10770;
+// pub const TIME_SOURCE_UUID: u32 = 10771;
+// pub const REF_TIME_INFO_UUID: u32 = 10772;
+// pub const TIME_UPDATE_CTRL_PT_UUID: u32 = 10774;
+// pub const TIME_UPDATE_STATE_UUID: u32 = 10775;
+// pub const GLUCOSE_MEAS_UUID: u32 = 10776;
+// pub const BATT_LEVEL_UUID: u32 = 10777;
+// pub const TEMP_MEAS_UUID: u32 = 10780;
+// pub const TEMP_TYPE_UUID: u32 = 10781;
+// pub const IMEDIATE_TEMP_UUID: u32 = 10782;
+// pub const MEAS_INTERVAL_UUID: u32 = 10785;
+// pub const BOOT_KEY_INPUT_UUID: u32 = 10786;
+// pub const SYSTEM_ID_UUID: u32 = 10787;
+// pub const MODEL_NUMBER_UUID: u32 = 10788;
+// pub const SERIAL_NUMBER_UUID: u32 = 10789;
+// pub const FIRMWARE_REV_UUID: u32 = 10790;
+// pub const HARDWARE_REV_UUID: u32 = 10791;
+// pub const SOFTWARE_REV_UUID: u32 = 10792;
+// pub const MANUFACTURER_NAME_UUID: u32 = 10793;
+// pub const IEEE_11073_CERT_DATA_UUID: u32 = 10794;
+// pub const CURRENT_TIME_UUID: u32 = 10795;
+// pub const SCAN_REFRESH_UUID: u32 = 10801;
+// pub const BOOT_KEY_OUTPUT_UUID: u32 = 10802;
+// pub const BOOT_MOUSE_INPUT_UUID: u32 = 10803;
+// pub const GLUCOSE_CONTEXT_UUID: u32 = 10804;
+// pub const BLOODPRESSURE_MEAS_UUID: u32 = 10805;
+// pub const IMEDIATE_CUFF_PRESSURE_UUID: u32 = 10806;
+// pub const HEARTRATE_MEAS_UUID: u32 = 10807;
+// pub const BODY_SENSOR_LOC_UUID: u32 = 10808;
+// pub const HEARTRATE_CTRL_PT_UUID: u32 = 10809;
+// pub const NETWORK_AVAIL_UUID: u32 = 10814;
+// pub const ALERT_STATUS_UUID: u32 = 10815;
+// pub const RINGER_CTRL_PT_UUID: u32 = 10816;
+// pub const RINGER_SETTING_UUID: u32 = 10817;
+// pub const ALERT_CAT_ID_BMASK_UUID: u32 = 10818;
+// pub const ALERT_CAT_ID_UUID: u32 = 10819;
+// pub const ALERT_NOTIF_CTRL_PT_UUID: u32 = 10820;
+// pub const UNREAD_ALERT_STATUS_UUID: u32 = 10821;
+// pub const NEW_ALERT_UUID: u32 = 10822;
+// pub const SUP_NEW_ALERT_CAT_UUID: u32 = 10823;
+// pub const SUP_UNREAD_ALERT_CAT_UUID: u32 = 10824;
+// pub const BLOODPRESSURE_FEATURE_UUID: u32 = 10825;
+// pub const HID_INFORMATION_UUID: u32 = 10826;
+// pub const REPORT_MAP_UUID: u32 = 10827;
+// pub const HID_CTRL_PT_UUID: u32 = 10828;
+// pub const REPORT_UUID: u32 = 10829;
+// pub const PROTOCOL_MODE_UUID: u32 = 10830;
+// pub const SCAN_INTERVAL_WINDOW_UUID: u32 = 10831;
+// pub const PNP_ID_UUID: u32 = 10832;
+// pub const GLUCOSE_FEATURE_UUID: u32 = 10833;
+// pub const RECORD_CTRL_PT_UUID: u32 = 10834;
+// pub const RSC_MEAS_UUID: u32 = 10835;
+// pub const RSC_FEATURE_UUID: u32 = 10836;
+// pub const SC_CTRL_PT_UUID: u32 = 10837;
+// pub const CSC_MEAS_UUID: u32 = 10843;
+// pub const CSC_FEATURE_UUID: u32 = 10844;
+// pub const SENSOR_LOC_UUID: u32 = 10845;
+// pub const CYCPWR_MEAS_UUID: u32 = 10851;
+// pub const CYCPWR_VECTOR_UUID: u32 = 10852;
+// pub const CYCPWR_FEATURE_UUID: u32 = 10853;
+// pub const CYCPWR_CTRL_PT_UUID: u32 = 10854;
+// pub const LOC_SPEED_UUID: u32 = 10855;
+// pub const NAV_UUID: u32 = 10856;
+// pub const POS_QUALITY_UUID: u32 = 10857;
+// pub const LN_FEATURE_UUID: u32 = 10858;
+// pub const LN_CTRL_PT_UUID: u32 = 10859;
+// pub const ELE_UUID: u32 = 10860;
+// pub const PRESSURE_UUID: u32 = 10861;
+// pub const TEMP_UUID: u32 = 10862;
+// pub const HUMI_UUID: u32 = 10863;
+// pub const TRUE_WIND_SPEED_UUID: u32 = 10864;
+// pub const TRUE_WIND_DIRECTION_UUID: u32 = 10865;
+// pub const URI_UUID: u32 = 10934;
+// pub const MEDIA_STATE_UUID: u32 = 11171;
+// pub const MEDIA_CTRL_PT_UUID: u32 = 11172;
+// pub const MEDIA_CTRL_PT_OS_UUID: u32 = 11173;
+// pub const CALL_STATE_UUID: u32 = 11197;
+// pub const CALL_CTRL_PT_UUID: u32 = 11198;
+// pub const CALL_CTRL_PT_OO_UUID: u32 = 11199;
+// pub const TERM_REASON_UUID: u32 = 11200;
+// pub const INCOMING_CALL_UUID: u32 = 11201;
+// pub const MUTE_UUID: u32 = 11203;
+// pub const GATT_UNITLESS_UUID: u32 = 9984;
+// pub const GATT_UNIT_LENGTH_METER_UUID: u32 = 9985;
+// pub const GATT_UNIT_MASS_KGRAM_UUID: u32 = 9986;
+// pub const GATT_UNIT_TIME_SECOND_UUID: u32 = 9987;
+// pub const GATT_UNIT_ELECTRIC_CURRENT_A_UUID: u32 = 9988;
+// pub const GATT_UNIT_THERMODYN_TEMP_K_UUID: u32 = 9989;
+// pub const GATT_UNIT_AMOUNT_SUBSTANCE_M_UUID: u32 = 9990;
+// pub const GATT_UNIT_LUMINOUS_INTENSITY_C_UUID: u32 = 9991;
+// pub const GATT_UNIT_AREA_SQ_MTR_UUID: u32 = 10000;
+// pub const GATT_UNIT_VOLUME_CUBIC_MTR_UUID: u32 = 10001;
+// pub const GATT_UNIT_VELOCITY_MPS_UUID: u32 = 10002;
+// pub const GATT_UNIT_ACCELERATION_MPS_SQ_UUID: u32 = 10003;
+// pub const GATT_UNIT_WAVENUMBER_RM_UUID: u32 = 10004;
+// pub const GATT_UNIT_DENSITY_KGPCM_UUID: u32 = 10005;
+// pub const GATT_UNIT_SURFACE_DENSITY_KGPSM_UUID: u32 = 10006;
+// pub const GATT_UNIT_SPECIFIC_VOLUME_CMPKG_UUID: u32 = 10007;
+// pub const GATT_UNIT_CURRENT_DENSITY_APSM_UUID: u32 = 10008;
+// pub const GATT_UNIT_MAG_FIELD_STRENGTH_UUID: u32 = 10009;
+// pub const GATT_UNIT_AMOUNT_CONC_MPCM_UUID: u32 = 10010;
+// pub const GATT_UNIT_MASS_CONC_KGPCM_UUID: u32 = 10011;
+// pub const GATT_UNIT_LUMINANCE_CPSM_UUID: u32 = 10012;
+// pub const GATT_UNIT_REFRACTIVE_INDEX_UUID: u32 = 10013;
+// pub const GATT_UNIT_RELATIVE_PERMEABLILTY_UUID: u32 = 10014;
+// pub const GATT_UNIT_PLANE_ANGLE_RAD_UUID: u32 = 10016;
+// pub const GATT_UNIT_SOLID_ANGLE_STERAD_UUID: u32 = 10017;
+// pub const GATT_UNIT_FREQUENCY_HTZ_UUID: u32 = 10018;
+// pub const GATT_UNIT_FORCE_NEWTON_UUID: u32 = 10019;
+// pub const GATT_UNIT_PRESSURE_PASCAL_UUID: u32 = 10020;
+// pub const GATT_UNIT_ENERGY_JOULE_UUID: u32 = 10021;
+// pub const GATT_UNIT_POWER_WATT_UUID: u32 = 10022;
+// pub const GATT_UNIT_E_CHARGE_C_UUID: u32 = 10023;
+// pub const GATT_UNIT_E_POTENTIAL_DIF_V_UUID: u32 = 10024;
+// pub const GATT_UNIT_CELSIUS_TEMP_DC_UUID: u32 = 10031;
+// pub const GATT_UNIT_TIME_MINUTE_UUID: u32 = 10080;
+// pub const GATT_UNIT_TIME_HOUR_UUID: u32 = 10081;
+// pub const GATT_UNIT_TIME_DAY_UUID: u32 = 10082;
+// pub const GATT_UNIT_PLANE_ANGLE_DEGREE_UUID: u32 = 10083;
+// pub const GATT_UNIT_PLANE_ANGLE_MINUTE_UUID: u32 = 10084;
+// pub const GATT_UNIT_PLANE_ANGLE_SECOND_UUID: u32 = 10085;
+// pub const GATT_UNIT_AREA_HECTARE_UUID: u32 = 10086;
+// pub const GATT_UNIT_VOLUME_LITRE_UUID: u32 = 10087;
+// pub const GATT_UNIT_MASS_TONNE_UUID: u32 = 10088;
+// pub const GATT_UINT_LENGTH_YARD_UUID: u32 = 10144;
+// pub const GATT_UNIT_LENGTH_PARSEC_UUID: u32 = 10145;
+// pub const GATT_UNIT_LENGTH_INCH_UUID: u32 = 10146;
+// pub const GATT_UNIT_LENGTH_FOOT_UUID: u32 = 10147;
+// pub const GATT_UNIT_LENGTH_MILE_UUID: u32 = 10148;
+// pub const GATT_UNIT_PRESSURE_PFPSI_UUID: u32 = 10149;
+// pub const GATT_UNIT_VELOCITY_KMPH_UUID: u32 = 10150;
+// pub const GATT_UNIT_VELOCITY_MPH_UUID: u32 = 10151;
+// pub const GATT_UNIT_ANGULAR_VELOCITY_RPM_UUID: u32 = 10152;
+// pub const GATT_UNIT_ENERGY_GCAL_UUID: u32 = 10153;
+// pub const GATT_UNIT_ENERGY_KCAL_UUID: u32 = 10154;
+// pub const GATT_UNIT_ENERGY_KWH_UUID: u32 = 10155;
+// pub const GATT_UNIT_THERMODYN_TEMP_DF_UUID: u32 = 10156;
+// pub const GATT_UNIT_PERCENTAGE_UUID: u32 = 10157;
+// pub const GATT_UNIT_PER_MILE_UUID: u32 = 10158;
+// pub const GATT_UNIT_PERIOD_BPM_UUID: u32 = 10159;
+// pub const GATT_UNIT_E_CHARGE_AH_UUID: u32 = 10160;
+// pub const GATT_UNIT_MASS_DENSITY_MGPD_UUID: u32 = 10161;
+// pub const GATT_UNIT_MASS_DENSITY_MMPL_UUID: u32 = 10162;
+// pub const GATT_UNIT_TIME_YEAR_UUID: u32 = 10163;
+// pub const GATT_UNIT_TIME_MONTH_UUID: u32 = 10164;
+// pub const GATT_MSG_EVENT: u32 = 176;
+// pub const GATT_SERV_MSG_EVENT: u32 = 177;
+// pub const GAP_MSG_EVENT: u32 = 208;
+// pub const ATT_MTU_SIZE: u32 = 23;
+// pub const ATT_MAX_MTU_SIZE: u32 = 512;
+// pub const ATT_ERROR_RSP: u32 = 1;
+// pub const ATT_EXCHANGE_MTU_REQ: u32 = 2;
+// pub const ATT_EXCHANGE_MTU_RSP: u32 = 3;
+// pub const ATT_FIND_INFO_REQ: u32 = 4;
+// pub const ATT_FIND_INFO_RSP: u32 = 5;
+// pub const ATT_FIND_BY_TYPE_VALUE_REQ: u32 = 6;
+// pub const ATT_FIND_BY_TYPE_VALUE_RSP: u32 = 7;
+// pub const ATT_READ_BY_TYPE_REQ: u32 = 8;
+// pub const ATT_READ_BY_TYPE_RSP: u32 = 9;
+// pub const ATT_READ_REQ: u32 = 10;
+// pub const ATT_READ_RSP: u32 = 11;
+// pub const ATT_READ_BLOB_REQ: u32 = 12;
+// pub const ATT_READ_BLOB_RSP: u32 = 13;
+// pub const ATT_READ_MULTI_REQ: u32 = 14;
+// pub const ATT_READ_MULTI_RSP: u32 = 15;
+// pub const ATT_READ_BY_GRP_TYPE_REQ: u32 = 16;
+// pub const ATT_READ_BY_GRP_TYPE_RSP: u32 = 17;
+// pub const ATT_WRITE_REQ: u32 = 18;
+// pub const ATT_WRITE_RSP: u32 = 19;
+// pub const ATT_PREPARE_WRITE_REQ: u32 = 22;
+// pub const ATT_PREPARE_WRITE_RSP: u32 = 23;
+// pub const ATT_EXECUTE_WRITE_REQ: u32 = 24;
+// pub const ATT_EXECUTE_WRITE_RSP: u32 = 25;
+// pub const ATT_HANDLE_VALUE_NOTI: u32 = 27;
+// pub const ATT_HANDLE_VALUE_IND: u32 = 29;
+// pub const ATT_HANDLE_VALUE_CFM: u32 = 30;
+// pub const ATT_WRITE_CMD: u32 = 82;
+// pub const ATT_SIGNED_WRITE_CMD: u32 = 210;
+// pub const ATT_ERR_INVALID_HANDLE: u32 = 1;
+// pub const ATT_ERR_READ_NOT_PERMITTED: u32 = 2;
+// pub const ATT_ERR_WRITE_NOT_PERMITTED: u32 = 3;
+// pub const ATT_ERR_INVALID_PDU: u32 = 4;
+// pub const ATT_ERR_INSUFFICIENT_AUTHEN: u32 = 5;
+// pub const ATT_ERR_UNSUPPORTED_REQ: u32 = 6;
+// pub const ATT_ERR_INVALID_OFFSET: u32 = 7;
+// pub const ATT_ERR_INSUFFICIENT_AUTHOR: u32 = 8;
+// pub const ATT_ERR_PREPARE_QUEUE_FULL: u32 = 9;
+// pub const ATT_ERR_ATTR_NOT_FOUND: u32 = 10;
+// pub const ATT_ERR_ATTR_NOT_LONG: u32 = 11;
+// pub const ATT_ERR_INSUFFICIENT_KEY_SIZE: u32 = 12;
+// pub const ATT_ERR_INVALID_VALUE_SIZE: u32 = 13;
+// pub const ATT_ERR_UNLIKELY: u32 = 14;
+// pub const ATT_ERR_INSUFFICIENT_ENCRYPT: u32 = 15;
+// pub const ATT_ERR_UNSUPPORTED_GRP_TYPE: u32 = 16;
+// pub const ATT_ERR_INSUFFICIENT_RESOURCES: u32 = 17;
+// pub const ATT_ERR_INVALID_VALUE: u32 = 128;
+// pub const ATT_FLOW_CTRL_VIOLATED_EVENT: u32 = 126;
+// pub const ATT_MTU_UPDATED_EVENT: u32 = 127;
+// pub const ATT_BT_UUID_SIZE: u32 = 2;
+// pub const ATT_UUID_SIZE: u32 = 16;
+// pub const GATT_PERMIT_READ: u32 = 1;
+// pub const GATT_PERMIT_WRITE: u32 = 2;
+// pub const GATT_PERMIT_AUTHEN_READ: u32 = 4;
+// pub const GATT_PERMIT_AUTHEN_WRITE: u32 = 8;
+// pub const GATT_PERMIT_AUTHOR_READ: u32 = 16;
+// pub const GATT_PERMIT_AUTHOR_WRITE: u32 = 32;
+// pub const GATT_PERMIT_ENCRYPT_READ: u32 = 64;
+// pub const GATT_PERMIT_ENCRYPT_WRITE: u32 = 128;
+// pub const GATT_PROP_BCAST: u32 = 1;
+// pub const GATT_PROP_READ: u32 = 2;
+// pub const GATT_PROP_WRITE_NO_RSP: u32 = 4;
+// pub const GATT_PROP_WRITE: u32 = 8;
+// pub const GATT_PROP_NOTIFY: u32 = 16;
+// pub const GATT_PROP_INDICATE: u32 = 32;
+// pub const GATT_PROP_AUTHEN: u32 = 64;
+// pub const GATT_PROP_EXTENDED: u32 = 128;
+// pub const GATT_LOCAL_READ: u32 = 255;
+// pub const GATT_LOCAL_WRITE: u32 = 254;
+// pub const GATT_MIN_ENCRYPT_KEY_SIZE: u32 = 7;
+// pub const GATT_MAX_ENCRYPT_KEY_SIZE: u32 = 16;
+// pub const GATT_INVALID_HANDLE: u32 = 0;
+// pub const GATT_MIN_HANDLE: u32 = 1;
+// pub const GATT_MAX_HANDLE: u32 = 65535;
+// pub const GATT_MAX_MTU: u32 = 65535;
+// pub const GATT_MAX_NUM_CONN: u32 = 4;
+// pub const GATT_CLIENT_CFG_NOTIFY: u32 = 1;
+// pub const GATT_CLIENT_CFG_INDICATE: u32 = 2;
+// pub const GATT_CFG_NO_OPERATION: u32 = 0;
+// pub const GATT_ALL_SERVICES: u32 = 4294967295;
+// pub const GAP_DEVICE_INIT_DONE_EVENT: u32 = 0;
+// pub const GAP_DEVICE_DISCOVERY_EVENT: u32 = 1;
+// pub const GAP_ADV_DATA_UPDATE_DONE_EVENT: u32 = 2;
+// pub const GAP_MAKE_DISCOVERABLE_DONE_EVENT: u32 = 3;
+// pub const GAP_END_DISCOVERABLE_DONE_EVENT: u32 = 4;
+// pub const GAP_LINK_ESTABLISHED_EVENT: u32 = 5;
+// pub const GAP_LINK_TERMINATED_EVENT: u32 = 6;
+// pub const GAP_LINK_PARAM_UPDATE_EVENT: u32 = 7;
+// pub const GAP_RANDOM_ADDR_CHANGED_EVENT: u32 = 8;
+// pub const GAP_SIGNATURE_UPDATED_EVENT: u32 = 9;
+// pub const GAP_AUTHENTICATION_COMPLETE_EVENT: u32 = 10;
+// pub const GAP_PASSKEY_NEEDED_EVENT: u32 = 11;
+// pub const GAP_SLAVE_REQUESTED_SECURITY_EVENT: u32 = 12;
+// pub const GAP_DEVICE_INFO_EVENT: u32 = 13;
+// pub const GAP_BOND_COMPLETE_EVENT: u32 = 14;
+// pub const GAP_PAIRING_REQ_EVENT: u32 = 15;
+// pub const GAP_DIRECT_DEVICE_INFO_EVENT: u32 = 16;
+// pub const GAP_PHY_UPDATE_EVENT: u32 = 17;
+// pub const GAP_EXT_ADV_DEVICE_INFO_EVENT: u32 = 18;
+// pub const GAP_MAKE_PERIODIC_ADV_DONE_EVENT: u32 = 19;
+// pub const GAP_END_PERIODIC_ADV_DONE_EVENT: u32 = 20;
+// pub const GAP_SYNC_ESTABLISHED_EVENT: u32 = 21;
+// pub const GAP_PERIODIC_ADV_DEVICE_INFO_EVENT: u32 = 22;
+// pub const GAP_SYNC_LOST_EVENT: u32 = 23;
+// pub const GAP_SCAN_REQUEST_EVENT: u32 = 25;
+// pub const GAP_OOB_NEEDED_EVENT: u32 = 26;
+// pub const GAP_MAKE_CONNECTIONESS_CTE_DONE_EVENT: u32 = 27;
+// pub const GAP_END_CONNECTIONESS_CTE_DONE_EVENT: u32 = 28;
+// pub const GAP_PERI_ADV_SYNC_TRAN_RECEIVED_EVENT: u32 = 29;
+// pub const GAP_PROFILE_BROADCASTER: u32 = 1;
+// pub const GAP_PROFILE_OBSERVER: u32 = 2;
+// pub const GAP_PROFILE_PERIPHERAL: u32 = 4;
+// pub const GAP_PROFILE_CENTRAL: u32 = 8;
+// pub const bleGAPUserCanceled: u32 = 48;
+// pub const bleGAPConnNotAcceptable: u32 = 49;
+// pub const bleGAPBondRejected: u32 = 50;
+// pub const bleGAPExpiredCanceled: u32 = 51;
+// pub const GAP_DEVICE_NAME_LEN: u32 = 21;
+// pub const GAP_DEVICE_NAME_MAX_LEN: u32 = 248;
+// pub const LISTEN_PERIODIC_ADVERTISING_MODE: u32 = 1;
+// pub const REPORTING_INITIALLY_DISABLED: u32 = 2;
+// pub const DUPLICATE_FILTERING_INITIALLY_ENABLED: u32 = 4;
+// pub const GAP_CONNHANDLE_INIT: u32 = 65534;
+// pub const GAP_CONNHANDLE_ALL: u32 = 65535;
+// pub const GAP_PRIVACY_DISABLED: u32 = 0;
+// pub const GAP_PRIVACY_ENABLED: u32 = 1;
+// pub const GGS_DEVICE_NAME_ATT: u32 = 0;
+// pub const GGS_APPEARANCE_ATT: u32 = 1;
+// pub const GGS_PERI_PRIVACY_FLAG_ATT: u32 = 2;
+// pub const GGS_RECONNCT_ADDR_ATT: u32 = 3;
+// pub const GGS_PERI_CONN_PARAM_ATT: u32 = 4;
+// pub const GGS_PERI_PRIVACY_FLAG_PROPS: u32 = 5;
+// pub const GGS_W_PERMIT_DEVICE_NAME_ATT: u32 = 6;
+// pub const GGS_W_PERMIT_APPEARANCE_ATT: u32 = 7;
+// pub const GGS_W_PERMIT_PRIVACY_FLAG_ATT: u32 = 8;
+// pub const GGS_CENT_ADDR_RES_ATT: u32 = 9;
+// pub const GAP_SERVICE: u32 = 1;
+// pub const TGAP_GEN_DISC_ADV_MIN: u32 = 0;
+// pub const TGAP_LIM_ADV_TIMEOUT: u32 = 1;
+// pub const TGAP_DISC_SCAN: u32 = 2;
+// pub const TGAP_DISC_ADV_INT_MIN: u32 = 3;
+// pub const TGAP_DISC_ADV_INT_MAX: u32 = 4;
+// pub const TGAP_DISC_SCAN_INT: u32 = 5;
+// pub const TGAP_DISC_SCAN_WIND: u32 = 6;
+// pub const TGAP_CONN_EST_INT_MIN: u32 = 7;
+// pub const TGAP_CONN_EST_INT_MAX: u32 = 8;
+// pub const TGAP_CONN_EST_SCAN_INT: u32 = 9;
+// pub const TGAP_CONN_EST_SCAN_WIND: u32 = 10;
+// pub const TGAP_CONN_EST_HIGH_SCAN_INT: u32 = 11;
+// pub const TGAP_CONN_EST_HIGH_SCAN_WIND: u32 = 12;
+// pub const TGAP_CONN_EST_SUPERV_TIMEOUT: u32 = 13;
+// pub const TGAP_CONN_EST_LATENCY: u32 = 14;
+// pub const TGAP_CONN_EST_MIN_CE_LEN: u32 = 15;
+// pub const TGAP_CONN_EST_MAX_CE_LEN: u32 = 16;
+// pub const TGAP_PRIVATE_ADDR_INT: u32 = 17;
+// pub const TGAP_SM_TIMEOUT: u32 = 18;
+// pub const TGAP_SM_MIN_KEY_LEN: u32 = 19;
+// pub const TGAP_SM_MAX_KEY_LEN: u32 = 20;
+// pub const TGAP_FILTER_ADV_REPORTS: u32 = 21;
+// pub const TGAP_SCAN_RSSI_MIN: u32 = 22;
+// pub const TGAP_REJECT_CONN_PARAMS: u32 = 23;
+// pub const TGAP_AUTH_TASK_ID: u32 = 24;
+// pub const TGAP_ADV_TX_POWER: u32 = 25;
+// pub const TGAP_ADV_PRIMARY_PHY: u32 = 26;
+// pub const TGAP_ADV_SECONDARY_PHY: u32 = 27;
+// pub const TGAP_ADV_SECONDARY_MAX_SKIP: u32 = 28;
+// pub const TGAP_ADV_ADVERTISING_SID: u32 = 29;
+// pub const TGAP_ADV_SCAN_REQ_NOTIFY: u32 = 30;
+// pub const TGAP_ADV_ADVERTISING_DURATION: u32 = 31;
+// pub const TGAP_ADV_MAX_EVENTS: u32 = 32;
+// pub const TGAP_DISC_SCAN_PHY: u32 = 33;
+// pub const TGAP_DISC_SCAN_CODED_INT: u32 = 34;
+// pub const TGAP_DISC_SCAN_CODED_WIND: u32 = 35;
+// pub const TGAP_DISC_SCAN_DURATION: u32 = 36;
+// pub const TGAP_DISC_SCAN_PERIOD: u32 = 37;
+// pub const TGAP_CONN_EST_INT_PHY: u32 = 38;
+// pub const TGAP_CONN_EST_2M_INT_MIN: u32 = 39;
+// pub const TGAP_CONN_EST_2M_INT_MAX: u32 = 40;
+// pub const TGAP_CONN_EST_2M_SUPERV_TIMEOUT: u32 = 41;
+// pub const TGAP_CONN_EST_2M_LATENCY: u32 = 42;
+// pub const TGAP_CONN_EST_2M_MIN_CE_LEN: u32 = 43;
+// pub const TGAP_CONN_EST_2M_MAX_CE_LEN: u32 = 44;
+// pub const TGAP_CONN_EST_CODED_INT_MIN: u32 = 45;
+// pub const TGAP_CONN_EST_CODED_INT_MAX: u32 = 46;
+// pub const TGAP_CONN_EST_CODED_SCAN_INT: u32 = 47;
+// pub const TGAP_CONN_EST_CODED_SCAN_WIND: u32 = 48;
+// pub const TGAP_CONN_EST_CODED_HIGH_SCAN_INT: u32 = 49;
+// pub const TGAP_CONN_EST_CODED_HIGH_SCAN_WIND: u32 = 50;
+// pub const TGAP_CONN_EST_CODED_SUPERV_TIMEOUT: u32 = 51;
+// pub const TGAP_CONN_EST_CODED_LATENCY: u32 = 52;
+// pub const TGAP_CONN_EST_CODED_MIN_CE_LEN: u32 = 53;
+// pub const TGAP_CONN_EST_CODED_MAX_CE_LEN: u32 = 54;
+// pub const TGAP_PERIODIC_ADV_INT_MIN: u32 = 55;
+// pub const TGAP_PERIODIC_ADV_INT_MAX: u32 = 56;
+// pub const TGAP_PERIODIC_ADV_PROPERTIES: u32 = 57;
+// pub const TGAP_SCAN_MAX_LENGTH: u32 = 58;
+// pub const TGAP_AFH_CHANNEL_MDOE: u32 = 59;
+// pub const TGAP_CTE_TYPE: u32 = 60;
+// pub const TGAP_CTE_LENGTH: u32 = 61;
+// pub const TGAP_CTE_COUNT: u32 = 62;
+// pub const TGAP_LENGTH_OF_SWITCHING_PATTERN: u32 = 63;
+// pub const TGAP_ADV_RSP_RSSI_MIN: u32 = 64;
+// pub const TGAP_PARAMID_MAX: u32 = 65;
+// pub const DEVDISC_MODE_NONDISCOVERABLE: u32 = 0;
+// pub const DEVDISC_MODE_GENERAL: u32 = 1;
+// pub const DEVDISC_MODE_LIMITED: u32 = 2;
+// pub const DEVDISC_MODE_ALL: u32 = 3;
+// pub const ADDRTYPE_PUBLIC: u32 = 0;
+// pub const ADDRTYPE_STATIC: u32 = 1;
+// pub const ADDRTYPE_PRIVATE_NONRESOLVE: u32 = 2;
+// pub const ADDRTYPE_PRIVATE_RESOLVE: u32 = 3;
+// pub const GAP_ADTYPE_ADV_IND: u32 = 0;
+// pub const GAP_ADTYPE_ADV_HDC_DIRECT_IND: u32 = 1;
+// pub const GAP_ADTYPE_ADV_SCAN_IND: u32 = 2;
+// pub const GAP_ADTYPE_ADV_NONCONN_IND: u32 = 3;
+// pub const GAP_ADTYPE_ADV_LDC_DIRECT_IND: u32 = 4;
+// pub const GAP_ADTYPE_EXT_CONN_DIRECT: u32 = 5;
+// pub const GAP_ADTYPE_EXT_SCAN_UNDIRECT: u32 = 6;
+// pub const GAP_ADTYPE_EXT_NONCONN_NONSCAN_UNDIRECT: u32 = 7;
+// pub const GAP_ADTYPE_EXT_CONN_UNDIRECT: u32 = 8;
+// pub const GAP_ADTYPE_EXT_SCAN_DIRECT: u32 = 9;
+// pub const GAP_ADTYPE_EXT_NONCONN_NONSCAN_DIRECT: u32 = 10;
+// pub const GAP_PHY_VAL_LE_1M: u32 = 1;
+// pub const GAP_PHY_VAL_LE_2M: u32 = 2;
+// pub const GAP_PHY_BIT_LE_1M: u32 = 1;
+// pub const GAP_PHY_BIT_LE_2M: u32 = 2;
+// pub const GAP_PHY_BIT_ALL: u32 = 3;
+// pub const GAP_PERI_PROPERTIES_INCLUDE_TXPOWER: u32 = 64;
+// pub const GAP_CTE_TYPE_AOA: u32 = 0;
+// pub const GAP_CTE_TYPE_AOD_1US: u32 = 1;
+// pub const GAP_CTE_TYPE_AOD_2US: u32 = 2;
+// pub const GAP_ADRPT_ADV_IND: u32 = 0;
+// pub const GAP_ADRPT_ADV_DIRECT_IND: u32 = 1;
+// pub const GAP_ADRPT_ADV_SCAN_IND: u32 = 2;
+// pub const GAP_ADRPT_ADV_NONCONN_IND: u32 = 3;
+// pub const GAP_ADRPT_SCAN_RSP: u32 = 4;
+// pub const GAP_ADRPT_EXT_CONN_DIRECT: u32 = 5;
+// pub const GAP_ADRPT_EXT_SCAN_UNDIRECT: u32 = 6;
+// pub const GAP_ADRPT_EXT_NONCONN_NONSCAN_UNDIRECT: u32 = 7;
+// pub const GAP_ADRPT_EXT_CONN_UNDIRECT: u32 = 8;
+// pub const GAP_ADRPT_EXT_SCAN_DIRECT: u32 = 9;
+// pub const GAP_ADRPT_EXT_NONCONN_NONSCAN_DIRECT: u32 = 10;
+// pub const GAP_ADRPT_EXT_SCAN_RESPONSE: u32 = 11;
+// pub const GAP_ADRPT_EXT_DATA_MASK: u32 = 96;
+// pub const GAP_ADRPT_EXT_DATA_COMPLETE: u32 = 0;
+// pub const GAP_ADRPT_EXT_DATA_INCOMPLETE: u32 = 32;
+// pub const GAP_ADRPT_EXT_DATA_LAST: u32 = 64;
+// pub const GAP_ADRPT_ADV_CONNECTABLE: u32 = 1;
+// pub const GAP_ADRPT_ADV_SCANNABLE: u32 = 2;
+// pub const GAP_ADRPT_ADV_DITECTED: u32 = 4;
+// pub const GAP_ADRPT_SCAN_RESPONSE: u32 = 8;
+// pub const GAP_FILTER_POLICY_ALL: u32 = 0;
+// pub const GAP_FILTER_POLICY_WHITE_SCAN: u32 = 1;
+// pub const GAP_FILTER_POLICY_WHITE_CON: u32 = 2;
+// pub const GAP_FILTER_POLICY_WHITE: u32 = 3;
+// pub const GAP_PASSCODE_MAX: u32 = 999999;
+// pub const GAP_INIT_SIGN_COUNTER: u32 = 4294967295;
+// pub const GAP_ADVCHAN_37: u32 = 1;
+// pub const GAP_ADVCHAN_38: u32 = 2;
+// pub const GAP_ADVCHAN_39: u32 = 4;
+// pub const GAP_ADVCHAN_ALL: u32 = 7;
+// pub const GAP_ADTYPE_FLAGS: u32 = 1;
+// pub const GAP_ADTYPE_16BIT_MORE: u32 = 2;
+// pub const GAP_ADTYPE_16BIT_COMPLETE: u32 = 3;
+// pub const GAP_ADTYPE_32BIT_MORE: u32 = 4;
+// pub const GAP_ADTYPE_32BIT_COMPLETE: u32 = 5;
+// pub const GAP_ADTYPE_128BIT_MORE: u32 = 6;
+// pub const GAP_ADTYPE_128BIT_COMPLETE: u32 = 7;
+// pub const GAP_ADTYPE_LOCAL_NAME_SHORT: u32 = 8;
+// pub const GAP_ADTYPE_LOCAL_NAME_COMPLETE: u32 = 9;
+// pub const GAP_ADTYPE_POWER_LEVEL: u32 = 10;
+// pub const GAP_ADTYPE_OOB_CLASS_OF_DEVICE: u32 = 13;
+// pub const GAP_ADTYPE_OOB_SIMPLE_PAIRING_HASHC: u32 = 14;
+// pub const GAP_ADTYPE_OOB_SIMPLE_PAIRING_RANDR: u32 = 15;
+// pub const GAP_ADTYPE_SM_TK: u32 = 16;
+// pub const GAP_ADTYPE_SM_OOB_FLAG: u32 = 17;
+// pub const GAP_ADTYPE_SLAVE_CONN_INTERVAL_RANGE: u32 = 18;
+// pub const GAP_ADTYPE_SIGNED_DATA: u32 = 19;
+// pub const GAP_ADTYPE_SERVICES_LIST_16BIT: u32 = 20;
+// pub const GAP_ADTYPE_SERVICES_LIST_128BIT: u32 = 21;
+// pub const GAP_ADTYPE_SERVICE_DATA: u32 = 22;
+// pub const GAP_ADTYPE_PUBLIC_TARGET_ADDR: u32 = 23;
+// pub const GAP_ADTYPE_RANDOM_TARGET_ADDR: u32 = 24;
+// pub const GAP_ADTYPE_APPEARANCE: u32 = 25;
+// pub const GAP_ADTYPE_ADV_INTERVAL: u32 = 26;
+// pub const GAP_ADTYPE_LE_BD_ADDR: u32 = 27;
+// pub const GAP_ADTYPE_LE_ROLE: u32 = 28;
+// pub const GAP_ADTYPE_SIMPLE_PAIRING_HASHC_256: u32 = 29;
+// pub const GAP_ADTYPE_SIMPLE_PAIRING_RANDR_256: u32 = 30;
+// pub const GAP_ADTYPE_SERVICE_DATA_32BIT: u32 = 32;
+// pub const GAP_ADTYPE_SERVICE_DATA_128BIT: u32 = 33;
+// pub const GAP_ADTYPE_LE_SC_CONFIRMATION_VALUE: u32 = 34;
+// pub const GAP_ADTYPE_LE_SC_RANDOM_VALUE: u32 = 35;
+// pub const GAP_ADTYPE_URI: u32 = 36;
+// pub const GAP_ADTYPE_INDOOR_POSITION: u32 = 37;
+// pub const GAP_ADTYPE_TRAN_DISCOVERY_DATA: u32 = 38;
+// pub const GAP_ADTYPE_SUPPORTED_FEATURES: u32 = 39;
+// pub const GAP_ADTYPE_CHANNEL_MAP_UPDATE: u32 = 40;
+// pub const GAP_ADTYPE_PB_ADV: u32 = 41;
+// pub const GAP_ADTYPE_MESH_MESSAGE: u32 = 42;
+// pub const GAP_ADTYPE_MESH_BEACON: u32 = 43;
+// pub const GAP_ADTYPE_BIG_INFO: u32 = 44;
+// pub const GAP_ADTYPE_BROADCAST_CODE: u32 = 45;
+// pub const GAP_ADTYPE_RSL_SET_IDENT: u32 = 46;
+// pub const GAP_ADTYPE_ADV_INTERVAL_LONG: u32 = 47;
+// pub const GAP_ADTYPE_3D_INFO_DATA: u32 = 61;
+// pub const GAP_ADTYPE_MANUFACTURER_SPECIFIC: u32 = 255;
+// pub const GAP_ADTYPE_FLAGS_LIMITED: u32 = 1;
+// pub const GAP_ADTYPE_FLAGS_GENERAL: u32 = 2;
+// pub const GAP_ADTYPE_FLAGS_BREDR_NOT_SUPPORTED: u32 = 4;
+// pub const GAP_APPEARE_UNKNOWN: u32 = 0;
+// pub const GAP_APPEARE_GENERIC_PHONE: u32 = 64;
+// pub const GAP_APPEARE_GENERIC_COMPUTER: u32 = 128;
+// pub const GAP_APPEARE_GENERIC_WATCH: u32 = 192;
+// pub const GAP_APPEARE_WATCH_SPORTS: u32 = 193;
+// pub const GAP_APPEARE_GENERIC_CLOCK: u32 = 256;
+// pub const GAP_APPEARE_GENERIC_DISPLAY: u32 = 320;
+// pub const GAP_APPEARE_GENERIC_RC: u32 = 384;
+// pub const GAP_APPEARE_GENERIC_EYE_GALSSES: u32 = 448;
+// pub const GAP_APPEARE_GENERIC_TAG: u32 = 512;
+// pub const GAP_APPEARE_GENERIC_KEYRING: u32 = 576;
+// pub const GAP_APPEARE_GENERIC_MEDIA_PLAYER: u32 = 640;
+// pub const GAP_APPEARE_GENERIC_BARCODE_SCANNER: u32 = 704;
+// pub const GAP_APPEARE_GENERIC_THERMOMETER: u32 = 768;
+// pub const GAP_APPEARE_GENERIC_THERMO_EAR: u32 = 769;
+// pub const GAP_APPEARE_GENERIC_HR_SENSOR: u32 = 832;
+// pub const GAP_APPEARE_GENERIC_HRS_BELT: u32 = 833;
+// pub const GAP_APPEARE_GENERIC_BLOOD_PRESSURE: u32 = 896;
+// pub const GAP_APPEARE_GENERIC_BP_ARM: u32 = 897;
+// pub const GAP_APPEARE_GENERIC_BP_WRIST: u32 = 898;
+// pub const GAP_APPEARE_GENERIC_HID: u32 = 960;
+// pub const GAP_APPEARE_HID_KEYBOARD: u32 = 961;
+// pub const GAP_APPEARE_HID_MOUSE: u32 = 962;
+// pub const GAP_APPEARE_HID_JOYSTIC: u32 = 963;
+// pub const GAP_APPEARE_HID_GAMEPAD: u32 = 964;
+// pub const GAP_APPEARE_HID_DIGITIZER_TYABLET: u32 = 965;
+// pub const GAP_APPEARE_HID_DIGITAL_CARDREADER: u32 = 966;
+// pub const GAP_APPEARE_HID_DIGITAL_PEN: u32 = 967;
+// pub const GAP_APPEARE_HID_BARCODE_SCANNER: u32 = 968;
+// pub const GAPROLE_PROFILEROLE: u32 = 768;
+// pub const GAPROLE_IRK: u32 = 769;
+// pub const GAPROLE_SRK: u32 = 770;
+// pub const GAPROLE_SIGNCOUNTER: u32 = 771;
+// pub const GAPROLE_BD_ADDR: u32 = 772;
+// pub const GAPROLE_ADVERT_ENABLED: u32 = 773;
+// pub const GAPROLE_ADVERT_DATA: u32 = 774;
+// pub const GAPROLE_SCAN_RSP_DATA: u32 = 775;
+// pub const GAPROLE_ADV_EVENT_TYPE: u32 = 776;
+// pub const GAPROLE_ADV_DIRECT_TYPE: u32 = 777;
+// pub const GAPROLE_ADV_DIRECT_ADDR: u32 = 778;
+// pub const GAPROLE_ADV_CHANNEL_MAP: u32 = 779;
+// pub const GAPROLE_ADV_FILTER_POLICY: u32 = 780;
+// pub const GAPROLE_STATE: u32 = 781;
+// pub const GAPROLE_MAX_SCAN_RES: u32 = 782;
+// pub const GAPROLE_MIN_CONN_INTERVAL: u32 = 785;
+// pub const GAPROLE_MAX_CONN_INTERVAL: u32 = 786;
+// pub const GAPROLE_PHY_TX_SUPPORTED: u32 = 787;
+// pub const GAPROLE_PHY_RX_SUPPORTED: u32 = 788;
+// pub const GAPROLE_PERIODIC_ADVERT_DATA: u32 = 789;
+// pub const GAPROLE_PERIODIC_ADVERT_ENABLED: u32 = 790;
+// pub const GAPROLE_CTE_CONNECTIONLESS_ENABLED: u32 = 791;
+// pub const GAPBOND_PERI_PAIRING_MODE: u32 = 1024;
+// pub const GAPBOND_PERI_MITM_PROTECTION: u32 = 1025;
+// pub const GAPBOND_PERI_IO_CAPABILITIES: u32 = 1026;
+// pub const GAPBOND_PERI_OOB_ENABLED: u32 = 1027;
+// pub const GAPBOND_PERI_OOB_DATA: u32 = 1028;
+// pub const GAPBOND_PERI_BONDING_ENABLED: u32 = 1029;
+// pub const GAPBOND_PERI_KEY_DIST_LIST: u32 = 1030;
+// pub const GAPBOND_PERI_DEFAULT_PASSCODE: u32 = 1031;
+// pub const GAPBOND_CENT_PAIRING_MODE: u32 = 1032;
+// pub const GAPBOND_CENT_MITM_PROTECTION: u32 = 1033;
+// pub const GAPBOND_CENT_IO_CAPABILITIES: u32 = 1034;
+// pub const GAPBOND_CENT_OOB_ENABLED: u32 = 1035;
+// pub const GAPBOND_CENT_OOB_DATA: u32 = 1036;
+// pub const GAPBOND_CENT_BONDING_ENABLED: u32 = 1037;
+// pub const GAPBOND_CENT_KEY_DIST_LIST: u32 = 1038;
+// pub const GAPBOND_CENT_DEFAULT_PASSCODE: u32 = 1039;
+// pub const GAPBOND_ERASE_ALLBONDS: u32 = 1040;
+// pub const GAPBOND_AUTO_FAIL_PAIRING: u32 = 1041;
+// pub const GAPBOND_AUTO_FAIL_REASON: u32 = 1042;
+// pub const GAPBOND_KEYSIZE: u32 = 1043;
+// pub const GAPBOND_AUTO_SYNC_WL: u32 = 1044;
+// pub const GAPBOND_BOND_COUNT: u32 = 1045;
+// pub const GAPBOND_BOND_FAIL_ACTION: u32 = 1046;
+// pub const GAPBOND_ERASE_SINGLEBOND: u32 = 1047;
+// pub const GAPBOND_BOND_AUTO: u32 = 1048;
+// pub const GAPBOND_BOND_UPDATE: u32 = 1049;
+// pub const GAPBOND_DISABLE_SINGLEBOND: u32 = 1050;
+// pub const GAPBOND_ENABLE_SINGLEBOND: u32 = 1051;
+// pub const GAPBOND_DISABLE_ALLBONDS: u32 = 1052;
+// pub const GAPBOND_ENABLE_ALLBONDS: u32 = 1053;
+// pub const GAPBOND_ERASE_AUTO: u32 = 1054;
+// pub const GAPBOND_AUTO_SYNC_RL: u32 = 1055;
+// pub const GAPBOND_SET_ENC_PARAMS: u32 = 1056;
+// pub const GAPBOND_PERI_SC_PROTECTION: u32 = 1057;
+// pub const GAPBOND_CENT_SC_PROTECTION: u32 = 1058;
+// pub const GAPBOND_PAIRING_MODE_NO_PAIRING: u32 = 0;
+// pub const GAPBOND_PAIRING_MODE_WAIT_FOR_REQ: u32 = 1;
+// pub const GAPBOND_PAIRING_MODE_INITIATE: u32 = 2;
+// pub const GAPBOND_IO_CAP_DISPLAY_ONLY: u32 = 0;
+// pub const GAPBOND_IO_CAP_DISPLAY_YES_NO: u32 = 1;
+// pub const GAPBOND_IO_CAP_KEYBOARD_ONLY: u32 = 2;
+// pub const GAPBOND_IO_CAP_NO_INPUT_NO_OUTPUT: u32 = 3;
+// pub const GAPBOND_IO_CAP_KEYBOARD_DISPLAY: u32 = 4;
+// pub const GAPBOND_KEYDIST_SENCKEY: u32 = 1;
+// pub const GAPBOND_KEYDIST_SIDKEY: u32 = 2;
+// pub const GAPBOND_KEYDIST_SSIGN: u32 = 4;
+// pub const GAPBOND_KEYDIST_SLINK: u32 = 8;
+// pub const GAPBOND_KEYDIST_MENCKEY: u32 = 16;
+// pub const GAPBOND_KEYDIST_MIDKEY: u32 = 32;
+// pub const GAPBOND_KEYDIST_MSIGN: u32 = 64;
+// pub const GAPBOND_KEYDIST_MLINK: u32 = 128;
+// pub const GAPBOND_PAIRING_STATE_STARTED: u32 = 0;
+// pub const GAPBOND_PAIRING_STATE_COMPLETE: u32 = 1;
+// pub const GAPBOND_PAIRING_STATE_BONDED: u32 = 2;
+// pub const GAPBOND_PAIRING_STATE_BOND_SAVED: u32 = 3;
+// pub const SMP_PAIRING_FAILED_PASSKEY_ENTRY_FAILED: u32 = 1;
+// pub const SMP_PAIRING_FAILED_OOB_NOT_AVAIL: u32 = 2;
+// pub const SMP_PAIRING_FAILED_AUTH_REQ: u32 = 3;
+// pub const SMP_PAIRING_FAILED_CONFIRM_VALUE: u32 = 4;
+// pub const SMP_PAIRING_FAILED_NOT_SUPPORTED: u32 = 5;
+// pub const SMP_PAIRING_FAILED_ENC_KEY_SIZE: u32 = 6;
+// pub const SMP_PAIRING_FAILED_CMD_NOT_SUPPORTED: u32 = 7;
+// pub const SMP_PAIRING_FAILED_UNSPECIFIED: u32 = 8;
+// pub const SMP_PAIRING_FAILED_REPEATED_ATTEMPTS: u32 = 9;
+// pub const SMP_PAIRING_FAILED_INVALID_PARAMERERS: u32 = 10;
+// pub const SMP_PAIRING_FAILED_DHKEY_CHECK_FAILED: u32 = 11;
+// pub const SMP_PAIRING_FAILED_NUMERIC_COMPARISON: u32 = 12;
+// pub const SMP_PAIRING_FAILED_KEY_REJECTED: u32 = 15;
+// pub const GAPBOND_FAIL_NO_ACTION: u32 = 0;
+// pub const GAPBOND_FAIL_INITIATE_PAIRING: u32 = 1;
+// pub const GAPBOND_FAIL_TERMINATE_LINK: u32 = 2;
+// pub const GAPBOND_FAIL_TERMINATE_ERASE_BONDS: u32 = 3;
+// pub const BLE_NVID_IRK: u32 = 2;
+// pub const BLE_NVID_CSRK: u32 = 3;
+// pub const BLE_NVID_SIGNCOUNTER: u32 = 4;
+// pub const BLE_NVID_BOND_RF_START: u32 = 256;
+// pub const BLE_NVID_GAP_BOND_START: u32 = 512;
+// pub const GAP_BOND_REC_ID_OFFSET: u32 = 0;
+// pub const GAP_BOND_LOCAL_LTK_OFFSET: u32 = 1;
+// pub const GAP_BOND_DEV_LTK_OFFSET: u32 = 2;
+// pub const GAP_BOND_DEV_IRK_OFFSET: u32 = 3;
+// pub const GAP_BOND_DEV_CSRK_OFFSET: u32 = 4;
+// pub const GAP_BOND_DEV_SIGN_COUNTER_OFFSET: u32 = 5;
+// pub const GAP_BOND_REC_IDS: u32 = 6;
+// pub const BLE_NVID_GATT_CFG_START: u32 = 28672;
+// pub const BLE_NVID_MAX_VAL: u32 = 32767;
+// pub const GAPROLE_STATE_ADV_MASK: u32 = 15;
+// pub const GAPROLE_STATE_ADV_SHIFT: u32 = 0;
+// pub const GAPROLE_INIT: u32 = 0;
+// pub const GAPROLE_STARTED: u32 = 1;
+// pub const GAPROLE_ADVERTISING: u32 = 2;
+// pub const GAPROLE_WAITING: u32 = 3;
+// pub const GAPROLE_CONNECTED: u32 = 4;
+// pub const GAPROLE_CONNECTED_ADV: u32 = 5;
+// pub const GAPROLE_ERROR: u32 = 6;
+// pub const GAPROLE_STATE_PERIODIC_MASK: u32 = 240;
+// pub const GAPROLE_STATE_PERIODIC_SHIFT: u32 = 4;
+// pub const GAPROLE_PERIODIC_INVALID: u32 = 0;
+// pub const GAPROLE_PERIODIC_ENABLE: u32 = 16;
+// pub const GAPROLE_PERIODIC_WAIT: u32 = 32;
+// pub const GAPROLE_PERIODIC_ERROR: u32 = 48;
+// pub const GAPROLE_STATE_CTE_MASK: u32 = 3840;
+// pub const GAPROLE_STATE_CTE_SHIFT: u32 = 8;
+// pub const GAPROLE_CONNECTIONLESS_CTE_INVALID: u32 = 0;
+// pub const GAPROLE_CONNECTIONLESS_CTE_ENABLE: u32 = 256;
+// pub const GAPROLE_CONNECTIONLESS_CTE_WAIT: u32 = 512;
+// pub const GAPROLE_CONNECTIONLESS_CTE_ERROR: u32 = 768;
+// pub const GAPROLE_PERIODIC_STATE_VALID: u32 = 16777216;
+// pub const GAPROLE_CTE_T_STATE_VALID: u32 = 33554432;
+// pub const TX_MODE_TX_FINISH: u32 = 1;
+// pub const TX_MODE_TX_FAIL: u32 = 17;
+// pub const TX_MODE_TX_TIMEOUT: u32 = 17;
+// pub const TX_MODE_RX_DATA: u32 = 2;
+// pub const TX_MODE_RX_TIMEOUT: u32 = 18;
+// pub const TX_MODE_HOP_SHUT: u32 = 34;
+// pub const RX_MODE_RX_DATA: u32 = 3;
+// pub const RX_MODE_TX_FINISH: u32 = 4;
+// pub const RX_MODE_TX_FAIL: u32 = 20;
+// pub const RX_MODE_TX_TIMEOUT: u32 = 20;
+// pub const RX_MODE_HOP_SHUT: u32 = 36;
+// pub const LLE_MODE_BASIC: u32 = 0;
+// pub const LLE_MODE_AUTO: u32 = 1;
+// pub const LLE_WHITENING_ON: u32 = 0;
+// pub const LLE_WHITENING_OFF: u32 = 2;
+// pub const LLE_MODE_PHY_MODE_MASK: u32 = 48;
+// pub const LLE_MODE_PHY_1M: u32 = 0;
+// pub const LLE_MODE_PHY_2M: u32 = 16;
+// pub const LLE_MODE_EX_CHANNEL: u32 = 64;
+// pub const LLE_MODE_NON_RSSI: u32 = 128;
+// pub const LL_TX_POWEER_MINUS_20_DBM: u32 = 1;
+// pub const LL_TX_POWEER_MINUS_15_DBM: u32 = 3;
+// pub const LL_TX_POWEER_MINUS_10_DBM: u32 = 5;
+// pub const LL_TX_POWEER_MINUS_8_DBM: u32 = 7;
+// pub const LL_TX_POWEER_MINUS_5_DBM: u32 = 11;
+// pub const LL_TX_POWEER_MINUS_3_DBM: u32 = 15;
+// pub const LL_TX_POWEER_MINUS_1_DBM: u32 = 19;
+// pub const LL_TX_POWEER_0_DBM: u32 = 21;
+// pub const LL_TX_POWEER_1_DBM: u32 = 27;
+// pub const LL_TX_POWEER_2_DBM: u32 = 35;
+// pub const LL_TX_POWEER_3_DBM: u32 = 43;
+// pub const LL_TX_POWEER_4_DBM: u32 = 59;
+// pub const LL_TX_POWEER_9_DBM: u32 = 191;
+// pub type __u_char = ::core::ffi::c_uchar;
+// pub type __u_short = ::core::ffi::c_ushort;
+// pub type __u_int = ::core::ffi::c_uint;
+// pub type __u_long = ::core::ffi::c_ulong;
+// pub type __int8_t = ::core::ffi::c_schar;
+// pub type __uint8_t = ::core::ffi::c_uchar;
+// pub type __int16_t = ::core::ffi::c_short;
+// pub type __uint16_t = ::core::ffi::c_ushort;
+// pub type __int32_t = ::core::ffi::c_int;
+// pub type __uint32_t = ::core::ffi::c_uint;
+// pub type __int64_t = ::core::ffi::c_long;
+// pub type __uint64_t = ::core::ffi::c_ulong;
+// pub type __int_least8_t = __int8_t;
+// pub type __uint_least8_t = __uint8_t;
+// pub type __int_least16_t = __int16_t;
+// pub type __uint_least16_t = __uint16_t;
+// pub type __int_least32_t = __int32_t;
+// pub type __uint_least32_t = __uint32_t;
+// pub type __int_least64_t = __int64_t;
+// pub type __uint_least64_t = __uint64_t;
+// pub type __quad_t = ::core::ffi::c_long;
+// pub type __u_quad_t = ::core::ffi::c_ulong;
+// pub type __intmax_t = ::core::ffi::c_long;
+// pub type __uintmax_t = ::core::ffi::c_ulong;
+// pub type __dev_t = ::core::ffi::c_ulong;
+// pub type __uid_t = ::core::ffi::c_uint;
+// pub type __gid_t = ::core::ffi::c_uint;
+// pub type __ino_t = ::core::ffi::c_ulong;
+// pub type __ino64_t = ::core::ffi::c_ulong;
+// pub type __mode_t = ::core::ffi::c_uint;
+// pub type __nlink_t = ::core::ffi::c_ulong;
+// pub type __off_t = ::core::ffi::c_long;
+// pub type __off64_t = ::core::ffi::c_long;
+// pub type __pid_t = ::core::ffi::c_int;
+// #[repr(C)]
+// #[derive(Debug, Copy, Clone)]
+// pub struct __fsid_t {
+//     pub __val: [::core::ffi::c_int; 2usize],
+// }
+// #[allow(clippy::unnecessary_operation, clippy::identity_op)]
+// const _: () = {
+//     ["Size of __fsid_t"][::core::mem::size_of::<__fsid_t>() - 8usize];
+//     ["Alignment of __fsid_t"][::core::mem::align_of::<__fsid_t>() - 4usize];
+//     ["Offset of field: __fsid_t::__val"][::core::mem::offset_of!(__fsid_t, __val) - 0usize];
+// };
+// pub type __clock_t = ::core::ffi::c_long;
+// pub type __rlim_t = ::core::ffi::c_ulong;
+// pub type __rlim64_t = ::core::ffi::c_ulong;
+// pub type __id_t = ::core::ffi::c_uint;
+// pub type __time_t = ::core::ffi::c_long;
+// pub type __useconds_t = ::core::ffi::c_uint;
+// pub type __suseconds_t = ::core::ffi::c_long;
+// pub type __suseconds64_t = ::core::ffi::c_long;
+// pub type __daddr_t = ::core::ffi::c_int;
+// pub type __key_t = ::core::ffi::c_int;
+// pub type __clockid_t = ::core::ffi::c_int;
+// pub type __timer_t = *mut ::core::ffi::c_void;
+// pub type __blksize_t = ::core::ffi::c_long;
+// pub type __blkcnt_t = ::core::ffi::c_long;
+// pub type __blkcnt64_t = ::core::ffi::c_long;
+// pub type __fsblkcnt_t = ::core::ffi::c_ulong;
+// pub type __fsblkcnt64_t = ::core::ffi::c_ulong;
+// pub type __fsfilcnt_t = ::core::ffi::c_ulong;
+// pub type __fsfilcnt64_t = ::core::ffi::c_ulong;
+// pub type __fsword_t = ::core::ffi::c_long;
+// pub type __ssize_t = ::core::ffi::c_long;
+// pub type __syscall_slong_t = ::core::ffi::c_long;
+// pub type __syscall_ulong_t = ::core::ffi::c_ulong;
+// pub type __loff_t = __off64_t;
+// pub type __caddr_t = *mut ::core::ffi::c_char;
+// pub type __intptr_t = ::core::ffi::c_long;
+// pub type __socklen_t = ::core::ffi::c_uint;
+// pub type __sig_atomic_t = ::core::ffi::c_int;
+// pub type int_least8_t = __int_least8_t;
+// pub type int_least16_t = __int_least16_t;
+// pub type int_least32_t = __int_least32_t;
+// pub type int_least64_t = __int_least64_t;
+// pub type uint_least8_t = __uint_least8_t;
+// pub type uint_least16_t = __uint_least16_t;
+// pub type uint_least32_t = __uint_least32_t;
+// pub type uint_least64_t = __uint_least64_t;
+// pub type int_fast8_t = ::core::ffi::c_schar;
+// pub type int_fast16_t = ::core::ffi::c_long;
+// pub type int_fast32_t = ::core::ffi::c_long;
+// pub type int_fast64_t = ::core::ffi::c_long;
+// pub type uint_fast8_t = ::core::ffi::c_uchar;
+// pub type uint_fast16_t = ::core::ffi::c_ulong;
+// pub type uint_fast32_t = ::core::ffi::c_ulong;
+// pub type uint_fast64_t = ::core::ffi::c_ulong;
+// pub type intmax_t = __intmax_t;
+// pub type uintmax_t = __uintmax_t;
+// pub type BOOL = u8;
 // pub type bStatus_t = u8;
-// SUCCESS(0x00):指令按预期执行。
-// INVALIDPARAMETER(0x02):无效的连接句柄或请求字段。
-// MSG_BUFFER_NOT_AVAIL (0x04):HCI 缓冲区不可用。请稍后重试。
-// bleNotConnected(0x14):设备未连接。
-// blePending(0x17):
-// 当返回到客户端功能时，服务器或 GATT 子过程正在进行中，有待处理的响应。
-// 返回服务器功能时，来自客户端的确认待处理。
-// bleTimeout(0x16):上一个事务超时。重新连接之前，无法发送 ATT 或 GATT 消息。
-// bleMemAllocError(0x13):发生内存分配错误
-// bleLinkEncrypted(0x19):链接已加密。不要在加密的链接上发送包含身份验证签
-/*
-#define FAILURE                         0x01   //!< Failure
-#define INVALIDPARAMETER                0x02   //!< Invalid request field
-#define INVALID_TASK                    0x03   //!< Task ID isn't setup properly
-#define MSG_BUFFER_NOT_AVAIL            0x04   //!< No buffer is available.
-#define INVALID_MSG_POINTER             0x05   //!< No message pointer.
-#define INVALID_EVENT_ID                0x06   //!< Invalid event id.
-#define INVALID_TIMEOUT                 0x07   //!< Invalid timeout.
-#define NO_TIMER_AVAIL                  0x08   //!< No event is available.
-#define NV_OPER_FAILED                  0x0A   //!< read a data item to NV failed.
-#define INVALID_MEM_SIZE                0x0B   //!< The tokens take up too much space and don't fit into Advertisement data and Scan Response Data
+// pub type tmosTaskID = u8;
+// pub type tmosEvents = u16;
+// pub type tmosTimer = u32;
+// pub type tmosSnvId_t = u16;
+// pub type tmosSnvLen_t = u16;
+// pub type pfnSrandCB = ::core::option::Option<unsafe extern "C" fn() -> u32>;
+// pub type pfnIdleCB = ::core::option::Option<unsafe extern "C" fn(arg1: u32) -> u32>;
+// pub type pfnLSICalibrationCB = ::core::option::Option<unsafe extern "C" fn()>;
+// pub type pfnTempSampleCB = ::core::option::Option<unsafe extern "C" fn() -> u16>;
+// pub type pfnEventCB = ::core::option::Option<unsafe extern "C" fn(timeUs: u32)>;
+// pub type pfnLibStatusErrorCB = ::core::option::Option<unsafe extern "C" fn(code: u8, status: u32)>;
+// pub type pTaskEventHandlerFn =
+//     ::core::option::Option<unsafe extern "C" fn(taskID: tmosTaskID, event: tmosEvents) -> tmosEvents>;
+// pub type pfnFlashReadCB = ::core::option::Option<unsafe extern "C" fn(addr: u32, num: u32, pBuf: *mut u32) -> u32>;
+// pub type pfnFlashWriteCB = ::core::option::Option<unsafe extern "C" fn(addr: u32, num: u32, pBuf: *mut u32) -> u32>;
+// pub type pfnGetSysClock = ::core::option::Option<unsafe extern "C" fn() -> u32>;
+// pub type pfnSetSysClockIRQ = ::core::option::Option<unsafe extern "C" fn()>;
+// #[repr(C)]
+// #[derive(Debug, Copy, Clone)]
+// pub struct tag_ble_config {
+//     pub MEMAddr: u32,
+//     pub MEMLen: u16,
+//     pub SNVAddr: u32,
+//     pub SNVBlock: u16,
+//     pub SNVNum: u8,
+//     pub BufNumber: u8,
+//     pub BufMaxLen: u16,
+//     pub TxNumEvent: u8,
+//     pub RxNumEvent: u8,
+//     pub TxPower: u8,
+//     pub ConnectNumber: u8,
+//     pub WindowWidening: u8,
+//     pub WaitWindow: u8,
+//     pub MacAddr: [u8; 6usize],
+//     pub srandCB: pfnSrandCB,
+//     pub idleCB: pfnIdleCB,
+//     pub tsCB: pfnTempSampleCB,
+//     pub rcCB: pfnLSICalibrationCB,
+//     pub staCB: pfnLibStatusErrorCB,
+//     pub readFlashCB: pfnFlashReadCB,
+//     pub writeFlashCB: pfnFlashWriteCB,
+//     pub PeripheralNumber: u8,
+//     pub CentralNumber: u8,
+// }
+// #[allow(clippy::unnecessary_operation, clippy::identity_op)]
+// const _: () = {
+//     ["Size of tag_ble_config"][::core::mem::size_of::<tag_ble_config>() - 96usize];
+//     ["Alignment of tag_ble_config"][::core::mem::align_of::<tag_ble_config>() - 8usize];
+//     ["Offset of field: tag_ble_config::MEMAddr"][::core::mem::offset_of!(tag_ble_config, MEMAddr) - 0usize];
+//     ["Offset of field: tag_ble_config::MEMLen"][::core::mem::offset_of!(tag_ble_config, MEMLen) - 4usize];
+//     ["Offset of field: tag_ble_config::SNVAddr"][::core::mem::offset_of!(tag_ble_config, SNVAddr) - 8usize];
+//     ["Offset of field: tag_ble_config::SNVBlock"][::core::mem::offset_of!(tag_ble_config, SNVBlock) - 12usize];
+//     ["Offset of field: tag_ble_config::SNVNum"][::core::mem::offset_of!(tag_ble_config, SNVNum) - 14usize];
+//     ["Offset of field: tag_ble_config::BufNumber"][::core::mem::offset_of!(tag_ble_config, BufNumber) - 15usize];
+//     ["Offset of field: tag_ble_config::BufMaxLen"][::core::mem::offset_of!(tag_ble_config, BufMaxLen) - 16usize];
+//     ["Offset of field: tag_ble_config::TxNumEvent"][::core::mem::offset_of!(tag_ble_config, TxNumEvent) - 18usize];
+//     ["Offset of field: tag_ble_config::RxNumEvent"][::core::mem::offset_of!(tag_ble_config, RxNumEvent) - 19usize];
+//     ["Offset of field: tag_ble_config::TxPower"][::core::mem::offset_of!(tag_ble_config, TxPower) - 20usize];
+//     ["Offset of field: tag_ble_config::ConnectNumber"]
+//         [::core::mem::offset_of!(tag_ble_config, ConnectNumber) - 21usize];
+//     ["Offset of field: tag_ble_config::WindowWidening"]
+//         [::core::mem::offset_of!(tag_ble_config, WindowWidening) - 22usize];
+//     ["Offset of field: tag_ble_config::WaitWindow"][::core::mem::offset_of!(tag_ble_config, WaitWindow) - 23usize];
+//     ["Offset of field: tag_ble_config::MacAddr"][::core::mem::offset_of!(tag_ble_config, MacAddr) - 24usize];
+//     ["Offset of field: tag_ble_config::srandCB"][::core::mem::offset_of!(tag_ble_config, srandCB) - 32usize];
+//     ["Offset of field: tag_ble_config::idleCB"][::core::mem::offset_of!(tag_ble_config, idleCB) - 40usize];
+//     ["Offset of field: tag_ble_config::tsCB"][::core::mem::offset_of!(tag_ble_config, tsCB) - 48usize];
+//     ["Offset of field: tag_ble_config::rcCB"][::core::mem::offset_of!(tag_ble_config, rcCB) - 56usize];
+//     ["Offset of field: tag_ble_config::staCB"][::core::mem::offset_of!(tag_ble_config, staCB) - 64usize];
+//     ["Offset of field: tag_ble_config::readFlashCB"][::core::mem::offset_of!(tag_ble_config, readFlashCB) - 72usize];
+//     ["Offset of field: tag_ble_config::writeFlashCB"][::core::mem::offset_of!(tag_ble_config, writeFlashCB) - 80usize];
+//     ["Offset of field: tag_ble_config::PeripheralNumber"]
+//         [::core::mem::offset_of!(tag_ble_config, PeripheralNumber) - 88usize];
+//     ["Offset of field: tag_ble_config::CentralNumber"]
+//         [::core::mem::offset_of!(tag_ble_config, CentralNumber) - 89usize];
+// };
+// pub type bleConfig_t = tag_ble_config;
+// #[repr(C)]
+// #[derive(Debug, Copy, Clone)]
+// pub struct tag_ble_clock_config {
+//     pub getClockValue: pfnGetSysClock,
+//     pub ClockMaxCount: u32,
+//     pub ClockFrequency: u16,
+//     pub ClockAccuracy: u16,
+//     pub irqEnable: u8,
+//     pub SetPendingIRQ: pfnSetSysClockIRQ,
+// }
+// #[allow(clippy::unnecessary_operation, clippy::identity_op)]
+// const _: () = {
+//     ["Size of tag_ble_clock_config"][::core::mem::size_of::<tag_ble_clock_config>() - 32usize];
+//     ["Alignment of tag_ble_clock_config"][::core::mem::align_of::<tag_ble_clock_config>() - 8usize];
+//     ["Offset of field: tag_ble_clock_config::getClockValue"]
+//         [::core::mem::offset_of!(tag_ble_clock_config, getClockValue) - 0usize];
+//     ["Offset of field: tag_ble_clock_config::ClockMaxCount"]
+//         [::core::mem::offset_of!(tag_ble_clock_config, ClockMaxCount) - 8usize];
+//     ["Offset of field: tag_ble_clock_config::ClockFrequency"]
+//         [::core::mem::offset_of!(tag_ble_clock_config, ClockFrequency) - 12usize];
+//     ["Offset of field: tag_ble_clock_config::ClockAccuracy"]
+//         [::core::mem::offset_of!(tag_ble_clock_config, ClockAccuracy) - 14usize];
+//     ["Offset of field: tag_ble_clock_config::irqEnable"]
+//         [::core::mem::offset_of!(tag_ble_clock_config, irqEnable) - 16usize];
+//     ["Offset of field: tag_ble_clock_config::SetPendingIRQ"]
+//         [::core::mem::offset_of!(tag_ble_clock_config, SetPendingIRQ) - 24usize];
+// };
+// pub type bleClockConfig_t = tag_ble_clock_config;
+// #[repr(C)]
+// #[derive(Debug, Copy, Clone)]
+// pub struct tag_ble_pa_control_config {
+//     pub txEnableGPIO: u32,
+//     pub txDisableGPIO: u32,
+//     pub tx_pin: u32,
+//     pub rxEnableGPIO: u32,
+//     pub rxDisableGPIO: u32,
+//     pub rx_pin: u32,
+// }
+// #[allow(clippy::unnecessary_operation, clippy::identity_op)]
+// const _: () = {
+//     ["Size of tag_ble_pa_control_config"][::core::mem::size_of::<tag_ble_pa_control_config>() - 24usize];
+//     ["Alignment of tag_ble_pa_control_config"][::core::mem::align_of::<tag_ble_pa_control_config>() - 4usize];
+//     ["Offset of field: tag_ble_pa_control_config::txEnableGPIO"]
+//         [::core::mem::offset_of!(tag_ble_pa_control_config, txEnableGPIO) - 0usize];
+//     ["Offset of field: tag_ble_pa_control_config::txDisableGPIO"]
+//         [::core::mem::offset_of!(tag_ble_pa_control_config, txDisableGPIO) - 4usize];
+//     ["Offset of field: tag_ble_pa_control_config::tx_pin"]
+//         [::core::mem::offset_of!(tag_ble_pa_control_config, tx_pin) - 8usize];
+//     ["Offset of field: tag_ble_pa_control_config::rxEnableGPIO"]
+//         [::core::mem::offset_of!(tag_ble_pa_control_config, rxEnableGPIO) - 12usize];
+//     ["Offset of field: tag_ble_pa_control_config::rxDisableGPIO"]
+//         [::core::mem::offset_of!(tag_ble_pa_control_config, rxDisableGPIO) - 16usize];
+//     ["Offset of field: tag_ble_pa_control_config::rx_pin"]
+//         [::core::mem::offset_of!(tag_ble_pa_control_config, rx_pin) - 20usize];
+// };
+// pub type blePaControlConfig_t = tag_ble_pa_control_config;
+// #[repr(C)]
+// #[derive(Debug, Copy, Clone)]
+// pub struct tmos_event_hdr_t {
+//     pub event: u8,
+//     pub status: u8,
+// }
+// #[allow(clippy::unnecessary_operation, clippy::identity_op)]
+// const _: () = {
+//     ["Size of tmos_event_hdr_t"][::core::mem::size_of::<tmos_event_hdr_t>() - 2usize];
+//     ["Alignment of tmos_event_hdr_t"][::core::mem::align_of::<tmos_event_hdr_t>() - 1usize];
+//     ["Offset of field: tmos_event_hdr_t::event"][::core::mem::offset_of!(tmos_event_hdr_t, event) - 0usize];
+//     ["Offset of field: tmos_event_hdr_t::status"][::core::mem::offset_of!(tmos_event_hdr_t, status) - 1usize];
+// };
+// unsafe extern "C" {
+//     pub static VER_LIB: [u8; 0usize];
+// }
+// #[repr(C)]
+// #[derive(Debug, Copy, Clone)]
+// pub struct gapBondLTK_t {
+//     #[doc = "!< Long Term Key (LTK)"]
+//     pub LTK: [u8; 16usize],
+//     #[doc = "!< LTK eDiv"]
+//     pub div: u16,
+//     #[doc = "!< LTK random number"]
+//     pub rand: [u8; 8usize],
+//     #[doc = "!< LTK key size"]
+//     pub keySize: u8,
+// }
+// #[allow(clippy::unnecessary_operation, clippy::identity_op)]
+// const _: () = {
+//     ["Size of gapBondLTK_t"][::core::mem::size_of::<gapBondLTK_t>() - 28usize];
+//     ["Alignment of gapBondLTK_t"][::core::mem::align_of::<gapBondLTK_t>() - 2usize];
+//     ["Offset of field: gapBondLTK_t::LTK"][::core::mem::offset_of!(gapBondLTK_t, LTK) - 0usize];
+//     ["Offset of field: gapBondLTK_t::div"][::core::mem::offset_of!(gapBondLTK_t, div) - 16usize];
+//     ["Offset of field: gapBondLTK_t::rand"][::core::mem::offset_of!(gapBondLTK_t, rand) - 18usize];
+//     ["Offset of field: gapBondLTK_t::keySize"][::core::mem::offset_of!(gapBondLTK_t, keySize) - 26usize];
+// };
+// #[repr(C)]
+// #[derive(Debug, Copy, Clone)]
+// pub struct gapBondRec_t {
+//     #[doc = "!< Central's address"]
+//     pub publicAddr: [u8; 6usize],
+//     #[doc = "!< Privacy Reconnection Address"]
+//     pub reconnectAddr: [u8; 6usize],
+//     #[doc = "!< State flags: SM_AUTH_STATE_AUTHENTICATED & SM_AUTH_STATE_BONDING"]
+//     pub stateFlags: u16,
+//     pub bondsToDelete: u8,
+//     #[doc = "!< Central's address type"]
+//     pub publicAddrType: u8,
+//     pub bondSeq: u32,
+// }
+// #[allow(clippy::unnecessary_operation, clippy::identity_op)]
+// const _: () = {
+//     ["Size of gapBondRec_t"][::core::mem::size_of::<gapBondRec_t>() - 20usize];
+//     ["Alignment of gapBondRec_t"][::core::mem::align_of::<gapBondRec_t>() - 4usize];
+//     ["Offset of field: gapBondRec_t::publicAddr"][::core::mem::offset_of!(gapBondRec_t, publicAddr) - 0usize];
+//     ["Offset of field: gapBondRec_t::reconnectAddr"][::core::mem::offset_of!(gapBondRec_t, reconnectAddr) - 6usize];
+//     ["Offset of field: gapBondRec_t::stateFlags"][::core::mem::offset_of!(gapBondRec_t, stateFlags) - 12usize];
+//     ["Offset of field: gapBondRec_t::bondsToDelete"][::core::mem::offset_of!(gapBondRec_t, bondsToDelete) - 14usize];
+//     ["Offset of field: gapBondRec_t::publicAddrType"][::core::mem::offset_of!(gapBondRec_t, publicAddrType) - 15usize];
+//     ["Offset of field: gapBondRec_t::bondSeq"][::core::mem::offset_of!(gapBondRec_t, bondSeq) - 16usize];
+// };
+// #[repr(C)]
+// #[derive(Debug, Copy, Clone)]
+// pub struct gapBondCharCfg_t {
+//     #[doc = "!< attribute handle"]
+//     pub attrHandle: u16,
+//     #[doc = "!< attribute value for this device"]
+//     pub value: u8,
+// }
+// #[allow(clippy::unnecessary_operation, clippy::identity_op)]
+// const _: () = {
+//     ["Size of gapBondCharCfg_t"][::core::mem::size_of::<gapBondCharCfg_t>() - 4usize];
+//     ["Alignment of gapBondCharCfg_t"][::core::mem::align_of::<gapBondCharCfg_t>() - 2usize];
+//     ["Offset of field: gapBondCharCfg_t::attrHandle"][::core::mem::offset_of!(gapBondCharCfg_t, attrHandle) - 0usize];
+//     ["Offset of field: gapBondCharCfg_t::value"][::core::mem::offset_of!(gapBondCharCfg_t, value) - 2usize];
+// };
+// #[doc = " TYPEDEFS"]
+// #[repr(C)]
+// #[derive(Debug, Copy, Clone)]
+// pub struct linkSec_t {
+//     #[doc = "!< Signature Resolving Key"]
+//     pub srk: [u8; 16usize],
+//     #[doc = "!< Sign Counter"]
+//     pub signCounter: u32,
+// }
+// #[allow(clippy::unnecessary_operation, clippy::identity_op)]
+// const _: () = {
+//     ["Size of linkSec_t"][::core::mem::size_of::<linkSec_t>() - 20usize];
+//     ["Alignment of linkSec_t"][::core::mem::align_of::<linkSec_t>() - 4usize];
+//     ["Offset of field: linkSec_t::srk"][::core::mem::offset_of!(linkSec_t, srk) - 0usize];
+//     ["Offset of field: linkSec_t::signCounter"][::core::mem::offset_of!(linkSec_t, signCounter) - 16usize];
+// };
+// #[repr(C)]
+// #[derive(Debug, Copy, Clone)]
+// pub struct encParams_t {
+//     #[doc = "!< Long Term Key"]
+//     pub ltk: [u8; 16usize],
+//     #[doc = "!< Diversifier"]
+//     pub div: u16,
+//     #[doc = "!< random number"]
+//     pub rand: [u8; 8usize],
+//     #[doc = "!< LTK Key Size"]
+//     pub keySize: u8,
+//     pub gapBondInvalid: u8,
+// }
+// #[allow(clippy::unnecessary_operation, clippy::identity_op)]
+// const _: () = {
+//     ["Size of encParams_t"][::core::mem::size_of::<encParams_t>() - 28usize];
+//     ["Alignment of encParams_t"][::core::mem::align_of::<encParams_t>() - 2usize];
+//     ["Offset of field: encParams_t::ltk"][::core::mem::offset_of!(encParams_t, ltk) - 0usize];
+//     ["Offset of field: encParams_t::div"][::core::mem::offset_of!(encParams_t, div) - 16usize];
+//     ["Offset of field: encParams_t::rand"][::core::mem::offset_of!(encParams_t, rand) - 18usize];
+//     ["Offset of field: encParams_t::keySize"][::core::mem::offset_of!(encParams_t, keySize) - 26usize];
+//     ["Offset of field: encParams_t::gapBondInvalid"][::core::mem::offset_of!(encParams_t, gapBondInvalid) - 27usize];
+// };
+// #[repr(C)]
+// #[derive(Debug, Copy, Clone)]
+// pub struct bondEncParams_t {
+//     #[doc = "!< GAP Profile Roles @GAP_PROFILE_ROLE_DEFINES"]
+//     pub connRole: u8,
+//     #[doc = "!< Address type of connected device"]
+//     pub addrType: u8,
+//     #[doc = "!< Other Device's address"]
+//     pub addr: [u8; 6usize],
+//     pub encParams: encParams_t,
+// }
+// #[allow(clippy::unnecessary_operation, clippy::identity_op)]
+// const _: () = {
+//     ["Size of bondEncParams_t"][::core::mem::size_of::<bondEncParams_t>() - 36usize];
+//     ["Alignment of bondEncParams_t"][::core::mem::align_of::<bondEncParams_t>() - 2usize];
+//     ["Offset of field: bondEncParams_t::connRole"][::core::mem::offset_of!(bondEncParams_t, connRole) - 0usize];
+//     ["Offset of field: bondEncParams_t::addrType"][::core::mem::offset_of!(bondEncParams_t, addrType) - 1usize];
+//     ["Offset of field: bondEncParams_t::addr"][::core::mem::offset_of!(bondEncParams_t, addr) - 2usize];
+//     ["Offset of field: bondEncParams_t::encParams"][::core::mem::offset_of!(bondEncParams_t, encParams) - 8usize];
+// };
+// #[repr(C)]
+// #[derive(Debug, Copy, Clone)]
+// pub struct linkDBItem_t {
+//     #[doc = "!< Application that controls the link"]
+//     pub taskID: u8,
+//     #[doc = "!< Controller connection handle"]
+//     pub connectionHandle: u16,
+//     #[doc = "!< LINK_CONNECTED, LINK_AUTHENTICATED..."]
+//     pub stateFlags: u8,
+//     #[doc = "!< Address type of connected device"]
+//     pub addrType: u8,
+//     #[doc = "!< Other Device's address"]
+//     pub addr: [u8; 6usize],
+//     #[doc = "!< Connection formed as central or peripheral"]
+//     pub connRole: u8,
+//     #[doc = "!< The connection's interval (n * 1.25ms)"]
+//     pub connInterval: u16,
+//     pub connLatency: u16,
+//     pub connTimeout: u16,
+//     #[doc = "!< The connection's MTU size"]
+//     pub MTU: u16,
+//     #[doc = "!< Connection Security related items"]
+//     pub sec: linkSec_t,
+//     #[doc = "!< pointer to LTK, ediv, rand. if needed."]
+//     pub pEncParams: *mut encParams_t,
+//     pub smEvtID: u16,
+//     pub pPairingParams: *mut ::core::ffi::c_void,
+//     pub pAuthLink: *mut ::core::ffi::c_void,
+// }
+// #[allow(clippy::unnecessary_operation, clippy::identity_op)]
+// const _: () = {
+//     ["Size of linkDBItem_t"][::core::mem::size_of::<linkDBItem_t>() - 80usize];
+//     ["Alignment of linkDBItem_t"][::core::mem::align_of::<linkDBItem_t>() - 8usize];
+//     ["Offset of field: linkDBItem_t::taskID"][::core::mem::offset_of!(linkDBItem_t, taskID) - 0usize];
+//     ["Offset of field: linkDBItem_t::connectionHandle"]
+//         [::core::mem::offset_of!(linkDBItem_t, connectionHandle) - 2usize];
+//     ["Offset of field: linkDBItem_t::stateFlags"][::core::mem::offset_of!(linkDBItem_t, stateFlags) - 4usize];
+//     ["Offset of field: linkDBItem_t::addrType"][::core::mem::offset_of!(linkDBItem_t, addrType) - 5usize];
+//     ["Offset of field: linkDBItem_t::addr"][::core::mem::offset_of!(linkDBItem_t, addr) - 6usize];
+//     ["Offset of field: linkDBItem_t::connRole"][::core::mem::offset_of!(linkDBItem_t, connRole) - 12usize];
+//     ["Offset of field: linkDBItem_t::connInterval"][::core::mem::offset_of!(linkDBItem_t, connInterval) - 14usize];
+//     ["Offset of field: linkDBItem_t::connLatency"][::core::mem::offset_of!(linkDBItem_t, connLatency) - 16usize];
+//     ["Offset of field: linkDBItem_t::connTimeout"][::core::mem::offset_of!(linkDBItem_t, connTimeout) - 18usize];
+//     ["Offset of field: linkDBItem_t::MTU"][::core::mem::offset_of!(linkDBItem_t, MTU) - 20usize];
+//     ["Offset of field: linkDBItem_t::sec"][::core::mem::offset_of!(linkDBItem_t, sec) - 24usize];
+//     ["Offset of field: linkDBItem_t::pEncParams"][::core::mem::offset_of!(linkDBItem_t, pEncParams) - 48usize];
+//     ["Offset of field: linkDBItem_t::smEvtID"][::core::mem::offset_of!(linkDBItem_t, smEvtID) - 56usize];
+//     ["Offset of field: linkDBItem_t::pPairingParams"][::core::mem::offset_of!(linkDBItem_t, pPairingParams) - 64usize];
+//     ["Offset of field: linkDBItem_t::pAuthLink"][::core::mem::offset_of!(linkDBItem_t, pAuthLink) - 72usize];
+// };
+// pub type pfnLinkDBCB_t = ::core::option::Option<unsafe extern "C" fn(connectionHandle: u16, changeType: u8)>;
+// pub type pfnPerformFuncCB_t = ::core::option::Option<unsafe extern "C" fn(pLinkItem: *mut linkDBItem_t)>;
+// #[doc = " Attribute Type format (2 or 16 octet UUID)."]
+// #[repr(C)]
+// #[derive(Debug, Copy, Clone)]
+// pub struct attAttrType_t {
+//     #[doc = "!< Length of UUID (2 or 16)"]
+//     pub len: u8,
+//     #[doc = "!< 16 or 128 bit UUID"]
+//     pub uuid: [u8; 16usize],
+// }
+// #[allow(clippy::unnecessary_operation, clippy::identity_op)]
+// const _: () = {
+//     ["Size of attAttrType_t"][::core::mem::size_of::<attAttrType_t>() - 17usize];
+//     ["Alignment of attAttrType_t"][::core::mem::align_of::<attAttrType_t>() - 1usize];
+//     ["Offset of field: attAttrType_t::len"][::core::mem::offset_of!(attAttrType_t, len) - 0usize];
+//     ["Offset of field: attAttrType_t::uuid"][::core::mem::offset_of!(attAttrType_t, uuid) - 1usize];
+// };
+// #[doc = " Attribute Type format (2-octet Bluetooth UUID)."]
+// #[repr(C)]
+// #[derive(Debug, Copy, Clone)]
+// pub struct attAttrBtType_t {
+//     #[doc = "!< Length of UUID (2)"]
+//     pub len: u8,
+//     #[doc = "!< 16 bit UUID"]
+//     pub uuid: [u8; 2usize],
+// }
+// #[allow(clippy::unnecessary_operation, clippy::identity_op)]
+// const _: () = {
+//     ["Size of attAttrBtType_t"][::core::mem::size_of::<attAttrBtType_t>() - 3usize];
+//     ["Alignment of attAttrBtType_t"][::core::mem::align_of::<attAttrBtType_t>() - 1usize];
+//     ["Offset of field: attAttrBtType_t::len"][::core::mem::offset_of!(attAttrBtType_t, len) - 0usize];
+//     ["Offset of field: attAttrBtType_t::uuid"][::core::mem::offset_of!(attAttrBtType_t, uuid) - 1usize];
+// };
+// #[doc = " Error Response format."]
+// #[repr(C)]
+// #[derive(Debug, Copy, Clone)]
+// pub struct attErrorRsp_t {
+//     #[doc = "!< Request that generated this error response"]
+//     pub reqOpcode: u8,
+//     #[doc = "!< Attribute handle that generated error response"]
+//     pub handle: u16,
+//     #[doc = "!< Reason why the request has generated error response"]
+//     pub errCode: u8,
+// }
+// #[allow(clippy::unnecessary_operation, clippy::identity_op)]
+// const _: () = {
+//     ["Size of attErrorRsp_t"][::core::mem::size_of::<attErrorRsp_t>() - 6usize];
+//     ["Alignment of attErrorRsp_t"][::core::mem::align_of::<attErrorRsp_t>() - 2usize];
+//     ["Offset of field: attErrorRsp_t::reqOpcode"][::core::mem::offset_of!(attErrorRsp_t, reqOpcode) - 0usize];
+//     ["Offset of field: attErrorRsp_t::handle"][::core::mem::offset_of!(attErrorRsp_t, handle) - 2usize];
+//     ["Offset of field: attErrorRsp_t::errCode"][::core::mem::offset_of!(attErrorRsp_t, errCode) - 4usize];
+// };
+// #[doc = " Exchange MTU Request format."]
+// #[repr(C)]
+// #[derive(Debug, Copy, Clone)]
+// pub struct attExchangeMTUReq_t {
+//     #[doc = "!< Client receive MTU size"]
+//     pub clientRxMTU: u16,
+// }
+// #[allow(clippy::unnecessary_operation, clippy::identity_op)]
+// const _: () = {
+//     ["Size of attExchangeMTUReq_t"][::core::mem::size_of::<attExchangeMTUReq_t>() - 2usize];
+//     ["Alignment of attExchangeMTUReq_t"][::core::mem::align_of::<attExchangeMTUReq_t>() - 2usize];
+//     ["Offset of field: attExchangeMTUReq_t::clientRxMTU"]
+//         [::core::mem::offset_of!(attExchangeMTUReq_t, clientRxMTU) - 0usize];
+// };
+// #[doc = " Exchange MTU Response format."]
+// #[repr(C)]
+// #[derive(Debug, Copy, Clone)]
+// pub struct attExchangeMTURsp_t {
+//     #[doc = "!< Server receive MTU size"]
+//     pub serverRxMTU: u16,
+// }
+// #[allow(clippy::unnecessary_operation, clippy::identity_op)]
+// const _: () = {
+//     ["Size of attExchangeMTURsp_t"][::core::mem::size_of::<attExchangeMTURsp_t>() - 2usize];
+//     ["Alignment of attExchangeMTURsp_t"][::core::mem::align_of::<attExchangeMTURsp_t>() - 2usize];
+//     ["Offset of field: attExchangeMTURsp_t::serverRxMTU"]
+//         [::core::mem::offset_of!(attExchangeMTURsp_t, serverRxMTU) - 0usize];
+// };
+// #[doc = " Find Information Request format."]
+// #[repr(C)]
+// #[derive(Debug, Copy, Clone)]
+// pub struct attFindInfoReq_t {
+//     #[doc = "!< First requested handle number (must be first field)"]
+//     pub startHandle: u16,
+//     #[doc = "!< Last requested handle number"]
+//     pub endHandle: u16,
+// }
+// #[allow(clippy::unnecessary_operation, clippy::identity_op)]
+// const _: () = {
+//     ["Size of attFindInfoReq_t"][::core::mem::size_of::<attFindInfoReq_t>() - 4usize];
+//     ["Alignment of attFindInfoReq_t"][::core::mem::align_of::<attFindInfoReq_t>() - 2usize];
+//     ["Offset of field: attFindInfoReq_t::startHandle"][::core::mem::offset_of!(attFindInfoReq_t, startHandle) - 0usize];
+//     ["Offset of field: attFindInfoReq_t::endHandle"][::core::mem::offset_of!(attFindInfoReq_t, endHandle) - 2usize];
+// };
+// #[doc = " Find Information Response format."]
+// #[repr(C)]
+// #[derive(Debug, Copy, Clone)]
+// pub struct attFindInfoRsp_t {
+//     #[doc = "!< Number of attribute handle-UUID pairs found"]
+//     pub numInfo: u16,
+//     #[doc = "!< Format of information data"]
+//     pub format: u8,
+//     #[doc = "!< Information data whose format is determined by format field (4 to ATT_MTU_SIZE-2)"]
+//     pub pInfo: *mut u8,
+// }
+// #[allow(clippy::unnecessary_operation, clippy::identity_op)]
+// const _: () = {
+//     ["Size of attFindInfoRsp_t"][::core::mem::size_of::<attFindInfoRsp_t>() - 16usize];
+//     ["Alignment of attFindInfoRsp_t"][::core::mem::align_of::<attFindInfoRsp_t>() - 8usize];
+//     ["Offset of field: attFindInfoRsp_t::numInfo"][::core::mem::offset_of!(attFindInfoRsp_t, numInfo) - 0usize];
+//     ["Offset of field: attFindInfoRsp_t::format"][::core::mem::offset_of!(attFindInfoRsp_t, format) - 2usize];
+//     ["Offset of field: attFindInfoRsp_t::pInfo"][::core::mem::offset_of!(attFindInfoRsp_t, pInfo) - 8usize];
+// };
+// #[doc = " Find By Type Value Request format."]
+// #[repr(C)]
+// #[derive(Debug, Copy, Clone)]
+// pub struct attFindByTypeValueReq_t {
+//     #[doc = "!< First requested handle number (must be first field)"]
+//     pub startHandle: u16,
+//     #[doc = "!< Last requested handle number"]
+//     pub endHandle: u16,
+//     #[doc = "!< 2-octet UUID to find"]
+//     pub type_: attAttrBtType_t,
+//     #[doc = "!< Length of value"]
+//     pub len: u16,
+//     #[doc = "!< Attribute value to find (0 to ATT_MTU_SIZE-7)"]
+//     pub pValue: *mut u8,
+// }
+// #[allow(clippy::unnecessary_operation, clippy::identity_op)]
+// const _: () = {
+//     ["Size of attFindByTypeValueReq_t"][::core::mem::size_of::<attFindByTypeValueReq_t>() - 24usize];
+//     ["Alignment of attFindByTypeValueReq_t"][::core::mem::align_of::<attFindByTypeValueReq_t>() - 8usize];
+//     ["Offset of field: attFindByTypeValueReq_t::startHandle"]
+//         [::core::mem::offset_of!(attFindByTypeValueReq_t, startHandle) - 0usize];
+//     ["Offset of field: attFindByTypeValueReq_t::endHandle"]
+//         [::core::mem::offset_of!(attFindByTypeValueReq_t, endHandle) - 2usize];
+//     ["Offset of field: attFindByTypeValueReq_t::type_"]
+//         [::core::mem::offset_of!(attFindByTypeValueReq_t, type_) - 4usize];
+//     ["Offset of field: attFindByTypeValueReq_t::len"][::core::mem::offset_of!(attFindByTypeValueReq_t, len) - 8usize];
+//     ["Offset of field: attFindByTypeValueReq_t::pValue"]
+//         [::core::mem::offset_of!(attFindByTypeValueReq_t, pValue) - 16usize];
+// };
+// #[doc = " Find By Type Value Response format."]
+// #[repr(C)]
+// #[derive(Debug, Copy, Clone)]
+// pub struct attFindByTypeValueRsp_t {
+//     #[doc = "!< Number of handles information found"]
+//     pub numInfo: u16,
+//     #[doc = "!< List of 1 or more handles information (4 to ATT_MTU_SIZE-1)"]
+//     pub pHandlesInfo: *mut u8,
+// }
+// #[allow(clippy::unnecessary_operation, clippy::identity_op)]
+// const _: () = {
+//     ["Size of attFindByTypeValueRsp_t"][::core::mem::size_of::<attFindByTypeValueRsp_t>() - 16usize];
+//     ["Alignment of attFindByTypeValueRsp_t"][::core::mem::align_of::<attFindByTypeValueRsp_t>() - 8usize];
+//     ["Offset of field: attFindByTypeValueRsp_t::numInfo"]
+//         [::core::mem::offset_of!(attFindByTypeValueRsp_t, numInfo) - 0usize];
+//     ["Offset of field: attFindByTypeValueRsp_t::pHandlesInfo"]
+//         [::core::mem::offset_of!(attFindByTypeValueRsp_t, pHandlesInfo) - 8usize];
+// };
+// #[doc = " Read By Type Request format."]
+// #[repr(C)]
+// #[derive(Debug, Copy, Clone)]
+// pub struct attReadByTypeReq_t {
+//     #[doc = "!< First requested handle number (must be first field)"]
+//     pub startHandle: u16,
+//     #[doc = "!< Last requested handle number"]
+//     pub endHandle: u16,
+//     #[doc = "!< Requested type (2 or 16 octet UUID)"]
+//     pub type_: attAttrType_t,
+// }
+// #[allow(clippy::unnecessary_operation, clippy::identity_op)]
+// const _: () = {
+//     ["Size of attReadByTypeReq_t"][::core::mem::size_of::<attReadByTypeReq_t>() - 22usize];
+//     ["Alignment of attReadByTypeReq_t"][::core::mem::align_of::<attReadByTypeReq_t>() - 2usize];
+//     ["Offset of field: attReadByTypeReq_t::startHandle"]
+//         [::core::mem::offset_of!(attReadByTypeReq_t, startHandle) - 0usize];
+//     ["Offset of field: attReadByTypeReq_t::endHandle"][::core::mem::offset_of!(attReadByTypeReq_t, endHandle) - 2usize];
+//     ["Offset of field: attReadByTypeReq_t::type_"][::core::mem::offset_of!(attReadByTypeReq_t, type_) - 4usize];
+// };
+// #[doc = " Read By Type Response format."]
+// #[repr(C)]
+// #[derive(Debug, Copy, Clone)]
+// pub struct attReadByTypeRsp_t {
+//     #[doc = "!< Number of attribute handle-UUID pairs found"]
+//     pub numPairs: u16,
+//     #[doc = "!< Size of each attribute handle-value pair"]
+//     pub len: u16,
+//     #[doc = "!< List of 1 or more attribute handle-value pairs (2 to ATT_MTU_SIZE-2)"]
+//     pub pDataList: *mut u8,
+// }
+// #[allow(clippy::unnecessary_operation, clippy::identity_op)]
+// const _: () = {
+//     ["Size of attReadByTypeRsp_t"][::core::mem::size_of::<attReadByTypeRsp_t>() - 16usize];
+//     ["Alignment of attReadByTypeRsp_t"][::core::mem::align_of::<attReadByTypeRsp_t>() - 8usize];
+//     ["Offset of field: attReadByTypeRsp_t::numPairs"][::core::mem::offset_of!(attReadByTypeRsp_t, numPairs) - 0usize];
+//     ["Offset of field: attReadByTypeRsp_t::len"][::core::mem::offset_of!(attReadByTypeRsp_t, len) - 2usize];
+//     ["Offset of field: attReadByTypeRsp_t::pDataList"][::core::mem::offset_of!(attReadByTypeRsp_t, pDataList) - 8usize];
+// };
+// #[doc = " Read Request format."]
+// #[repr(C)]
+// #[derive(Debug, Copy, Clone)]
+// pub struct attReadReq_t {
+//     #[doc = "!< Handle of the attribute to be read (must be first field)"]
+//     pub handle: u16,
+// }
+// #[allow(clippy::unnecessary_operation, clippy::identity_op)]
+// const _: () = {
+//     ["Size of attReadReq_t"][::core::mem::size_of::<attReadReq_t>() - 2usize];
+//     ["Alignment of attReadReq_t"][::core::mem::align_of::<attReadReq_t>() - 2usize];
+//     ["Offset of field: attReadReq_t::handle"][::core::mem::offset_of!(attReadReq_t, handle) - 0usize];
+// };
+// #[doc = " Read Response format."]
+// #[repr(C)]
+// #[derive(Debug, Copy, Clone)]
+// pub struct attReadRsp_t {
+//     #[doc = "!< Length of value"]
+//     pub len: u16,
+//     #[doc = "!< Value of the attribute with the handle given (0 to ATT_MTU_SIZE-1)"]
+//     pub pValue: *mut u8,
+// }
+// #[allow(clippy::unnecessary_operation, clippy::identity_op)]
+// const _: () = {
+//     ["Size of attReadRsp_t"][::core::mem::size_of::<attReadRsp_t>() - 16usize];
+//     ["Alignment of attReadRsp_t"][::core::mem::align_of::<attReadRsp_t>() - 8usize];
+//     ["Offset of field: attReadRsp_t::len"][::core::mem::offset_of!(attReadRsp_t, len) - 0usize];
+//     ["Offset of field: attReadRsp_t::pValue"][::core::mem::offset_of!(attReadRsp_t, pValue) - 8usize];
+// };
+// #[doc = " Read Blob Req format."]
+// #[repr(C)]
+// #[derive(Debug, Copy, Clone)]
+// pub struct attReadBlobReq_t {
+//     #[doc = "!< Handle of the attribute to be read (must be first field)"]
+//     pub handle: u16,
+//     #[doc = "!< Offset of the first octet to be read"]
+//     pub offset: u16,
+// }
+// #[allow(clippy::unnecessary_operation, clippy::identity_op)]
+// const _: () = {
+//     ["Size of attReadBlobReq_t"][::core::mem::size_of::<attReadBlobReq_t>() - 4usize];
+//     ["Alignment of attReadBlobReq_t"][::core::mem::align_of::<attReadBlobReq_t>() - 2usize];
+//     ["Offset of field: attReadBlobReq_t::handle"][::core::mem::offset_of!(attReadBlobReq_t, handle) - 0usize];
+//     ["Offset of field: attReadBlobReq_t::offset"][::core::mem::offset_of!(attReadBlobReq_t, offset) - 2usize];
+// };
+// #[doc = " Read Blob Response format."]
+// #[repr(C)]
+// #[derive(Debug, Copy, Clone)]
+// pub struct attReadBlobRsp_t {
+//     #[doc = "!< Length of value"]
+//     pub len: u16,
+//     #[doc = "!< Part of the value of the attribute with the handle given (0 to ATT_MTU_SIZE-1)"]
+//     pub pValue: *mut u8,
+// }
+// #[allow(clippy::unnecessary_operation, clippy::identity_op)]
+// const _: () = {
+//     ["Size of attReadBlobRsp_t"][::core::mem::size_of::<attReadBlobRsp_t>() - 16usize];
+//     ["Alignment of attReadBlobRsp_t"][::core::mem::align_of::<attReadBlobRsp_t>() - 8usize];
+//     ["Offset of field: attReadBlobRsp_t::len"][::core::mem::offset_of!(attReadBlobRsp_t, len) - 0usize];
+//     ["Offset of field: attReadBlobRsp_t::pValue"][::core::mem::offset_of!(attReadBlobRsp_t, pValue) - 8usize];
+// };
+// #[doc = " Read Multiple Request format."]
+// #[repr(C)]
+// #[derive(Debug, Copy, Clone)]
+// pub struct attReadMultiReq_t {
+//     #[doc = "!< Set of two or more attribute handles (4 to ATT_MTU_SIZE-1) - must be first field"]
+//     pub pHandles: *mut u8,
+//     #[doc = "!< Number of attribute handles"]
+//     pub numHandles: u16,
+// }
+// #[allow(clippy::unnecessary_operation, clippy::identity_op)]
+// const _: () = {
+//     ["Size of attReadMultiReq_t"][::core::mem::size_of::<attReadMultiReq_t>() - 16usize];
+//     ["Alignment of attReadMultiReq_t"][::core::mem::align_of::<attReadMultiReq_t>() - 8usize];
+//     ["Offset of field: attReadMultiReq_t::pHandles"][::core::mem::offset_of!(attReadMultiReq_t, pHandles) - 0usize];
+//     ["Offset of field: attReadMultiReq_t::numHandles"][::core::mem::offset_of!(attReadMultiReq_t, numHandles) - 8usize];
+// };
+// #[doc = " Read Multiple Response format."]
+// #[repr(C)]
+// #[derive(Debug, Copy, Clone)]
+// pub struct attReadMultiRsp_t {
+//     #[doc = "!< Length of values"]
+//     pub len: u16,
+//     #[doc = "!< Set of two or more values (0 to ATT_MTU_SIZE-1)"]
+//     pub pValues: *mut u8,
+// }
+// #[allow(clippy::unnecessary_operation, clippy::identity_op)]
+// const _: () = {
+//     ["Size of attReadMultiRsp_t"][::core::mem::size_of::<attReadMultiRsp_t>() - 16usize];
+//     ["Alignment of attReadMultiRsp_t"][::core::mem::align_of::<attReadMultiRsp_t>() - 8usize];
+//     ["Offset of field: attReadMultiRsp_t::len"][::core::mem::offset_of!(attReadMultiRsp_t, len) - 0usize];
+//     ["Offset of field: attReadMultiRsp_t::pValues"][::core::mem::offset_of!(attReadMultiRsp_t, pValues) - 8usize];
+// };
+// #[doc = " Read By Group Type Request format."]
+// #[repr(C)]
+// #[derive(Debug, Copy, Clone)]
+// pub struct attReadByGrpTypeReq_t {
+//     #[doc = "!< First requested handle number (must be first field)"]
+//     pub startHandle: u16,
+//     #[doc = "!< Last requested handle number"]
+//     pub endHandle: u16,
+//     #[doc = "!< Requested group type (2 or 16 octet UUID)"]
+//     pub type_: attAttrType_t,
+// }
+// #[allow(clippy::unnecessary_operation, clippy::identity_op)]
+// const _: () = {
+//     ["Size of attReadByGrpTypeReq_t"][::core::mem::size_of::<attReadByGrpTypeReq_t>() - 22usize];
+//     ["Alignment of attReadByGrpTypeReq_t"][::core::mem::align_of::<attReadByGrpTypeReq_t>() - 2usize];
+//     ["Offset of field: attReadByGrpTypeReq_t::startHandle"]
+//         [::core::mem::offset_of!(attReadByGrpTypeReq_t, startHandle) - 0usize];
+//     ["Offset of field: attReadByGrpTypeReq_t::endHandle"]
+//         [::core::mem::offset_of!(attReadByGrpTypeReq_t, endHandle) - 2usize];
+//     ["Offset of field: attReadByGrpTypeReq_t::type_"][::core::mem::offset_of!(attReadByGrpTypeReq_t, type_) - 4usize];
+// };
+// #[doc = " Read By Group Type Response format."]
+// #[repr(C)]
+// #[derive(Debug, Copy, Clone)]
+// pub struct attReadByGrpTypeRsp_t {
+//     #[doc = "!< Number of attribute handle, end group handle and value sets found"]
+//     pub numGrps: u16,
+//     #[doc = "!< Length of each attribute handle, end group handle and value set"]
+//     pub len: u16,
+//     #[doc = "!< List of 1 or more attribute handle, end group handle and value (4 to ATT_MTU_SIZE-2)"]
+//     pub pDataList: *mut u8,
+// }
+// #[allow(clippy::unnecessary_operation, clippy::identity_op)]
+// const _: () = {
+//     ["Size of attReadByGrpTypeRsp_t"][::core::mem::size_of::<attReadByGrpTypeRsp_t>() - 16usize];
+//     ["Alignment of attReadByGrpTypeRsp_t"][::core::mem::align_of::<attReadByGrpTypeRsp_t>() - 8usize];
+//     ["Offset of field: attReadByGrpTypeRsp_t::numGrps"]
+//         [::core::mem::offset_of!(attReadByGrpTypeRsp_t, numGrps) - 0usize];
+//     ["Offset of field: attReadByGrpTypeRsp_t::len"][::core::mem::offset_of!(attReadByGrpTypeRsp_t, len) - 2usize];
+//     ["Offset of field: attReadByGrpTypeRsp_t::pDataList"]
+//         [::core::mem::offset_of!(attReadByGrpTypeRsp_t, pDataList) - 8usize];
+// };
+// #[doc = " Write Request format."]
+// #[repr(C)]
+// #[derive(Debug, Copy, Clone)]
+// pub struct attWriteReq_t {
+//     #[doc = "!< Handle of the attribute to be written (must be first field)"]
+//     pub handle: u16,
+//     #[doc = "!< Length of value"]
+//     pub len: u16,
+//     #[doc = "!< Value of the attribute to be written (0 to ATT_MTU_SIZE-3)"]
+//     pub pValue: *mut u8,
+//     #[doc = "!< Authentication Signature status (not included (0), valid (1), invalid (2))"]
+//     pub sig: u8,
+//     #[doc = "!< Command Flag"]
+//     pub cmd: u8,
+// }
+// #[allow(clippy::unnecessary_operation, clippy::identity_op)]
+// const _: () = {
+//     ["Size of attWriteReq_t"][::core::mem::size_of::<attWriteReq_t>() - 24usize];
+//     ["Alignment of attWriteReq_t"][::core::mem::align_of::<attWriteReq_t>() - 8usize];
+//     ["Offset of field: attWriteReq_t::handle"][::core::mem::offset_of!(attWriteReq_t, handle) - 0usize];
+//     ["Offset of field: attWriteReq_t::len"][::core::mem::offset_of!(attWriteReq_t, len) - 2usize];
+//     ["Offset of field: attWriteReq_t::pValue"][::core::mem::offset_of!(attWriteReq_t, pValue) - 8usize];
+//     ["Offset of field: attWriteReq_t::sig"][::core::mem::offset_of!(attWriteReq_t, sig) - 16usize];
+//     ["Offset of field: attWriteReq_t::cmd"][::core::mem::offset_of!(attWriteReq_t, cmd) - 17usize];
+// };
+// #[doc = " Prepare Write Request format."]
+// #[repr(C)]
+// #[derive(Debug, Copy, Clone)]
+// pub struct attPrepareWriteReq_t {
+//     #[doc = "!< Handle of the attribute to be written (must be first field)"]
+//     pub handle: u16,
+//     #[doc = "!< Offset of the first octet to be written"]
+//     pub offset: u16,
+//     #[doc = "!< Length of value"]
+//     pub len: u16,
+//     #[doc = "!< Part of the value of the attribute to be written (0 to ATT_MTU_SIZE-5) - must be allocated"]
+//     pub pValue: *mut u8,
+// }
+// #[allow(clippy::unnecessary_operation, clippy::identity_op)]
+// const _: () = {
+//     ["Size of attPrepareWriteReq_t"][::core::mem::size_of::<attPrepareWriteReq_t>() - 16usize];
+//     ["Alignment of attPrepareWriteReq_t"][::core::mem::align_of::<attPrepareWriteReq_t>() - 8usize];
+//     ["Offset of field: attPrepareWriteReq_t::handle"][::core::mem::offset_of!(attPrepareWriteReq_t, handle) - 0usize];
+//     ["Offset of field: attPrepareWriteReq_t::offset"][::core::mem::offset_of!(attPrepareWriteReq_t, offset) - 2usize];
+//     ["Offset of field: attPrepareWriteReq_t::len"][::core::mem::offset_of!(attPrepareWriteReq_t, len) - 4usize];
+//     ["Offset of field: attPrepareWriteReq_t::pValue"][::core::mem::offset_of!(attPrepareWriteReq_t, pValue) - 8usize];
+// };
+// #[doc = " Prepare Write Response format."]
+// #[repr(C)]
+// #[derive(Debug, Copy, Clone)]
+// pub struct attPrepareWriteRsp_t {
+//     #[doc = "!< Handle of the attribute that has been read"]
+//     pub handle: u16,
+//     #[doc = "!< Offset of the first octet to be written"]
+//     pub offset: u16,
+//     #[doc = "!< Length of value"]
+//     pub len: u16,
+//     #[doc = "!< Part of the value of the attribute to be written (0 to ATT_MTU_SIZE-5)"]
+//     pub pValue: *mut u8,
+// }
+// #[allow(clippy::unnecessary_operation, clippy::identity_op)]
+// const _: () = {
+//     ["Size of attPrepareWriteRsp_t"][::core::mem::size_of::<attPrepareWriteRsp_t>() - 16usize];
+//     ["Alignment of attPrepareWriteRsp_t"][::core::mem::align_of::<attPrepareWriteRsp_t>() - 8usize];
+//     ["Offset of field: attPrepareWriteRsp_t::handle"][::core::mem::offset_of!(attPrepareWriteRsp_t, handle) - 0usize];
+//     ["Offset of field: attPrepareWriteRsp_t::offset"][::core::mem::offset_of!(attPrepareWriteRsp_t, offset) - 2usize];
+//     ["Offset of field: attPrepareWriteRsp_t::len"][::core::mem::offset_of!(attPrepareWriteRsp_t, len) - 4usize];
+//     ["Offset of field: attPrepareWriteRsp_t::pValue"][::core::mem::offset_of!(attPrepareWriteRsp_t, pValue) - 8usize];
+// };
+// #[doc = " Execute Write Request format."]
+// #[repr(C)]
+// #[derive(Debug, Copy, Clone)]
+// pub struct attExecuteWriteReq_t {
+//     #[doc = "!< 0x00 - cancel all prepared writes.\n!< 0x01 - immediately write all pending prepared values."]
+//     pub flags: u8,
+// }
+// #[allow(clippy::unnecessary_operation, clippy::identity_op)]
+// const _: () = {
+//     ["Size of attExecuteWriteReq_t"][::core::mem::size_of::<attExecuteWriteReq_t>() - 1usize];
+//     ["Alignment of attExecuteWriteReq_t"][::core::mem::align_of::<attExecuteWriteReq_t>() - 1usize];
+//     ["Offset of field: attExecuteWriteReq_t::flags"][::core::mem::offset_of!(attExecuteWriteReq_t, flags) - 0usize];
+// };
+// #[doc = " Handle Value Notification format."]
+// #[repr(C)]
+// #[derive(Debug, Copy, Clone)]
+// pub struct attHandleValueNoti_t {
+//     #[doc = "!< Handle of the attribute that has been changed (must be first field)"]
+//     pub handle: u16,
+//     #[doc = "!< Length of value"]
+//     pub len: u16,
+//     #[doc = "!< Current value of the attribute (0 to ATT_MTU_SIZE-3)"]
+//     pub pValue: *mut u8,
+// }
+// #[allow(clippy::unnecessary_operation, clippy::identity_op)]
+// const _: () = {
+//     ["Size of attHandleValueNoti_t"][::core::mem::size_of::<attHandleValueNoti_t>() - 16usize];
+//     ["Alignment of attHandleValueNoti_t"][::core::mem::align_of::<attHandleValueNoti_t>() - 8usize];
+//     ["Offset of field: attHandleValueNoti_t::handle"][::core::mem::offset_of!(attHandleValueNoti_t, handle) - 0usize];
+//     ["Offset of field: attHandleValueNoti_t::len"][::core::mem::offset_of!(attHandleValueNoti_t, len) - 2usize];
+//     ["Offset of field: attHandleValueNoti_t::pValue"][::core::mem::offset_of!(attHandleValueNoti_t, pValue) - 8usize];
+// };
+// #[doc = " Handle Value Indication format."]
+// #[repr(C)]
+// #[derive(Debug, Copy, Clone)]
+// pub struct attHandleValueInd_t {
+//     #[doc = "!< Handle of the attribute that has been changed (must be first field)"]
+//     pub handle: u16,
+//     #[doc = "!< Length of value"]
+//     pub len: u16,
+//     #[doc = "!< Current value of the attribute (0 to ATT_MTU_SIZE-3)"]
+//     pub pValue: *mut u8,
+// }
+// #[allow(clippy::unnecessary_operation, clippy::identity_op)]
+// const _: () = {
+//     ["Size of attHandleValueInd_t"][::core::mem::size_of::<attHandleValueInd_t>() - 16usize];
+//     ["Alignment of attHandleValueInd_t"][::core::mem::align_of::<attHandleValueInd_t>() - 8usize];
+//     ["Offset of field: attHandleValueInd_t::handle"][::core::mem::offset_of!(attHandleValueInd_t, handle) - 0usize];
+//     ["Offset of field: attHandleValueInd_t::len"][::core::mem::offset_of!(attHandleValueInd_t, len) - 2usize];
+//     ["Offset of field: attHandleValueInd_t::pValue"][::core::mem::offset_of!(attHandleValueInd_t, pValue) - 8usize];
+// };
+// #[doc = " ATT Flow Control Violated Event message format.  This message is sent to the\n app by the local ATT Server or Client when a sequential ATT Request-Response\n or Indication-Confirmation protocol flow control is violated for a connection.\n All subsequent ATT Requests and Indications received by the local ATT Server\n and Client respectively will be dropped.\n\n This message is to inform the app (that has registered with GAP by calling\n GAP_RegisterForMsgs()) in case it wants to drop the connection."]
+// #[repr(C)]
+// #[derive(Debug, Copy, Clone)]
+// pub struct attFlowCtrlViolatedEvt_t {
+//     #[doc = "!< opcode of message that caused flow control violation"]
+//     pub opcode: u8,
+//     #[doc = "!< opcode of pending message"]
+//     pub pendingOpcode: u8,
+// }
+// #[allow(clippy::unnecessary_operation, clippy::identity_op)]
+// const _: () = {
+//     ["Size of attFlowCtrlViolatedEvt_t"][::core::mem::size_of::<attFlowCtrlViolatedEvt_t>() - 2usize];
+//     ["Alignment of attFlowCtrlViolatedEvt_t"][::core::mem::align_of::<attFlowCtrlViolatedEvt_t>() - 1usize];
+//     ["Offset of field: attFlowCtrlViolatedEvt_t::opcode"]
+//         [::core::mem::offset_of!(attFlowCtrlViolatedEvt_t, opcode) - 0usize];
+//     ["Offset of field: attFlowCtrlViolatedEvt_t::pendingOpcode"]
+//         [::core::mem::offset_of!(attFlowCtrlViolatedEvt_t, pendingOpcode) - 1usize];
+// };
+// #[doc = " ATT MTU Updated Event message format.  This message is sent to the app\n by the local ATT Server or Client when the ATT MTU size is updated for a\n connection. The default ATT MTU size is 23 octets.\n\n This message is to inform the app (that has registered with GAP by calling\n GAP_RegisterForMsgs()) about the new ATT MTU size negotiated for a connection."]
+// #[repr(C)]
+// #[derive(Debug, Copy, Clone)]
+// pub struct attMtuUpdatedEvt_t {
+//     #[doc = "!< new MTU size"]
+//     pub MTU: u16,
+// }
+// #[allow(clippy::unnecessary_operation, clippy::identity_op)]
+// const _: () = {
+//     ["Size of attMtuUpdatedEvt_t"][::core::mem::size_of::<attMtuUpdatedEvt_t>() - 2usize];
+//     ["Alignment of attMtuUpdatedEvt_t"][::core::mem::align_of::<attMtuUpdatedEvt_t>() - 2usize];
+//     ["Offset of field: attMtuUpdatedEvt_t::MTU"][::core::mem::offset_of!(attMtuUpdatedEvt_t, MTU) - 0usize];
+// };
+// #[doc = " ATT Message format. It's a union of all attribute protocol messages and\n locally-generated events used between the attribute protocol and upper\n layer profile/application."]
+// #[repr(C)]
+// #[derive(Copy, Clone)]
+// pub union attMsg_t {
+//     #[doc = "!< ATT Exchange MTU Request"]
+//     pub exchangeMTUReq: attExchangeMTUReq_t,
+//     #[doc = "!< ATT Find Information Request"]
+//     pub findInfoReq: attFindInfoReq_t,
+//     #[doc = "!< ATT Find By Type Value Request"]
+//     pub findByTypeValueReq: attFindByTypeValueReq_t,
+//     #[doc = "!< ATT Read By Type Request"]
+//     pub readByTypeReq: attReadByTypeReq_t,
+//     #[doc = "!< ATT Read Request"]
+//     pub readReq: attReadReq_t,
+//     #[doc = "!< ATT Read Blob Request"]
+//     pub readBlobReq: attReadBlobReq_t,
+//     #[doc = "!< ATT Read Multiple Request"]
+//     pub readMultiReq: attReadMultiReq_t,
+//     #[doc = "!< ATT Read By Group Type Request"]
+//     pub readByGrpTypeReq: attReadByGrpTypeReq_t,
+//     #[doc = "!< ATT Write Request"]
+//     pub writeReq: attWriteReq_t,
+//     #[doc = "!< ATT Prepare Write Request"]
+//     pub prepareWriteReq: attPrepareWriteReq_t,
+//     #[doc = "!< ATT Execute Write Request"]
+//     pub executeWriteReq: attExecuteWriteReq_t,
+//     #[doc = "!< ATT Error Response"]
+//     pub errorRsp: attErrorRsp_t,
+//     #[doc = "!< ATT Exchange MTU Response"]
+//     pub exchangeMTURsp: attExchangeMTURsp_t,
+//     #[doc = "!< ATT Find Information Response"]
+//     pub findInfoRsp: attFindInfoRsp_t,
+//     #[doc = "!< ATT Find By Type Value Response"]
+//     pub findByTypeValueRsp: attFindByTypeValueRsp_t,
+//     #[doc = "!< ATT Read By Type Response"]
+//     pub readByTypeRsp: attReadByTypeRsp_t,
+//     #[doc = "!< ATT Read Response"]
+//     pub readRsp: attReadRsp_t,
+//     #[doc = "!< ATT Read Blob Response"]
+//     pub readBlobRsp: attReadBlobRsp_t,
+//     #[doc = "!< ATT Read Multiple Response"]
+//     pub readMultiRsp: attReadMultiRsp_t,
+//     #[doc = "!< ATT Read By Group Type Response"]
+//     pub readByGrpTypeRsp: attReadByGrpTypeRsp_t,
+//     #[doc = "!< ATT Prepare Write Response"]
+//     pub prepareWriteRsp: attPrepareWriteRsp_t,
+//     #[doc = "!< ATT Handle Value Notification"]
+//     pub handleValueNoti: attHandleValueNoti_t,
+//     #[doc = "!< ATT Handle Value Indication"]
+//     pub handleValueInd: attHandleValueInd_t,
+//     #[doc = "!< ATT Flow Control Violated Event"]
+//     pub flowCtrlEvt: attFlowCtrlViolatedEvt_t,
+//     #[doc = "!< ATT MTU Updated Event"]
+//     pub mtuEvt: attMtuUpdatedEvt_t,
+// }
+// #[allow(clippy::unnecessary_operation, clippy::identity_op)]
+// const _: () = {
+//     ["Size of attMsg_t"][::core::mem::size_of::<attMsg_t>() - 24usize];
+//     ["Alignment of attMsg_t"][::core::mem::align_of::<attMsg_t>() - 8usize];
+//     ["Offset of field: attMsg_t::exchangeMTUReq"][::core::mem::offset_of!(attMsg_t, exchangeMTUReq) - 0usize];
+//     ["Offset of field: attMsg_t::findInfoReq"][::core::mem::offset_of!(attMsg_t, findInfoReq) - 0usize];
+//     ["Offset of field: attMsg_t::findByTypeValueReq"][::core::mem::offset_of!(attMsg_t, findByTypeValueReq) - 0usize];
+//     ["Offset of field: attMsg_t::readByTypeReq"][::core::mem::offset_of!(attMsg_t, readByTypeReq) - 0usize];
+//     ["Offset of field: attMsg_t::readReq"][::core::mem::offset_of!(attMsg_t, readReq) - 0usize];
+//     ["Offset of field: attMsg_t::readBlobReq"][::core::mem::offset_of!(attMsg_t, readBlobReq) - 0usize];
+//     ["Offset of field: attMsg_t::readMultiReq"][::core::mem::offset_of!(attMsg_t, readMultiReq) - 0usize];
+//     ["Offset of field: attMsg_t::readByGrpTypeReq"][::core::mem::offset_of!(attMsg_t, readByGrpTypeReq) - 0usize];
+//     ["Offset of field: attMsg_t::writeReq"][::core::mem::offset_of!(attMsg_t, writeReq) - 0usize];
+//     ["Offset of field: attMsg_t::prepareWriteReq"][::core::mem::offset_of!(attMsg_t, prepareWriteReq) - 0usize];
+//     ["Offset of field: attMsg_t::executeWriteReq"][::core::mem::offset_of!(attMsg_t, executeWriteReq) - 0usize];
+//     ["Offset of field: attMsg_t::errorRsp"][::core::mem::offset_of!(attMsg_t, errorRsp) - 0usize];
+//     ["Offset of field: attMsg_t::exchangeMTURsp"][::core::mem::offset_of!(attMsg_t, exchangeMTURsp) - 0usize];
+//     ["Offset of field: attMsg_t::findInfoRsp"][::core::mem::offset_of!(attMsg_t, findInfoRsp) - 0usize];
+//     ["Offset of field: attMsg_t::findByTypeValueRsp"][::core::mem::offset_of!(attMsg_t, findByTypeValueRsp) - 0usize];
+//     ["Offset of field: attMsg_t::readByTypeRsp"][::core::mem::offset_of!(attMsg_t, readByTypeRsp) - 0usize];
+//     ["Offset of field: attMsg_t::readRsp"][::core::mem::offset_of!(attMsg_t, readRsp) - 0usize];
+//     ["Offset of field: attMsg_t::readBlobRsp"][::core::mem::offset_of!(attMsg_t, readBlobRsp) - 0usize];
+//     ["Offset of field: attMsg_t::readMultiRsp"][::core::mem::offset_of!(attMsg_t, readMultiRsp) - 0usize];
+//     ["Offset of field: attMsg_t::readByGrpTypeRsp"][::core::mem::offset_of!(attMsg_t, readByGrpTypeRsp) - 0usize];
+//     ["Offset of field: attMsg_t::prepareWriteRsp"][::core::mem::offset_of!(attMsg_t, prepareWriteRsp) - 0usize];
+//     ["Offset of field: attMsg_t::handleValueNoti"][::core::mem::offset_of!(attMsg_t, handleValueNoti) - 0usize];
+//     ["Offset of field: attMsg_t::handleValueInd"][::core::mem::offset_of!(attMsg_t, handleValueInd) - 0usize];
+//     ["Offset of field: attMsg_t::flowCtrlEvt"][::core::mem::offset_of!(attMsg_t, flowCtrlEvt) - 0usize];
+//     ["Offset of field: attMsg_t::mtuEvt"][::core::mem::offset_of!(attMsg_t, mtuEvt) - 0usize];
+// };
+// #[doc = " GATT Find By Type Value Request format."]
+// #[repr(C)]
+// #[derive(Debug, Copy, Clone)]
+// pub struct gattFindByTypeValueReq_t {
+//     #[doc = "!< First requested handle number (must be first field)"]
+//     pub startHandle: u16,
+//     #[doc = "!< Last requested handle number"]
+//     pub endHandle: u16,
+//     #[doc = "!< Primary service UUID value (2 or 16 octets)"]
+//     pub value: attAttrType_t,
+// }
+// #[allow(clippy::unnecessary_operation, clippy::identity_op)]
+// const _: () = {
+//     ["Size of gattFindByTypeValueReq_t"][::core::mem::size_of::<gattFindByTypeValueReq_t>() - 22usize];
+//     ["Alignment of gattFindByTypeValueReq_t"][::core::mem::align_of::<gattFindByTypeValueReq_t>() - 2usize];
+//     ["Offset of field: gattFindByTypeValueReq_t::startHandle"]
+//         [::core::mem::offset_of!(gattFindByTypeValueReq_t, startHandle) - 0usize];
+//     ["Offset of field: gattFindByTypeValueReq_t::endHandle"]
+//         [::core::mem::offset_of!(gattFindByTypeValueReq_t, endHandle) - 2usize];
+//     ["Offset of field: gattFindByTypeValueReq_t::value"]
+//         [::core::mem::offset_of!(gattFindByTypeValueReq_t, value) - 4usize];
+// };
+// #[doc = " GATT Read By Type Request format."]
+// #[repr(C)]
+// #[derive(Debug, Copy, Clone)]
+// pub struct gattReadByTypeReq_t {
+//     #[doc = "!< Whether this is a GATT Discover Characteristics by UUID sub-procedure"]
+//     pub discCharsByUUID: u8,
+//     #[doc = "!< Read By Type Request"]
+//     pub req: attReadByTypeReq_t,
+// }
+// #[allow(clippy::unnecessary_operation, clippy::identity_op)]
+// const _: () = {
+//     ["Size of gattReadByTypeReq_t"][::core::mem::size_of::<gattReadByTypeReq_t>() - 24usize];
+//     ["Alignment of gattReadByTypeReq_t"][::core::mem::align_of::<gattReadByTypeReq_t>() - 2usize];
+//     ["Offset of field: gattReadByTypeReq_t::discCharsByUUID"]
+//         [::core::mem::offset_of!(gattReadByTypeReq_t, discCharsByUUID) - 0usize];
+//     ["Offset of field: gattReadByTypeReq_t::req"][::core::mem::offset_of!(gattReadByTypeReq_t, req) - 2usize];
+// };
+// #[doc = " GATT Write Long Request format. Do not change the order of the members."]
+// #[repr(C)]
+// #[derive(Debug, Copy, Clone)]
+// pub struct gattWriteLongReq_t {
+//     #[doc = "!< Whether reliable writes requested (always FALSE for Write Long)"]
+//     pub reliable: u8,
+//     #[doc = "!< ATT Prepare Write Request"]
+//     pub req: attPrepareWriteReq_t,
+//     #[doc = "!< Offset of last Prepare Write Request sent"]
+//     pub lastOffset: u16,
+// }
+// #[allow(clippy::unnecessary_operation, clippy::identity_op)]
+// const _: () = {
+//     ["Size of gattWriteLongReq_t"][::core::mem::size_of::<gattWriteLongReq_t>() - 32usize];
+//     ["Alignment of gattWriteLongReq_t"][::core::mem::align_of::<gattWriteLongReq_t>() - 8usize];
+//     ["Offset of field: gattWriteLongReq_t::reliable"][::core::mem::offset_of!(gattWriteLongReq_t, reliable) - 0usize];
+//     ["Offset of field: gattWriteLongReq_t::req"][::core::mem::offset_of!(gattWriteLongReq_t, req) - 8usize];
+//     ["Offset of field: gattWriteLongReq_t::lastOffset"]
+//         [::core::mem::offset_of!(gattWriteLongReq_t, lastOffset) - 24usize];
+// };
+// #[doc = " GATT Reliable Writes Request format. Do not change the order of the members."]
+// #[repr(C)]
+// #[derive(Debug, Copy, Clone)]
+// pub struct gattReliableWritesReq_t {
+//     #[doc = "!< Whether reliable writes requested (always TRUE for Reliable Writes)"]
+//     pub reliable: u8,
+//     #[doc = "!< Array of Prepare Write Requests (must be allocated)"]
+//     pub pReqs: *mut attPrepareWriteReq_t,
+//     #[doc = "!< Number of Prepare Write Requests"]
+//     pub numReqs: u8,
+//     #[doc = "!< Index of last Prepare Write Request sent"]
+//     pub index: u8,
+//     #[doc = "!< 0x00 - cancel all prepared writes.\n!< 0x01 - immediately write all pending prepared values."]
+//     pub flags: u8,
+// }
+// #[allow(clippy::unnecessary_operation, clippy::identity_op)]
+// const _: () = {
+//     ["Size of gattReliableWritesReq_t"][::core::mem::size_of::<gattReliableWritesReq_t>() - 24usize];
+//     ["Alignment of gattReliableWritesReq_t"][::core::mem::align_of::<gattReliableWritesReq_t>() - 8usize];
+//     ["Offset of field: gattReliableWritesReq_t::reliable"]
+//         [::core::mem::offset_of!(gattReliableWritesReq_t, reliable) - 0usize];
+//     ["Offset of field: gattReliableWritesReq_t::pReqs"]
+//         [::core::mem::offset_of!(gattReliableWritesReq_t, pReqs) - 8usize];
+//     ["Offset of field: gattReliableWritesReq_t::numReqs"]
+//         [::core::mem::offset_of!(gattReliableWritesReq_t, numReqs) - 16usize];
+//     ["Offset of field: gattReliableWritesReq_t::index"]
+//         [::core::mem::offset_of!(gattReliableWritesReq_t, index) - 17usize];
+//     ["Offset of field: gattReliableWritesReq_t::flags"]
+//         [::core::mem::offset_of!(gattReliableWritesReq_t, flags) - 18usize];
+// };
+// #[doc = " GATT Message format. It's a union of all attribute protocol/profile messages\n and locally-generated events used between the attribute protocol/profile and\n upper layer application."]
+// #[repr(C)]
+// #[derive(Copy, Clone)]
+// pub union gattMsg_t {
+//     #[doc = "!< ATT Exchange MTU Request"]
+//     pub exchangeMTUReq: attExchangeMTUReq_t,
+//     #[doc = "!< ATT Find Information Request"]
+//     pub findInfoReq: attFindInfoReq_t,
+//     #[doc = "!< ATT Find By Type Value Request"]
+//     pub findByTypeValueReq: attFindByTypeValueReq_t,
+//     #[doc = "!< ATT Read By Type Request"]
+//     pub readByTypeReq: attReadByTypeReq_t,
+//     #[doc = "!< ATT Read Request"]
+//     pub readReq: attReadReq_t,
+//     #[doc = "!< ATT Read Blob Request"]
+//     pub readBlobReq: attReadBlobReq_t,
+//     #[doc = "!< ATT Read Multiple Request"]
+//     pub readMultiReq: attReadMultiReq_t,
+//     #[doc = "!< ATT Read By Group Type Request"]
+//     pub readByGrpTypeReq: attReadByGrpTypeReq_t,
+//     #[doc = "!< ATT Write Request"]
+//     pub writeReq: attWriteReq_t,
+//     #[doc = "!< ATT Prepare Write Request"]
+//     pub prepareWriteReq: attPrepareWriteReq_t,
+//     #[doc = "!< ATT Execute Write Request"]
+//     pub executeWriteReq: attExecuteWriteReq_t,
+//     #[doc = "!< GATT Find By Type Value Request"]
+//     pub gattFindByTypeValueReq: gattFindByTypeValueReq_t,
+//     #[doc = "!< GATT Read By Type Request"]
+//     pub gattReadByTypeReq: gattReadByTypeReq_t,
+//     #[doc = "!< GATT Long Write Request"]
+//     pub gattWriteLongReq: gattWriteLongReq_t,
+//     #[doc = "!< GATT Reliable Writes Request"]
+//     pub gattReliableWritesReq: gattReliableWritesReq_t,
+//     #[doc = "!< ATT Error Response"]
+//     pub errorRsp: attErrorRsp_t,
+//     #[doc = "!< ATT Exchange MTU Response"]
+//     pub exchangeMTURsp: attExchangeMTURsp_t,
+//     #[doc = "!< ATT Find Information Response"]
+//     pub findInfoRsp: attFindInfoRsp_t,
+//     #[doc = "!< ATT Find By Type Value Response"]
+//     pub findByTypeValueRsp: attFindByTypeValueRsp_t,
+//     #[doc = "!< ATT Read By Type Response"]
+//     pub readByTypeRsp: attReadByTypeRsp_t,
+//     #[doc = "!< ATT Read Response"]
+//     pub readRsp: attReadRsp_t,
+//     #[doc = "!< ATT Read Blob Response"]
+//     pub readBlobRsp: attReadBlobRsp_t,
+//     #[doc = "!< ATT Read Multiple Response"]
+//     pub readMultiRsp: attReadMultiRsp_t,
+//     #[doc = "!< ATT Read By Group Type Response"]
+//     pub readByGrpTypeRsp: attReadByGrpTypeRsp_t,
+//     #[doc = "!< ATT Prepare Write Response"]
+//     pub prepareWriteRsp: attPrepareWriteRsp_t,
+//     #[doc = "!< ATT Handle Value Notification"]
+//     pub handleValueNoti: attHandleValueNoti_t,
+//     #[doc = "!< ATT Handle Value Indication"]
+//     pub handleValueInd: attHandleValueInd_t,
+//     #[doc = "!< ATT Flow Control Violated Event"]
+//     pub flowCtrlEvt: attFlowCtrlViolatedEvt_t,
+//     #[doc = "!< ATT MTU Updated Event"]
+//     pub mtuEvt: attMtuUpdatedEvt_t,
+// }
+// #[allow(clippy::unnecessary_operation, clippy::identity_op)]
+// const _: () = {
+//     ["Size of gattMsg_t"][::core::mem::size_of::<gattMsg_t>() - 32usize];
+//     ["Alignment of gattMsg_t"][::core::mem::align_of::<gattMsg_t>() - 8usize];
+//     ["Offset of field: gattMsg_t::exchangeMTUReq"][::core::mem::offset_of!(gattMsg_t, exchangeMTUReq) - 0usize];
+//     ["Offset of field: gattMsg_t::findInfoReq"][::core::mem::offset_of!(gattMsg_t, findInfoReq) - 0usize];
+//     ["Offset of field: gattMsg_t::findByTypeValueReq"][::core::mem::offset_of!(gattMsg_t, findByTypeValueReq) - 0usize];
+//     ["Offset of field: gattMsg_t::readByTypeReq"][::core::mem::offset_of!(gattMsg_t, readByTypeReq) - 0usize];
+//     ["Offset of field: gattMsg_t::readReq"][::core::mem::offset_of!(gattMsg_t, readReq) - 0usize];
+//     ["Offset of field: gattMsg_t::readBlobReq"][::core::mem::offset_of!(gattMsg_t, readBlobReq) - 0usize];
+//     ["Offset of field: gattMsg_t::readMultiReq"][::core::mem::offset_of!(gattMsg_t, readMultiReq) - 0usize];
+//     ["Offset of field: gattMsg_t::readByGrpTypeReq"][::core::mem::offset_of!(gattMsg_t, readByGrpTypeReq) - 0usize];
+//     ["Offset of field: gattMsg_t::writeReq"][::core::mem::offset_of!(gattMsg_t, writeReq) - 0usize];
+//     ["Offset of field: gattMsg_t::prepareWriteReq"][::core::mem::offset_of!(gattMsg_t, prepareWriteReq) - 0usize];
+//     ["Offset of field: gattMsg_t::executeWriteReq"][::core::mem::offset_of!(gattMsg_t, executeWriteReq) - 0usize];
+//     ["Offset of field: gattMsg_t::gattFindByTypeValueReq"]
+//         [::core::mem::offset_of!(gattMsg_t, gattFindByTypeValueReq) - 0usize];
+//     ["Offset of field: gattMsg_t::gattReadByTypeReq"][::core::mem::offset_of!(gattMsg_t, gattReadByTypeReq) - 0usize];
+//     ["Offset of field: gattMsg_t::gattWriteLongReq"][::core::mem::offset_of!(gattMsg_t, gattWriteLongReq) - 0usize];
+//     ["Offset of field: gattMsg_t::gattReliableWritesReq"]
+//         [::core::mem::offset_of!(gattMsg_t, gattReliableWritesReq) - 0usize];
+//     ["Offset of field: gattMsg_t::errorRsp"][::core::mem::offset_of!(gattMsg_t, errorRsp) - 0usize];
+//     ["Offset of field: gattMsg_t::exchangeMTURsp"][::core::mem::offset_of!(gattMsg_t, exchangeMTURsp) - 0usize];
+//     ["Offset of field: gattMsg_t::findInfoRsp"][::core::mem::offset_of!(gattMsg_t, findInfoRsp) - 0usize];
+//     ["Offset of field: gattMsg_t::findByTypeValueRsp"][::core::mem::offset_of!(gattMsg_t, findByTypeValueRsp) - 0usize];
+//     ["Offset of field: gattMsg_t::readByTypeRsp"][::core::mem::offset_of!(gattMsg_t, readByTypeRsp) - 0usize];
+//     ["Offset of field: gattMsg_t::readRsp"][::core::mem::offset_of!(gattMsg_t, readRsp) - 0usize];
+//     ["Offset of field: gattMsg_t::readBlobRsp"][::core::mem::offset_of!(gattMsg_t, readBlobRsp) - 0usize];
+//     ["Offset of field: gattMsg_t::readMultiRsp"][::core::mem::offset_of!(gattMsg_t, readMultiRsp) - 0usize];
+//     ["Offset of field: gattMsg_t::readByGrpTypeRsp"][::core::mem::offset_of!(gattMsg_t, readByGrpTypeRsp) - 0usize];
+//     ["Offset of field: gattMsg_t::prepareWriteRsp"][::core::mem::offset_of!(gattMsg_t, prepareWriteRsp) - 0usize];
+//     ["Offset of field: gattMsg_t::handleValueNoti"][::core::mem::offset_of!(gattMsg_t, handleValueNoti) - 0usize];
+//     ["Offset of field: gattMsg_t::handleValueInd"][::core::mem::offset_of!(gattMsg_t, handleValueInd) - 0usize];
+//     ["Offset of field: gattMsg_t::flowCtrlEvt"][::core::mem::offset_of!(gattMsg_t, flowCtrlEvt) - 0usize];
+//     ["Offset of field: gattMsg_t::mtuEvt"][::core::mem::offset_of!(gattMsg_t, mtuEvt) - 0usize];
+// };
+// #[doc = " GATT tmos GATT_MSG_EVENT message format. This message is used to forward an\n incoming attribute protocol/profile message up to upper layer application."]
+// #[repr(C)]
+// #[derive(Copy, Clone)]
+// pub struct gattMsgEvent_t {
+//     #[doc = "!< GATT_MSG_EVENT and status"]
+//     pub hdr: tmos_event_hdr_t,
+//     #[doc = "!< Connection message was received on"]
+//     pub connHandle: u16,
+//     #[doc = "!< Type of message"]
+//     pub method: u8,
+//     #[doc = "!< Attribute protocol/profile message"]
+//     pub msg: gattMsg_t,
+// }
+// #[allow(clippy::unnecessary_operation, clippy::identity_op)]
+// const _: () = {
+//     ["Size of gattMsgEvent_t"][::core::mem::size_of::<gattMsgEvent_t>() - 40usize];
+//     ["Alignment of gattMsgEvent_t"][::core::mem::align_of::<gattMsgEvent_t>() - 8usize];
+//     ["Offset of field: gattMsgEvent_t::hdr"][::core::mem::offset_of!(gattMsgEvent_t, hdr) - 0usize];
+//     ["Offset of field: gattMsgEvent_t::connHandle"][::core::mem::offset_of!(gattMsgEvent_t, connHandle) - 2usize];
+//     ["Offset of field: gattMsgEvent_t::method"][::core::mem::offset_of!(gattMsgEvent_t, method) - 4usize];
+//     ["Offset of field: gattMsgEvent_t::msg"][::core::mem::offset_of!(gattMsgEvent_t, msg) - 8usize];
+// };
+// #[doc = " GATT Attribute Type format."]
+// #[repr(C)]
+// #[derive(Debug, Copy, Clone)]
+// pub struct gattAttrType_t {
+//     #[doc = "!< Length of UUID (2 or 16)"]
+//     pub len: u8,
+//     #[doc = "!< Pointer to UUID"]
+//     pub uuid: *const u8,
+// }
+// #[allow(clippy::unnecessary_operation, clippy::identity_op)]
+// const _: () = {
+//     ["Size of gattAttrType_t"][::core::mem::size_of::<gattAttrType_t>() - 16usize];
+//     ["Alignment of gattAttrType_t"][::core::mem::align_of::<gattAttrType_t>() - 8usize];
+//     ["Offset of field: gattAttrType_t::len"][::core::mem::offset_of!(gattAttrType_t, len) - 0usize];
+//     ["Offset of field: gattAttrType_t::uuid"][::core::mem::offset_of!(gattAttrType_t, uuid) - 8usize];
+// };
+// #[doc = " GATT Attribute format."]
+// #[repr(C)]
+// #[derive(Debug, Copy, Clone)]
+// pub struct attAttribute_t {
+//     #[doc = "!< Attribute type (2 or 16 octet UUIDs)"]
+//     pub type_: gattAttrType_t,
+//     #[doc = "!< Attribute permissions"]
+//     pub permissions: u8,
+//     #[doc = "!< Attribute handle - assigned internally by attribute server"]
+//     pub handle: u16,
+//     #[doc = "!< Attribute value - encoding of the octet array is defined in\n!< the applicable profile. The maximum length of an attribute\n!< value shall be 512 octets."]
+//     pub pValue: *mut u8,
+// }
+// #[allow(clippy::unnecessary_operation, clippy::identity_op)]
+// const _: () = {
+//     ["Size of attAttribute_t"][::core::mem::size_of::<attAttribute_t>() - 32usize];
+//     ["Alignment of attAttribute_t"][::core::mem::align_of::<attAttribute_t>() - 8usize];
+//     ["Offset of field: attAttribute_t::type_"][::core::mem::offset_of!(attAttribute_t, type_) - 0usize];
+//     ["Offset of field: attAttribute_t::permissions"][::core::mem::offset_of!(attAttribute_t, permissions) - 16usize];
+//     ["Offset of field: attAttribute_t::handle"][::core::mem::offset_of!(attAttribute_t, handle) - 18usize];
+//     ["Offset of field: attAttribute_t::pValue"][::core::mem::offset_of!(attAttribute_t, pValue) - 24usize];
+// };
+// #[doc = " GATT Attribute format."]
+// pub type gattAttribute_t = attAttribute_t;
+// #[doc = " GATT Service format."]
+// #[repr(C)]
+// #[derive(Debug, Copy, Clone)]
+// pub struct gattService_t {
+//     #[doc = "!< Number of attributes in attrs"]
+//     pub numAttrs: u16,
+//     #[doc = "!< Minimum encryption key size required by service (7-16 bytes)"]
+//     pub encKeySize: u8,
+//     #[doc = " Array of attribute records.\n  note: The list must start with a Service attribute followed by\n        all attributes associated with this Service attribute."]
+//     pub attrs: *mut gattAttribute_t,
+// }
+// #[allow(clippy::unnecessary_operation, clippy::identity_op)]
+// const _: () = {
+//     ["Size of gattService_t"][::core::mem::size_of::<gattService_t>() - 16usize];
+//     ["Alignment of gattService_t"][::core::mem::align_of::<gattService_t>() - 8usize];
+//     ["Offset of field: gattService_t::numAttrs"][::core::mem::offset_of!(gattService_t, numAttrs) - 0usize];
+//     ["Offset of field: gattService_t::encKeySize"][::core::mem::offset_of!(gattService_t, encKeySize) - 2usize];
+//     ["Offset of field: gattService_t::attrs"][::core::mem::offset_of!(gattService_t, attrs) - 8usize];
+// };
+// #[doc = " @brief   Callback function prototype to read an attribute value.\n\n @note    blePending can be returned ONLY for the following\n          read operations:\n          - Read Request: ATT_READ_REQ\n          - Read Blob Request: ATT_READ_BLOB_REQ\n\n @note    If blePending is returned then it's the responsibility of the application to respond to\n          ATT_READ_REQ and ATT_READ_BLOB_REQ message with ATT_READ_RSP and ATT_READ_BLOB_RSP\n          message respectively.\n\n @note    Payload 'pValue' used with ATT_READ_RSP and ATT_READ_BLOB_RSP must be allocated using GATT_bm_alloc().\n\n @param   connHandle - connection request was received on\n @param   pAttr - pointer to attribute\n @param   pValue - pointer to data to be read (to be returned)\n @param   pLen - length of data (to be returned)\n @param   offset - offset of the first octet to be read\n @param   maxLen - maximum length of data to be read\n @param   method - type of read message\n\n @return  SUCCESS: Read was successfully.<BR>\n          blePending: A response is pending for this client.<BR>\n          Error, otherwise: ref ATT_ERR_CODE_DEFINES.<BR>"]
+// pub type pfnGATTReadAttrCB_t = ::core::option::Option<
+//     unsafe extern "C" fn(
+//         connHandle: u16,
+//         pAttr: *mut gattAttribute_t,
+//         pValue: *mut u8,
+//         pLen: *mut u16,
+//         offset: u16,
+//         maxLen: u16,
+//         method: u8,
+//     ) -> u8,
+// >;
+// #[doc = " @brief   Callback function prototype to write an attribute value.\n\n @note    blePending can be returned ONLY for the following\n          write operations:\n          - Write Request: ATT_WRITE_REQ\n          - Write Command: ATT_WRITE_CMD\n          - Write Long: ATT_EXECUTE_WRITE_REQ\n          - Reliable Writes: Multiple ATT_PREPARE_WRITE_REQ followed by one final ATT_EXECUTE_WRITE_REQ\n\n @note    If blePending is returned then it's the responsibility of the application to 1) respond to\n          ATT_WRITE_REQ and ATT_EXECUTE_WRITE_REQ message with ATT_WRITE_RSP and ATT_EXECUTE_WRITE_RSP\n          message respectively, and 2) free each request payload 'pValue' using BM_free().\n\n @note    Write Command (ATT_WRITE_CMD) does NOT require a response message.\n\n @param   connHandle - connection request was received on\n @param   pAttr - pointer to attribute\n @param   pValue - pointer to data to be written\n @param   pLen - length of data\n @param   offset - offset of the first octet to be written\n @param   method - type of write message\n\n @return  SUCCESS: Write was successfully.<BR>\n          blePending: A response is pending for this client.<BR>\n          Error, otherwise: ref ATT_ERR_CODE_DEFINES.<BR>"]
+// pub type pfnGATTWriteAttrCB_t = ::core::option::Option<
+//     unsafe extern "C" fn(
+//         connHandle: u16,
+//         pAttr: *mut gattAttribute_t,
+//         pValue: *mut u8,
+//         len: u16,
+//         offset: u16,
+//         method: u8,
+//     ) -> u8,
+// >;
+// #[doc = " @brief   Callback function prototype to authorize a Read or Write operation\n          on a given attribute.\n\n @param   connHandle - connection request was received on\n @param   pAttr - pointer to attribute\n @param   opcode - request opcode (ATT_READ_REQ or ATT_WRITE_REQ)\n\n @return  SUCCESS: Operation authorized.<BR>\n          ATT_ERR_INSUFFICIENT_AUTHOR: Authorization required.<BR>"]
+// pub type pfnGATTAuthorizeAttrCB_t =
+//     ::core::option::Option<unsafe extern "C" fn(connHandle: u16, pAttr: *mut gattAttribute_t, opcode: u8) -> bStatus_t>;
+// #[doc = " GATT Structure for Client Characteristic Configuration."]
+// #[repr(C)]
+// #[derive(Debug, Copy, Clone)]
+// pub struct gattCharCfg_t {
+//     #[doc = "!< Client connection handle"]
+//     pub connHandle: u16,
+//     #[doc = "!< Characteristic configuration value for this client"]
+//     pub value: u8,
+// }
+// #[allow(clippy::unnecessary_operation, clippy::identity_op)]
+// const _: () = {
+//     ["Size of gattCharCfg_t"][::core::mem::size_of::<gattCharCfg_t>() - 4usize];
+//     ["Alignment of gattCharCfg_t"][::core::mem::align_of::<gattCharCfg_t>() - 2usize];
+//     ["Offset of field: gattCharCfg_t::connHandle"][::core::mem::offset_of!(gattCharCfg_t, connHandle) - 0usize];
+//     ["Offset of field: gattCharCfg_t::value"][::core::mem::offset_of!(gattCharCfg_t, value) - 2usize];
+// };
+// #[doc = " GATT Structure for service callback functions - must be setup by the application\n and used when GATTServApp_RegisterService() is called."]
+// #[repr(C)]
+// #[derive(Debug, Copy, Clone)]
+// pub struct gattServiceCBs_t {
+//     #[doc = "!< Read callback function pointer"]
+//     pub pfnReadAttrCB: pfnGATTReadAttrCB_t,
+//     #[doc = "!< Write callback function pointer"]
+//     pub pfnWriteAttrCB: pfnGATTWriteAttrCB_t,
+//     #[doc = "!< Authorization callback function pointer"]
+//     pub pfnAuthorizeAttrCB: pfnGATTAuthorizeAttrCB_t,
+// }
+// #[allow(clippy::unnecessary_operation, clippy::identity_op)]
+// const _: () = {
+//     ["Size of gattServiceCBs_t"][::core::mem::size_of::<gattServiceCBs_t>() - 24usize];
+//     ["Alignment of gattServiceCBs_t"][::core::mem::align_of::<gattServiceCBs_t>() - 8usize];
+//     ["Offset of field: gattServiceCBs_t::pfnReadAttrCB"]
+//         [::core::mem::offset_of!(gattServiceCBs_t, pfnReadAttrCB) - 0usize];
+//     ["Offset of field: gattServiceCBs_t::pfnWriteAttrCB"]
+//         [::core::mem::offset_of!(gattServiceCBs_t, pfnWriteAttrCB) - 8usize];
+//     ["Offset of field: gattServiceCBs_t::pfnAuthorizeAttrCB"]
+//         [::core::mem::offset_of!(gattServiceCBs_t, pfnAuthorizeAttrCB) - 16usize];
+// };
+// #[doc = "gap**************************************/\n/**\n Connection parameters for the peripheral device.  These numbers are used\n to compare against connection events and request connection parameter\n updates with the central."]
+// #[repr(C)]
+// #[derive(Debug, Copy, Clone)]
+// pub struct gapPeriConnectParams_t {
+//     #[doc = "!< Minimum value for the connection event (interval. 0x0006 - 0x0C80 * 1.25ms)"]
+//     pub intervalMin: u16,
+//     #[doc = "!< Maximum value for the connection event (interval. 0x0006 - 0x0C80 * 1.25ms)"]
+//     pub intervalMax: u16,
+//     #[doc = "!< Number of LL latency connection events (0x0000 - 0x03e8)"]
+//     pub latency: u16,
+//     #[doc = "!< Connection Timeout (0x000A - 0x0C80 * 10ms)"]
+//     pub timeout: u16,
+// }
+// #[allow(clippy::unnecessary_operation, clippy::identity_op)]
+// const _: () = {
+//     ["Size of gapPeriConnectParams_t"][::core::mem::size_of::<gapPeriConnectParams_t>() - 8usize];
+//     ["Alignment of gapPeriConnectParams_t"][::core::mem::align_of::<gapPeriConnectParams_t>() - 2usize];
+//     ["Offset of field: gapPeriConnectParams_t::intervalMin"]
+//         [::core::mem::offset_of!(gapPeriConnectParams_t, intervalMin) - 0usize];
+//     ["Offset of field: gapPeriConnectParams_t::intervalMax"]
+//         [::core::mem::offset_of!(gapPeriConnectParams_t, intervalMax) - 2usize];
+//     ["Offset of field: gapPeriConnectParams_t::latency"]
+//         [::core::mem::offset_of!(gapPeriConnectParams_t, latency) - 4usize];
+//     ["Offset of field: gapPeriConnectParams_t::timeout"]
+//         [::core::mem::offset_of!(gapPeriConnectParams_t, timeout) - 6usize];
+// };
+// #[doc = " GAP event header format."]
+// #[repr(C)]
+// #[derive(Debug, Copy, Clone)]
+// pub struct gapEventHdr_t {
+//     #[doc = "!< GAP_MSG_EVENT and status"]
+//     pub hdr: tmos_event_hdr_t,
+//     #[doc = "!< GAP type of command. Ref: @ref GAP_MSG_EVENT_DEFINES"]
+//     pub opcode: u8,
+// }
+// #[allow(clippy::unnecessary_operation, clippy::identity_op)]
+// const _: () = {
+//     ["Size of gapEventHdr_t"][::core::mem::size_of::<gapEventHdr_t>() - 3usize];
+//     ["Alignment of gapEventHdr_t"][::core::mem::align_of::<gapEventHdr_t>() - 1usize];
+//     ["Offset of field: gapEventHdr_t::hdr"][::core::mem::offset_of!(gapEventHdr_t, hdr) - 0usize];
+//     ["Offset of field: gapEventHdr_t::opcode"][::core::mem::offset_of!(gapEventHdr_t, opcode) - 2usize];
+// };
+// #[doc = " GAP_DEVICE_INIT_DONE_EVENT message format.  This message is sent to the\n app when the Device Initialization is done [initiated by calling\n GAP_DeviceInit()]."]
+// #[repr(C)]
+// #[derive(Debug, Copy, Clone)]
+// pub struct gapDeviceInitDoneEvent_t {
+//     #[doc = "!< GAP_MSG_EVENT and status"]
+//     pub hdr: tmos_event_hdr_t,
+//     #[doc = "!< GAP_DEVICE_INIT_DONE_EVENT"]
+//     pub opcode: u8,
+//     #[doc = "!< Device's BD_ADDR"]
+//     pub devAddr: [u8; 6usize],
+//     #[doc = "!< HC_LE_Data_Packet_Length"]
+//     pub dataPktLen: u16,
+//     #[doc = "!< HC_Total_Num_LE_Data_Packets"]
+//     pub numDataPkts: u8,
+// }
+// #[allow(clippy::unnecessary_operation, clippy::identity_op)]
+// const _: () = {
+//     ["Size of gapDeviceInitDoneEvent_t"][::core::mem::size_of::<gapDeviceInitDoneEvent_t>() - 14usize];
+//     ["Alignment of gapDeviceInitDoneEvent_t"][::core::mem::align_of::<gapDeviceInitDoneEvent_t>() - 2usize];
+//     ["Offset of field: gapDeviceInitDoneEvent_t::hdr"][::core::mem::offset_of!(gapDeviceInitDoneEvent_t, hdr) - 0usize];
+//     ["Offset of field: gapDeviceInitDoneEvent_t::opcode"]
+//         [::core::mem::offset_of!(gapDeviceInitDoneEvent_t, opcode) - 2usize];
+//     ["Offset of field: gapDeviceInitDoneEvent_t::devAddr"]
+//         [::core::mem::offset_of!(gapDeviceInitDoneEvent_t, devAddr) - 3usize];
+//     ["Offset of field: gapDeviceInitDoneEvent_t::dataPktLen"]
+//         [::core::mem::offset_of!(gapDeviceInitDoneEvent_t, dataPktLen) - 10usize];
+//     ["Offset of field: gapDeviceInitDoneEvent_t::numDataPkts"]
+//         [::core::mem::offset_of!(gapDeviceInitDoneEvent_t, numDataPkts) - 12usize];
+// };
+// #[doc = " GAP_SIGNATURE_UPDATED_EVENT message format.  This message is sent to the\n app when the signature counter has changed.  This message is to inform the\n application in case it wants to save it to be restored on reboot or reconnect.\n This message is sent to update a connection's signature counter and to update\n this device's signature counter.  If devAddr == BD_ADDR, then this message pertains\n to this device."]
+// #[repr(C)]
+// #[derive(Debug, Copy, Clone)]
+// pub struct gapSignUpdateEvent_t {
+//     #[doc = "!< GAP_MSG_EVENT and status"]
+//     pub hdr: tmos_event_hdr_t,
+//     #[doc = "!< GAP_SIGNATURE_UPDATED_EVENT"]
+//     pub opcode: u8,
+//     #[doc = "!< Device's address type for devAddr"]
+//     pub addrType: u8,
+//     #[doc = "!< Device's BD_ADDR, could be own address"]
+//     pub devAddr: [u8; 6usize],
+//     #[doc = "!< new Signed Counter"]
+//     pub signCounter: u32,
+// }
+// #[allow(clippy::unnecessary_operation, clippy::identity_op)]
+// const _: () = {
+//     ["Size of gapSignUpdateEvent_t"][::core::mem::size_of::<gapSignUpdateEvent_t>() - 16usize];
+//     ["Alignment of gapSignUpdateEvent_t"][::core::mem::align_of::<gapSignUpdateEvent_t>() - 4usize];
+//     ["Offset of field: gapSignUpdateEvent_t::hdr"][::core::mem::offset_of!(gapSignUpdateEvent_t, hdr) - 0usize];
+//     ["Offset of field: gapSignUpdateEvent_t::opcode"][::core::mem::offset_of!(gapSignUpdateEvent_t, opcode) - 2usize];
+//     ["Offset of field: gapSignUpdateEvent_t::addrType"]
+//         [::core::mem::offset_of!(gapSignUpdateEvent_t, addrType) - 3usize];
+//     ["Offset of field: gapSignUpdateEvent_t::devAddr"][::core::mem::offset_of!(gapSignUpdateEvent_t, devAddr) - 4usize];
+//     ["Offset of field: gapSignUpdateEvent_t::signCounter"]
+//         [::core::mem::offset_of!(gapSignUpdateEvent_t, signCounter) - 12usize];
+// };
+// #[doc = " GAP_DEVICE_INFO_EVENT message format.  This message is sent to the\n app during a Device Discovery Request, when a new advertisement or scan\n response is received."]
+// #[repr(C)]
+// #[derive(Debug, Copy, Clone)]
+// pub struct gapDeviceInfoEvent_t {
+//     #[doc = "!< GAP_MSG_EVENT and status"]
+//     pub hdr: tmos_event_hdr_t,
+//     #[doc = "!< GAP_DEVICE_INFO_EVENT"]
+//     pub opcode: u8,
+//     #[doc = "!< Advertisement Type: @ref GAP_ADVERTISEMENT_REPORT_TYPE_DEFINES"]
+//     pub eventType: u8,
+//     #[doc = "!< address type: @ref GAP_ADDR_TYPE_DEFINES"]
+//     pub addrType: u8,
+//     #[doc = "!< Address of the advertisement or SCAN_RSP"]
+//     pub addr: [u8; 6usize],
+//     #[doc = "!< Advertisement or SCAN_RSP RSSI"]
+//     pub rssi: i8,
+//     #[doc = "!< Length (in bytes) of the data field (evtData)"]
+//     pub dataLen: u8,
+//     #[doc = "!< Data field of advertisement or SCAN_RSP"]
+//     pub pEvtData: *mut u8,
+// }
+// #[allow(clippy::unnecessary_operation, clippy::identity_op)]
+// const _: () = {
+//     ["Size of gapDeviceInfoEvent_t"][::core::mem::size_of::<gapDeviceInfoEvent_t>() - 24usize];
+//     ["Alignment of gapDeviceInfoEvent_t"][::core::mem::align_of::<gapDeviceInfoEvent_t>() - 8usize];
+//     ["Offset of field: gapDeviceInfoEvent_t::hdr"][::core::mem::offset_of!(gapDeviceInfoEvent_t, hdr) - 0usize];
+//     ["Offset of field: gapDeviceInfoEvent_t::opcode"][::core::mem::offset_of!(gapDeviceInfoEvent_t, opcode) - 2usize];
+//     ["Offset of field: gapDeviceInfoEvent_t::eventType"]
+//         [::core::mem::offset_of!(gapDeviceInfoEvent_t, eventType) - 3usize];
+//     ["Offset of field: gapDeviceInfoEvent_t::addrType"]
+//         [::core::mem::offset_of!(gapDeviceInfoEvent_t, addrType) - 4usize];
+//     ["Offset of field: gapDeviceInfoEvent_t::addr"][::core::mem::offset_of!(gapDeviceInfoEvent_t, addr) - 5usize];
+//     ["Offset of field: gapDeviceInfoEvent_t::rssi"][::core::mem::offset_of!(gapDeviceInfoEvent_t, rssi) - 11usize];
+//     ["Offset of field: gapDeviceInfoEvent_t::dataLen"]
+//         [::core::mem::offset_of!(gapDeviceInfoEvent_t, dataLen) - 12usize];
+//     ["Offset of field: gapDeviceInfoEvent_t::pEvtData"]
+//         [::core::mem::offset_of!(gapDeviceInfoEvent_t, pEvtData) - 16usize];
+// };
+// #[doc = " GAP_DIRECT_DEVICE_INFO_EVENT message format.  This message is sent to the\n app during a Device Discovery Request, when a new advertisement or scan\n response is received."]
+// #[repr(C)]
+// #[derive(Debug, Copy, Clone)]
+// pub struct gapDirectDeviceInfoEvent_t {
+//     #[doc = "!< GAP_MSG_EVENT and status"]
+//     pub hdr: tmos_event_hdr_t,
+//     #[doc = "!< GAP_DIRECT_DEVICE_INFO_EVENT"]
+//     pub opcode: u8,
+//     #[doc = "!< Advertisement Type: @ref GAP_ADVERTISEMENT_REPORT_TYPE_DEFINES"]
+//     pub eventType: u8,
+//     #[doc = "!< address type: @ref GAP_ADDR_TYPE_DEFINES"]
+//     pub addrType: u8,
+//     #[doc = "!< Address of the advertisement or SCAN_RSP"]
+//     pub addr: [u8; 6usize],
+//     #[doc = "!< public or random address type"]
+//     pub directAddrType: u8,
+//     #[doc = "!< device address"]
+//     pub directAddr: [u8; 6usize],
+//     #[doc = "!< Advertisement or SCAN_RSP RSSI"]
+//     pub rssi: i8,
+// }
+// #[allow(clippy::unnecessary_operation, clippy::identity_op)]
+// const _: () = {
+//     ["Size of gapDirectDeviceInfoEvent_t"][::core::mem::size_of::<gapDirectDeviceInfoEvent_t>() - 19usize];
+//     ["Alignment of gapDirectDeviceInfoEvent_t"][::core::mem::align_of::<gapDirectDeviceInfoEvent_t>() - 1usize];
+//     ["Offset of field: gapDirectDeviceInfoEvent_t::hdr"]
+//         [::core::mem::offset_of!(gapDirectDeviceInfoEvent_t, hdr) - 0usize];
+//     ["Offset of field: gapDirectDeviceInfoEvent_t::opcode"]
+//         [::core::mem::offset_of!(gapDirectDeviceInfoEvent_t, opcode) - 2usize];
+//     ["Offset of field: gapDirectDeviceInfoEvent_t::eventType"]
+//         [::core::mem::offset_of!(gapDirectDeviceInfoEvent_t, eventType) - 3usize];
+//     ["Offset of field: gapDirectDeviceInfoEvent_t::addrType"]
+//         [::core::mem::offset_of!(gapDirectDeviceInfoEvent_t, addrType) - 4usize];
+//     ["Offset of field: gapDirectDeviceInfoEvent_t::addr"]
+//         [::core::mem::offset_of!(gapDirectDeviceInfoEvent_t, addr) - 5usize];
+//     ["Offset of field: gapDirectDeviceInfoEvent_t::directAddrType"]
+//         [::core::mem::offset_of!(gapDirectDeviceInfoEvent_t, directAddrType) - 11usize];
+//     ["Offset of field: gapDirectDeviceInfoEvent_t::directAddr"]
+//         [::core::mem::offset_of!(gapDirectDeviceInfoEvent_t, directAddr) - 12usize];
+//     ["Offset of field: gapDirectDeviceInfoEvent_t::rssi"]
+//         [::core::mem::offset_of!(gapDirectDeviceInfoEvent_t, rssi) - 18usize];
+// };
+// #[doc = " GAP_EXT_ADV_DEVICE_INFO_EVENT message format.  This message is sent to the\n app during a Device Discovery Request, when a new advertisement or scan\n response is received."]
+// #[repr(C)]
+// #[derive(Debug, Copy, Clone)]
+// pub struct gapExtAdvDeviceInfoEvent_t {
+//     #[doc = "!< GAP_MSG_EVENT and status"]
+//     pub hdr: tmos_event_hdr_t,
+//     #[doc = "!< GAP_EXT_ADV_DEVICE_INFO_EVENT"]
+//     pub opcode: u8,
+//     #[doc = "!< Advertisement Type: @ref GAP_ADVERTISEMENT_REPORT_TYPE_DEFINES"]
+//     pub eventType: u8,
+//     #[doc = "!< address type: @ref GAP_ADDR_TYPE_DEFINES"]
+//     pub addrType: u8,
+//     #[doc = "!< Address of the advertisement or SCAN_RSP"]
+//     pub addr: [u8; 6usize],
+//     #[doc = "!< Advertiser PHY on the primary advertising channel"]
+//     pub primaryPHY: u8,
+//     #[doc = "!< Advertiser PHY on the secondary advertising channel"]
+//     pub secondaryPHY: u8,
+//     #[doc = "!< Value of the Advertising SID subfield in the ADI field of the PDU"]
+//     pub advertisingSID: u8,
+//     #[doc = "!< Advertisement or SCAN_RSP power"]
+//     pub txPower: i8,
+//     #[doc = "!< Advertisement or SCAN_RSP RSSI"]
+//     pub rssi: i8,
+//     #[doc = "!< the interval of periodic advertising"]
+//     pub periodicAdvInterval: u16,
+//     #[doc = "!< public or random address type"]
+//     pub directAddressType: u8,
+//     #[doc = "!< device address"]
+//     pub directAddress: [u8; 6usize],
+//     #[doc = "!< Length (in bytes) of the data field (evtData)"]
+//     pub dataLen: u8,
+//     #[doc = "!< Data field of advertisement or SCAN_RSP"]
+//     pub pEvtData: *mut u8,
+// }
+// #[allow(clippy::unnecessary_operation, clippy::identity_op)]
+// const _: () = {
+//     ["Size of gapExtAdvDeviceInfoEvent_t"][::core::mem::size_of::<gapExtAdvDeviceInfoEvent_t>() - 40usize];
+//     ["Alignment of gapExtAdvDeviceInfoEvent_t"][::core::mem::align_of::<gapExtAdvDeviceInfoEvent_t>() - 8usize];
+//     ["Offset of field: gapExtAdvDeviceInfoEvent_t::hdr"]
+//         [::core::mem::offset_of!(gapExtAdvDeviceInfoEvent_t, hdr) - 0usize];
+//     ["Offset of field: gapExtAdvDeviceInfoEvent_t::opcode"]
+//         [::core::mem::offset_of!(gapExtAdvDeviceInfoEvent_t, opcode) - 2usize];
+//     ["Offset of field: gapExtAdvDeviceInfoEvent_t::eventType"]
+//         [::core::mem::offset_of!(gapExtAdvDeviceInfoEvent_t, eventType) - 3usize];
+//     ["Offset of field: gapExtAdvDeviceInfoEvent_t::addrType"]
+//         [::core::mem::offset_of!(gapExtAdvDeviceInfoEvent_t, addrType) - 4usize];
+//     ["Offset of field: gapExtAdvDeviceInfoEvent_t::addr"]
+//         [::core::mem::offset_of!(gapExtAdvDeviceInfoEvent_t, addr) - 5usize];
+//     ["Offset of field: gapExtAdvDeviceInfoEvent_t::primaryPHY"]
+//         [::core::mem::offset_of!(gapExtAdvDeviceInfoEvent_t, primaryPHY) - 11usize];
+//     ["Offset of field: gapExtAdvDeviceInfoEvent_t::secondaryPHY"]
+//         [::core::mem::offset_of!(gapExtAdvDeviceInfoEvent_t, secondaryPHY) - 12usize];
+//     ["Offset of field: gapExtAdvDeviceInfoEvent_t::advertisingSID"]
+//         [::core::mem::offset_of!(gapExtAdvDeviceInfoEvent_t, advertisingSID) - 13usize];
+//     ["Offset of field: gapExtAdvDeviceInfoEvent_t::txPower"]
+//         [::core::mem::offset_of!(gapExtAdvDeviceInfoEvent_t, txPower) - 14usize];
+//     ["Offset of field: gapExtAdvDeviceInfoEvent_t::rssi"]
+//         [::core::mem::offset_of!(gapExtAdvDeviceInfoEvent_t, rssi) - 15usize];
+//     ["Offset of field: gapExtAdvDeviceInfoEvent_t::periodicAdvInterval"]
+//         [::core::mem::offset_of!(gapExtAdvDeviceInfoEvent_t, periodicAdvInterval) - 16usize];
+//     ["Offset of field: gapExtAdvDeviceInfoEvent_t::directAddressType"]
+//         [::core::mem::offset_of!(gapExtAdvDeviceInfoEvent_t, directAddressType) - 18usize];
+//     ["Offset of field: gapExtAdvDeviceInfoEvent_t::directAddress"]
+//         [::core::mem::offset_of!(gapExtAdvDeviceInfoEvent_t, directAddress) - 19usize];
+//     ["Offset of field: gapExtAdvDeviceInfoEvent_t::dataLen"]
+//         [::core::mem::offset_of!(gapExtAdvDeviceInfoEvent_t, dataLen) - 25usize];
+//     ["Offset of field: gapExtAdvDeviceInfoEvent_t::pEvtData"]
+//         [::core::mem::offset_of!(gapExtAdvDeviceInfoEvent_t, pEvtData) - 32usize];
+// };
+// #[doc = " Type of device discovery (Scan) to perform."]
+// #[repr(C)]
+// #[derive(Debug, Copy, Clone)]
+// pub struct gapDevDiscReq_t {
+//     #[doc = "!< Requesting App's Task ID, used to return results"]
+//     pub taskID: u8,
+//     #[doc = "!< Discovery Mode: @ref GAP_DEVDISC_MODE_DEFINES"]
+//     pub mode: u8,
+//     #[doc = "!< TRUE for active scanning"]
+//     pub activeScan: u8,
+//     #[doc = "!< TRUE to only allow advertisements from devices in the white list."]
+//     pub whiteList: u8,
+// }
+// #[allow(clippy::unnecessary_operation, clippy::identity_op)]
+// const _: () = {
+//     ["Size of gapDevDiscReq_t"][::core::mem::size_of::<gapDevDiscReq_t>() - 4usize];
+//     ["Alignment of gapDevDiscReq_t"][::core::mem::align_of::<gapDevDiscReq_t>() - 1usize];
+//     ["Offset of field: gapDevDiscReq_t::taskID"][::core::mem::offset_of!(gapDevDiscReq_t, taskID) - 0usize];
+//     ["Offset of field: gapDevDiscReq_t::mode"][::core::mem::offset_of!(gapDevDiscReq_t, mode) - 1usize];
+//     ["Offset of field: gapDevDiscReq_t::activeScan"][::core::mem::offset_of!(gapDevDiscReq_t, activeScan) - 2usize];
+//     ["Offset of field: gapDevDiscReq_t::whiteList"][::core::mem::offset_of!(gapDevDiscReq_t, whiteList) - 3usize];
+// };
+// #[doc = " Type of device."]
+// #[repr(C)]
+// #[derive(Debug, Copy, Clone)]
+// pub struct gapDevRec_t {
+//     #[doc = "!< Indicates advertising event type used by the advertiser: @ref GAP_ADVERTISEMENT_REPORT_TYPE_DEFINES"]
+//     pub eventType: u8,
+//     #[doc = "!< Address Type: @ref GAP_ADDR_TYPE_DEFINES"]
+//     pub addrType: u8,
+//     #[doc = "!< Device's Address"]
+//     pub addr: [u8; 6usize],
+// }
+// #[allow(clippy::unnecessary_operation, clippy::identity_op)]
+// const _: () = {
+//     ["Size of gapDevRec_t"][::core::mem::size_of::<gapDevRec_t>() - 8usize];
+//     ["Alignment of gapDevRec_t"][::core::mem::align_of::<gapDevRec_t>() - 1usize];
+//     ["Offset of field: gapDevRec_t::eventType"][::core::mem::offset_of!(gapDevRec_t, eventType) - 0usize];
+//     ["Offset of field: gapDevRec_t::addrType"][::core::mem::offset_of!(gapDevRec_t, addrType) - 1usize];
+//     ["Offset of field: gapDevRec_t::addr"][::core::mem::offset_of!(gapDevRec_t, addr) - 2usize];
+// };
+// #[doc = " GAP_DEVICE_DISCOVERY_EVENT message format. This message is sent to the\n Application after a scan is performed."]
+// #[repr(C)]
+// #[derive(Debug, Copy, Clone)]
+// pub struct gapDevDiscEvent_t {
+//     #[doc = "!< GAP_MSG_EVENT and status"]
+//     pub hdr: tmos_event_hdr_t,
+//     #[doc = "!< GAP_DEVICE_DISCOVERY_EVENT"]
+//     pub opcode: u8,
+//     #[doc = "!< Number of devices found during scan"]
+//     pub numDevs: u8,
+//     #[doc = "!< array of device records"]
+//     pub pDevList: *mut gapDevRec_t,
+// }
+// #[allow(clippy::unnecessary_operation, clippy::identity_op)]
+// const _: () = {
+//     ["Size of gapDevDiscEvent_t"][::core::mem::size_of::<gapDevDiscEvent_t>() - 16usize];
+//     ["Alignment of gapDevDiscEvent_t"][::core::mem::align_of::<gapDevDiscEvent_t>() - 8usize];
+//     ["Offset of field: gapDevDiscEvent_t::hdr"][::core::mem::offset_of!(gapDevDiscEvent_t, hdr) - 0usize];
+//     ["Offset of field: gapDevDiscEvent_t::opcode"][::core::mem::offset_of!(gapDevDiscEvent_t, opcode) - 2usize];
+//     ["Offset of field: gapDevDiscEvent_t::numDevs"][::core::mem::offset_of!(gapDevDiscEvent_t, numDevs) - 3usize];
+//     ["Offset of field: gapDevDiscEvent_t::pDevList"][::core::mem::offset_of!(gapDevDiscEvent_t, pDevList) - 8usize];
+// };
+// #[doc = " GAP_MAKE_DISCOVERABLE_DONE_EVENT message format.  This message is sent to the\n app when the Advertise config is complete."]
+// #[repr(C)]
+// #[derive(Debug, Copy, Clone)]
+// pub struct gapMakeDiscoverableRspEvent_t {
+//     #[doc = "!< GAP_MSG_EVENT and status"]
+//     pub hdr: tmos_event_hdr_t,
+//     #[doc = "!< GAP_MAKE_DISCOVERABLE_DONE_EVENT"]
+//     pub opcode: u8,
+// }
+// #[allow(clippy::unnecessary_operation, clippy::identity_op)]
+// const _: () = {
+//     ["Size of gapMakeDiscoverableRspEvent_t"][::core::mem::size_of::<gapMakeDiscoverableRspEvent_t>() - 3usize];
+//     ["Alignment of gapMakeDiscoverableRspEvent_t"][::core::mem::align_of::<gapMakeDiscoverableRspEvent_t>() - 1usize];
+//     ["Offset of field: gapMakeDiscoverableRspEvent_t::hdr"]
+//         [::core::mem::offset_of!(gapMakeDiscoverableRspEvent_t, hdr) - 0usize];
+//     ["Offset of field: gapMakeDiscoverableRspEvent_t::opcode"]
+//         [::core::mem::offset_of!(gapMakeDiscoverableRspEvent_t, opcode) - 2usize];
+// };
+// #[doc = " GAP_END_DISCOVERABLE_DONE_EVENT message format.  This message is sent to the\n app when the Advertising has stopped."]
+// #[repr(C)]
+// #[derive(Debug, Copy, Clone)]
+// pub struct gapEndDiscoverableRspEvent_t {
+//     #[doc = "!< GAP_MSG_EVENT and status"]
+//     pub hdr: tmos_event_hdr_t,
+//     #[doc = "!< GAP_END_DISCOVERABLE_DONE_EVENT"]
+//     pub opcode: u8,
+// }
+// #[allow(clippy::unnecessary_operation, clippy::identity_op)]
+// const _: () = {
+//     ["Size of gapEndDiscoverableRspEvent_t"][::core::mem::size_of::<gapEndDiscoverableRspEvent_t>() - 3usize];
+//     ["Alignment of gapEndDiscoverableRspEvent_t"][::core::mem::align_of::<gapEndDiscoverableRspEvent_t>() - 1usize];
+//     ["Offset of field: gapEndDiscoverableRspEvent_t::hdr"]
+//         [::core::mem::offset_of!(gapEndDiscoverableRspEvent_t, hdr) - 0usize];
+//     ["Offset of field: gapEndDiscoverableRspEvent_t::opcode"]
+//         [::core::mem::offset_of!(gapEndDiscoverableRspEvent_t, opcode) - 2usize];
+// };
+// #[doc = " GAP_PERIODIC_ADVERTISING_DONE_EVENT message format.  This message is sent to the\n app when the Periodic Advertising config is complete."]
+// #[repr(C)]
+// #[derive(Debug, Copy, Clone)]
+// pub struct gapMakePeriodicRspEvent_t {
+//     #[doc = "!< GAP_MSG_EVENT and status"]
+//     pub hdr: tmos_event_hdr_t,
+//     #[doc = "!< GAP_PERIODIC_ADVERTISING_DONE_EVENT"]
+//     pub opcode: u8,
+// }
+// #[allow(clippy::unnecessary_operation, clippy::identity_op)]
+// const _: () = {
+//     ["Size of gapMakePeriodicRspEvent_t"][::core::mem::size_of::<gapMakePeriodicRspEvent_t>() - 3usize];
+//     ["Alignment of gapMakePeriodicRspEvent_t"][::core::mem::align_of::<gapMakePeriodicRspEvent_t>() - 1usize];
+//     ["Offset of field: gapMakePeriodicRspEvent_t::hdr"]
+//         [::core::mem::offset_of!(gapMakePeriodicRspEvent_t, hdr) - 0usize];
+//     ["Offset of field: gapMakePeriodicRspEvent_t::opcode"]
+//         [::core::mem::offset_of!(gapMakePeriodicRspEvent_t, opcode) - 2usize];
+// };
+// #[doc = " GAP_END_PERIODIC_ADV_DONE_EVENT message format.  This message is sent to the\n app when the Periodic Advertising disable is complete."]
+// #[repr(C)]
+// #[derive(Debug, Copy, Clone)]
+// pub struct gapEndPeriodicRspEvent_t {
+//     #[doc = "!< GAP_MSG_EVENT and status"]
+//     pub hdr: tmos_event_hdr_t,
+//     #[doc = "!< GAP_END_PERIODIC_ADV_DONE_EVENT"]
+//     pub opcode: u8,
+// }
+// #[allow(clippy::unnecessary_operation, clippy::identity_op)]
+// const _: () = {
+//     ["Size of gapEndPeriodicRspEvent_t"][::core::mem::size_of::<gapEndPeriodicRspEvent_t>() - 3usize];
+//     ["Alignment of gapEndPeriodicRspEvent_t"][::core::mem::align_of::<gapEndPeriodicRspEvent_t>() - 1usize];
+//     ["Offset of field: gapEndPeriodicRspEvent_t::hdr"][::core::mem::offset_of!(gapEndPeriodicRspEvent_t, hdr) - 0usize];
+//     ["Offset of field: gapEndPeriodicRspEvent_t::opcode"]
+//         [::core::mem::offset_of!(gapEndPeriodicRspEvent_t, opcode) - 2usize];
+// };
+// #[doc = " GAP_SYNC_ESTABLISHED_EVENT message format.  This message is sent to the\n app when the Periodic Advertising Sync Establish is complete."]
+// #[repr(C)]
+// #[derive(Debug, Copy, Clone)]
+// pub struct gapSyncEstablishedEvent_t {
+//     #[doc = "!< GAP_MSG_EVENT and status"]
+//     pub hdr: tmos_event_hdr_t,
+//     #[doc = "!< GAP_SYNC_ESTABLISHED_EVENT"]
+//     pub opcode: u8,
+//     #[doc = "!< Periodic advertising sync status"]
+//     pub status: u8,
+//     #[doc = "!< Identifying the periodic advertising train"]
+//     pub syncHandle: u16,
+//     #[doc = "!< Value of the Advertising SID subfield in the ADI field of the PDU"]
+//     pub advertisingSID: u8,
+//     #[doc = "!< Device address type: @ref GAP_ADDR_TYPE_DEFINES"]
+//     pub devAddrType: u8,
+//     #[doc = "!< Device address of sync"]
+//     pub devAddr: [u8; 6usize],
+//     #[doc = "!< Advertiser PHY"]
+//     pub advertisingPHY: u8,
+//     #[doc = "!< Periodic advertising interval"]
+//     pub periodicInterval: u16,
+//     #[doc = "!< Clock Accuracy"]
+//     pub clockAccuracy: u8,
+// }
+// #[allow(clippy::unnecessary_operation, clippy::identity_op)]
+// const _: () = {
+//     ["Size of gapSyncEstablishedEvent_t"][::core::mem::size_of::<gapSyncEstablishedEvent_t>() - 20usize];
+//     ["Alignment of gapSyncEstablishedEvent_t"][::core::mem::align_of::<gapSyncEstablishedEvent_t>() - 2usize];
+//     ["Offset of field: gapSyncEstablishedEvent_t::hdr"]
+//         [::core::mem::offset_of!(gapSyncEstablishedEvent_t, hdr) - 0usize];
+//     ["Offset of field: gapSyncEstablishedEvent_t::opcode"]
+//         [::core::mem::offset_of!(gapSyncEstablishedEvent_t, opcode) - 2usize];
+//     ["Offset of field: gapSyncEstablishedEvent_t::status"]
+//         [::core::mem::offset_of!(gapSyncEstablishedEvent_t, status) - 3usize];
+//     ["Offset of field: gapSyncEstablishedEvent_t::syncHandle"]
+//         [::core::mem::offset_of!(gapSyncEstablishedEvent_t, syncHandle) - 4usize];
+//     ["Offset of field: gapSyncEstablishedEvent_t::advertisingSID"]
+//         [::core::mem::offset_of!(gapSyncEstablishedEvent_t, advertisingSID) - 6usize];
+//     ["Offset of field: gapSyncEstablishedEvent_t::devAddrType"]
+//         [::core::mem::offset_of!(gapSyncEstablishedEvent_t, devAddrType) - 7usize];
+//     ["Offset of field: gapSyncEstablishedEvent_t::devAddr"]
+//         [::core::mem::offset_of!(gapSyncEstablishedEvent_t, devAddr) - 8usize];
+//     ["Offset of field: gapSyncEstablishedEvent_t::advertisingPHY"]
+//         [::core::mem::offset_of!(gapSyncEstablishedEvent_t, advertisingPHY) - 14usize];
+//     ["Offset of field: gapSyncEstablishedEvent_t::periodicInterval"]
+//         [::core::mem::offset_of!(gapSyncEstablishedEvent_t, periodicInterval) - 16usize];
+//     ["Offset of field: gapSyncEstablishedEvent_t::clockAccuracy"]
+//         [::core::mem::offset_of!(gapSyncEstablishedEvent_t, clockAccuracy) - 18usize];
+// };
+// #[doc = " GAP_PERIODIC_ADV_DEVICE_INFO_EVENT message format.  This message is sent to the\n app during Periodic Advertising Sync, when received a Periodic Advertising packet"]
+// #[repr(C)]
+// #[derive(Debug, Copy, Clone)]
+// pub struct gapPeriodicAdvDeviceInfoEvent_t {
+//     #[doc = "!< GAP_MSG_EVENT and status"]
+//     pub hdr: tmos_event_hdr_t,
+//     #[doc = "!< GAP_PERIODIC_ADV_DEVICE_INFO_EVENT"]
+//     pub opcode: u8,
+//     #[doc = "!< Identifying the periodic advertising train"]
+//     pub syncHandle: u16,
+//     #[doc = "!< Periodic advertising tx power,Units: dBm"]
+//     pub txPower: i8,
+//     #[doc = "!< Periodic advertising rssi,Units: dBm"]
+//     pub rssi: i8,
+//     pub unUsed: u8,
+//     #[doc = "!< Data complete"]
+//     pub dataStatus: u8,
+//     #[doc = "!< Length (in bytes) of the data field (evtData)"]
+//     pub dataLength: u8,
+//     #[doc = "!< Data field of periodic advertising data"]
+//     pub pEvtData: *mut u8,
+// }
+// #[allow(clippy::unnecessary_operation, clippy::identity_op)]
+// const _: () = {
+//     ["Size of gapPeriodicAdvDeviceInfoEvent_t"][::core::mem::size_of::<gapPeriodicAdvDeviceInfoEvent_t>() - 24usize];
+//     ["Alignment of gapPeriodicAdvDeviceInfoEvent_t"]
+//         [::core::mem::align_of::<gapPeriodicAdvDeviceInfoEvent_t>() - 8usize];
+//     ["Offset of field: gapPeriodicAdvDeviceInfoEvent_t::hdr"]
+//         [::core::mem::offset_of!(gapPeriodicAdvDeviceInfoEvent_t, hdr) - 0usize];
+//     ["Offset of field: gapPeriodicAdvDeviceInfoEvent_t::opcode"]
+//         [::core::mem::offset_of!(gapPeriodicAdvDeviceInfoEvent_t, opcode) - 2usize];
+//     ["Offset of field: gapPeriodicAdvDeviceInfoEvent_t::syncHandle"]
+//         [::core::mem::offset_of!(gapPeriodicAdvDeviceInfoEvent_t, syncHandle) - 4usize];
+//     ["Offset of field: gapPeriodicAdvDeviceInfoEvent_t::txPower"]
+//         [::core::mem::offset_of!(gapPeriodicAdvDeviceInfoEvent_t, txPower) - 6usize];
+//     ["Offset of field: gapPeriodicAdvDeviceInfoEvent_t::rssi"]
+//         [::core::mem::offset_of!(gapPeriodicAdvDeviceInfoEvent_t, rssi) - 7usize];
+//     ["Offset of field: gapPeriodicAdvDeviceInfoEvent_t::unUsed"]
+//         [::core::mem::offset_of!(gapPeriodicAdvDeviceInfoEvent_t, unUsed) - 8usize];
+//     ["Offset of field: gapPeriodicAdvDeviceInfoEvent_t::dataStatus"]
+//         [::core::mem::offset_of!(gapPeriodicAdvDeviceInfoEvent_t, dataStatus) - 9usize];
+//     ["Offset of field: gapPeriodicAdvDeviceInfoEvent_t::dataLength"]
+//         [::core::mem::offset_of!(gapPeriodicAdvDeviceInfoEvent_t, dataLength) - 10usize];
+//     ["Offset of field: gapPeriodicAdvDeviceInfoEvent_t::pEvtData"]
+//         [::core::mem::offset_of!(gapPeriodicAdvDeviceInfoEvent_t, pEvtData) - 16usize];
+// };
+// #[doc = " GAP_SYNC_LOST_EVENT message format.  This message is sent to the\n app when the Periodic Advertising Sync timeout period."]
+// #[repr(C)]
+// #[derive(Debug, Copy, Clone)]
+// pub struct gapSyncLostEvent_t {
+//     #[doc = "!< GAP_MSG_EVENT and status"]
+//     pub hdr: tmos_event_hdr_t,
+//     #[doc = "!< GAP_SYNC_LOST_EVENT"]
+//     pub opcode: u8,
+//     #[doc = "!< Identifying the periodic advertising train"]
+//     pub syncHandle: u16,
+// }
+// #[allow(clippy::unnecessary_operation, clippy::identity_op)]
+// const _: () = {
+//     ["Size of gapSyncLostEvent_t"][::core::mem::size_of::<gapSyncLostEvent_t>() - 6usize];
+//     ["Alignment of gapSyncLostEvent_t"][::core::mem::align_of::<gapSyncLostEvent_t>() - 2usize];
+//     ["Offset of field: gapSyncLostEvent_t::hdr"][::core::mem::offset_of!(gapSyncLostEvent_t, hdr) - 0usize];
+//     ["Offset of field: gapSyncLostEvent_t::opcode"][::core::mem::offset_of!(gapSyncLostEvent_t, opcode) - 2usize];
+//     ["Offset of field: gapSyncLostEvent_t::syncHandle"]
+//         [::core::mem::offset_of!(gapSyncLostEvent_t, syncHandle) - 4usize];
+// };
+// #[doc = " GAP_SCAN_REQUEST_EVENT message format.  This message is sent to the\n app when the advertiser receives a SCAN_REQ PDU or an AUX_SCAN_REQ PDU"]
+// #[repr(C)]
+// #[derive(Debug, Copy, Clone)]
+// pub struct gapScanReqReseiveEvent_t {
+//     #[doc = "!< GAP_MSG_EVENT and status"]
+//     pub hdr: tmos_event_hdr_t,
+//     #[doc = "!< GAP_SCAN_REQUEST_EVENT"]
+//     pub opcode: u8,
+//     #[doc = "!< identifying the periodic advertising train"]
+//     pub advHandle: u8,
+//     #[doc = "!< the type of the address"]
+//     pub scannerAddrType: u8,
+//     #[doc = "!< the address of scanner device"]
+//     pub scannerAddr: [u8; 6usize],
+// }
+// #[allow(clippy::unnecessary_operation, clippy::identity_op)]
+// const _: () = {
+//     ["Size of gapScanReqReseiveEvent_t"][::core::mem::size_of::<gapScanReqReseiveEvent_t>() - 11usize];
+//     ["Alignment of gapScanReqReseiveEvent_t"][::core::mem::align_of::<gapScanReqReseiveEvent_t>() - 1usize];
+//     ["Offset of field: gapScanReqReseiveEvent_t::hdr"][::core::mem::offset_of!(gapScanReqReseiveEvent_t, hdr) - 0usize];
+//     ["Offset of field: gapScanReqReseiveEvent_t::opcode"]
+//         [::core::mem::offset_of!(gapScanReqReseiveEvent_t, opcode) - 2usize];
+//     ["Offset of field: gapScanReqReseiveEvent_t::advHandle"]
+//         [::core::mem::offset_of!(gapScanReqReseiveEvent_t, advHandle) - 3usize];
+//     ["Offset of field: gapScanReqReseiveEvent_t::scannerAddrType"]
+//         [::core::mem::offset_of!(gapScanReqReseiveEvent_t, scannerAddrType) - 4usize];
+//     ["Offset of field: gapScanReqReseiveEvent_t::scannerAddr"]
+//         [::core::mem::offset_of!(gapScanReqReseiveEvent_t, scannerAddr) - 5usize];
+// };
+// #[doc = " GAP_CONNECTIONESS_CTE_DONE_EVENT message format.  This message is sent to the\n app when the Connectionless CTE Transmit config is complete."]
+// #[repr(C)]
+// #[derive(Debug, Copy, Clone)]
+// pub struct gapMakeConnectionlessCTERspEvent_t {
+//     #[doc = "!< GAP_MSG_EVENT and status"]
+//     pub hdr: tmos_event_hdr_t,
+//     #[doc = "!< GAP_CONNECTIONESS_CTE_DONE_EVENT"]
+//     pub opcode: u8,
+// }
+// #[allow(clippy::unnecessary_operation, clippy::identity_op)]
+// const _: () = {
+//     ["Size of gapMakeConnectionlessCTERspEvent_t"]
+//         [::core::mem::size_of::<gapMakeConnectionlessCTERspEvent_t>() - 3usize];
+//     ["Alignment of gapMakeConnectionlessCTERspEvent_t"]
+//         [::core::mem::align_of::<gapMakeConnectionlessCTERspEvent_t>() - 1usize];
+//     ["Offset of field: gapMakeConnectionlessCTERspEvent_t::hdr"]
+//         [::core::mem::offset_of!(gapMakeConnectionlessCTERspEvent_t, hdr) - 0usize];
+//     ["Offset of field: gapMakeConnectionlessCTERspEvent_t::opcode"]
+//         [::core::mem::offset_of!(gapMakeConnectionlessCTERspEvent_t, opcode) - 2usize];
+// };
+// #[doc = " GAP_END_PERIODIC_ADV_DONE_EVENT message format.  This message is sent to the\n app when the Periodic Advertising disable is complete."]
+// #[repr(C)]
+// #[derive(Debug, Copy, Clone)]
+// pub struct gapEndConnectionlessCTERspEvent_t {
+//     #[doc = "!< GAP_MSG_EVENT and status"]
+//     pub hdr: tmos_event_hdr_t,
+//     #[doc = "!< GAP_END_CONNECTIONESS_CTE_DONE_EVENT"]
+//     pub opcode: u8,
+// }
+// #[allow(clippy::unnecessary_operation, clippy::identity_op)]
+// const _: () = {
+//     ["Size of gapEndConnectionlessCTERspEvent_t"][::core::mem::size_of::<gapEndConnectionlessCTERspEvent_t>() - 3usize];
+//     ["Alignment of gapEndConnectionlessCTERspEvent_t"]
+//         [::core::mem::align_of::<gapEndConnectionlessCTERspEvent_t>() - 1usize];
+//     ["Offset of field: gapEndConnectionlessCTERspEvent_t::hdr"]
+//         [::core::mem::offset_of!(gapEndConnectionlessCTERspEvent_t, hdr) - 0usize];
+//     ["Offset of field: gapEndConnectionlessCTERspEvent_t::opcode"]
+//         [::core::mem::offset_of!(gapEndConnectionlessCTERspEvent_t, opcode) - 2usize];
+// };
+// #[doc = " GAP_ADV_DATA_UPDATE_DONE_EVENT message format.  This message is sent to the\n app when Advertising Data Update is complete."]
+// #[repr(C)]
+// #[derive(Debug, Copy, Clone)]
+// pub struct gapAdvDataUpdateEvent_t {
+//     #[doc = "!< GAP_MSG_EVENT and status"]
+//     pub hdr: tmos_event_hdr_t,
+//     #[doc = "!< GAP_ADV_DATA_UPDATE_DONE_EVENT"]
+//     pub opcode: u8,
+//     #[doc = "!< TRUE if advertising data, FALSE if SCAN_RSP"]
+//     pub adType: u8,
+// }
+// #[allow(clippy::unnecessary_operation, clippy::identity_op)]
+// const _: () = {
+//     ["Size of gapAdvDataUpdateEvent_t"][::core::mem::size_of::<gapAdvDataUpdateEvent_t>() - 4usize];
+//     ["Alignment of gapAdvDataUpdateEvent_t"][::core::mem::align_of::<gapAdvDataUpdateEvent_t>() - 1usize];
+//     ["Offset of field: gapAdvDataUpdateEvent_t::hdr"][::core::mem::offset_of!(gapAdvDataUpdateEvent_t, hdr) - 0usize];
+//     ["Offset of field: gapAdvDataUpdateEvent_t::opcode"]
+//         [::core::mem::offset_of!(gapAdvDataUpdateEvent_t, opcode) - 2usize];
+//     ["Offset of field: gapAdvDataUpdateEvent_t::adType"]
+//         [::core::mem::offset_of!(gapAdvDataUpdateEvent_t, adType) - 3usize];
+// };
+// #[doc = " GAP_LINK_ESTABLISHED_EVENT message format.  This message is sent to the app\n when the link request is complete.<BR>\n <BR>\n For an Observer, this message is sent to complete the Establish Link Request.<BR>\n For a Peripheral, this message is sent to indicate that a link has been created."]
+// #[repr(C)]
+// #[derive(Debug, Copy, Clone)]
+// pub struct gapEstLinkReqEvent_t {
+//     #[doc = "!< GAP_MSG_EVENT and status"]
+//     pub hdr: tmos_event_hdr_t,
+//     #[doc = "!< GAP_LINK_ESTABLISHED_EVENT"]
+//     pub opcode: u8,
+//     #[doc = "!< Device address type: @ref GAP_ADDR_TYPE_DEFINES"]
+//     pub devAddrType: u8,
+//     #[doc = "!< Device address of link"]
+//     pub devAddr: [u8; 6usize],
+//     #[doc = "!< Connection Handle from controller used to ref the device"]
+//     pub connectionHandle: u16,
+//     #[doc = "!< Connection formed as Central or Peripheral"]
+//     pub connRole: u8,
+//     #[doc = "!< Connection Interval"]
+//     pub connInterval: u16,
+//     #[doc = "!< Connection Latency"]
+//     pub connLatency: u16,
+//     #[doc = "!< Connection Timeout"]
+//     pub connTimeout: u16,
+//     #[doc = "!< Clock Accuracy"]
+//     pub clockAccuracy: u8,
+// }
+// #[allow(clippy::unnecessary_operation, clippy::identity_op)]
+// const _: () = {
+//     ["Size of gapEstLinkReqEvent_t"][::core::mem::size_of::<gapEstLinkReqEvent_t>() - 22usize];
+//     ["Alignment of gapEstLinkReqEvent_t"][::core::mem::align_of::<gapEstLinkReqEvent_t>() - 2usize];
+//     ["Offset of field: gapEstLinkReqEvent_t::hdr"][::core::mem::offset_of!(gapEstLinkReqEvent_t, hdr) - 0usize];
+//     ["Offset of field: gapEstLinkReqEvent_t::opcode"][::core::mem::offset_of!(gapEstLinkReqEvent_t, opcode) - 2usize];
+//     ["Offset of field: gapEstLinkReqEvent_t::devAddrType"]
+//         [::core::mem::offset_of!(gapEstLinkReqEvent_t, devAddrType) - 3usize];
+//     ["Offset of field: gapEstLinkReqEvent_t::devAddr"][::core::mem::offset_of!(gapEstLinkReqEvent_t, devAddr) - 4usize];
+//     ["Offset of field: gapEstLinkReqEvent_t::connectionHandle"]
+//         [::core::mem::offset_of!(gapEstLinkReqEvent_t, connectionHandle) - 10usize];
+//     ["Offset of field: gapEstLinkReqEvent_t::connRole"]
+//         [::core::mem::offset_of!(gapEstLinkReqEvent_t, connRole) - 12usize];
+//     ["Offset of field: gapEstLinkReqEvent_t::connInterval"]
+//         [::core::mem::offset_of!(gapEstLinkReqEvent_t, connInterval) - 14usize];
+//     ["Offset of field: gapEstLinkReqEvent_t::connLatency"]
+//         [::core::mem::offset_of!(gapEstLinkReqEvent_t, connLatency) - 16usize];
+//     ["Offset of field: gapEstLinkReqEvent_t::connTimeout"]
+//         [::core::mem::offset_of!(gapEstLinkReqEvent_t, connTimeout) - 18usize];
+//     ["Offset of field: gapEstLinkReqEvent_t::clockAccuracy"]
+//         [::core::mem::offset_of!(gapEstLinkReqEvent_t, clockAccuracy) - 20usize];
+// };
+// #[doc = " GAP_LINK_PARAM_UPDATE_EVENT message format.  This message is sent to the app\n when the connection parameters update request is complete."]
+// #[repr(C)]
+// #[derive(Debug, Copy, Clone)]
+// pub struct gapLinkUpdateEvent_t {
+//     #[doc = "!< GAP_MSG_EVENT and status"]
+//     pub hdr: tmos_event_hdr_t,
+//     #[doc = "!< GAP_LINK_PARAM_UPDATE_EVENT"]
+//     pub opcode: u8,
+//     #[doc = "!< bStatus_t"]
+//     pub status: u8,
+//     #[doc = "!< Connection handle of the update"]
+//     pub connectionHandle: u16,
+//     #[doc = "!< Requested connection interval"]
+//     pub connInterval: u16,
+//     #[doc = "!< Requested connection latency"]
+//     pub connLatency: u16,
+//     #[doc = "!< Requested connection timeout"]
+//     pub connTimeout: u16,
+// }
+// #[allow(clippy::unnecessary_operation, clippy::identity_op)]
+// const _: () = {
+//     ["Size of gapLinkUpdateEvent_t"][::core::mem::size_of::<gapLinkUpdateEvent_t>() - 12usize];
+//     ["Alignment of gapLinkUpdateEvent_t"][::core::mem::align_of::<gapLinkUpdateEvent_t>() - 2usize];
+//     ["Offset of field: gapLinkUpdateEvent_t::hdr"][::core::mem::offset_of!(gapLinkUpdateEvent_t, hdr) - 0usize];
+//     ["Offset of field: gapLinkUpdateEvent_t::opcode"][::core::mem::offset_of!(gapLinkUpdateEvent_t, opcode) - 2usize];
+//     ["Offset of field: gapLinkUpdateEvent_t::status"][::core::mem::offset_of!(gapLinkUpdateEvent_t, status) - 3usize];
+//     ["Offset of field: gapLinkUpdateEvent_t::connectionHandle"]
+//         [::core::mem::offset_of!(gapLinkUpdateEvent_t, connectionHandle) - 4usize];
+//     ["Offset of field: gapLinkUpdateEvent_t::connInterval"]
+//         [::core::mem::offset_of!(gapLinkUpdateEvent_t, connInterval) - 6usize];
+//     ["Offset of field: gapLinkUpdateEvent_t::connLatency"]
+//         [::core::mem::offset_of!(gapLinkUpdateEvent_t, connLatency) - 8usize];
+//     ["Offset of field: gapLinkUpdateEvent_t::connTimeout"]
+//         [::core::mem::offset_of!(gapLinkUpdateEvent_t, connTimeout) - 10usize];
+// };
+// #[doc = " GAP_LINK_TERMINATED_EVENT message format.  This message is sent to the\n app when a link to a device is terminated."]
+// #[repr(C)]
+// #[derive(Debug, Copy, Clone)]
+// pub struct gapTerminateLinkEvent_t {
+//     #[doc = "!< GAP_MSG_EVENT and status"]
+//     pub hdr: tmos_event_hdr_t,
+//     #[doc = "!< GAP_LINK_TERMINATED_EVENT"]
+//     pub opcode: u8,
+//     #[doc = "!< connection Handle"]
+//     pub connectionHandle: u16,
+//     #[doc = "!< termination reason from LL"]
+//     pub reason: u8,
+//     pub connRole: u8,
+// }
+// #[allow(clippy::unnecessary_operation, clippy::identity_op)]
+// const _: () = {
+//     ["Size of gapTerminateLinkEvent_t"][::core::mem::size_of::<gapTerminateLinkEvent_t>() - 8usize];
+//     ["Alignment of gapTerminateLinkEvent_t"][::core::mem::align_of::<gapTerminateLinkEvent_t>() - 2usize];
+//     ["Offset of field: gapTerminateLinkEvent_t::hdr"][::core::mem::offset_of!(gapTerminateLinkEvent_t, hdr) - 0usize];
+//     ["Offset of field: gapTerminateLinkEvent_t::opcode"]
+//         [::core::mem::offset_of!(gapTerminateLinkEvent_t, opcode) - 2usize];
+//     ["Offset of field: gapTerminateLinkEvent_t::connectionHandle"]
+//         [::core::mem::offset_of!(gapTerminateLinkEvent_t, connectionHandle) - 4usize];
+//     ["Offset of field: gapTerminateLinkEvent_t::reason"]
+//         [::core::mem::offset_of!(gapTerminateLinkEvent_t, reason) - 6usize];
+//     ["Offset of field: gapTerminateLinkEvent_t::connRole"]
+//         [::core::mem::offset_of!(gapTerminateLinkEvent_t, connRole) - 7usize];
+// };
+// #[doc = " GAP_PHY_UPDATE_EVENT message format.  This message is sent to the app(GAP_MSG_EVENT)\n when the PHY update request is complete."]
+// #[repr(C)]
+// #[derive(Debug, Copy, Clone)]
+// pub struct gapPhyUpdateEvent_t {
+//     #[doc = "!< GAP_MSG_EVENT and status"]
+//     pub hdr: tmos_event_hdr_t,
+//     #[doc = "!< GAP_PHY_UPDATE_EVENT"]
+//     pub opcode: u8,
+//     #[doc = "!< bStatus_t"]
+//     pub status: u8,
+//     #[doc = "!< Connection handle of the update"]
+//     pub connectionHandle: u16,
+//     #[doc = "!< tx phy(GAP_PHY_VAL_TYPE)"]
+//     pub connTxPHYS: u8,
+//     #[doc = "!< rx phy(GAP_PHY_VAL_TYPE)"]
+//     pub connRxPHYS: u8,
+// }
+// #[allow(clippy::unnecessary_operation, clippy::identity_op)]
+// const _: () = {
+//     ["Size of gapPhyUpdateEvent_t"][::core::mem::size_of::<gapPhyUpdateEvent_t>() - 8usize];
+//     ["Alignment of gapPhyUpdateEvent_t"][::core::mem::align_of::<gapPhyUpdateEvent_t>() - 2usize];
+//     ["Offset of field: gapPhyUpdateEvent_t::hdr"][::core::mem::offset_of!(gapPhyUpdateEvent_t, hdr) - 0usize];
+//     ["Offset of field: gapPhyUpdateEvent_t::opcode"][::core::mem::offset_of!(gapPhyUpdateEvent_t, opcode) - 2usize];
+//     ["Offset of field: gapPhyUpdateEvent_t::status"][::core::mem::offset_of!(gapPhyUpdateEvent_t, status) - 3usize];
+//     ["Offset of field: gapPhyUpdateEvent_t::connectionHandle"]
+//         [::core::mem::offset_of!(gapPhyUpdateEvent_t, connectionHandle) - 4usize];
+//     ["Offset of field: gapPhyUpdateEvent_t::connTxPHYS"]
+//         [::core::mem::offset_of!(gapPhyUpdateEvent_t, connTxPHYS) - 6usize];
+//     ["Offset of field: gapPhyUpdateEvent_t::connRxPHYS"]
+//         [::core::mem::offset_of!(gapPhyUpdateEvent_t, connRxPHYS) - 7usize];
+// };
+// #[doc = " GAP_PASSKEY_NEEDED_EVENT message format.  This message is sent to the\n app when a Passkey is needed from the app's user interface."]
+// #[repr(C)]
+// #[derive(Debug, Copy, Clone)]
+// pub struct gapPasskeyNeededEvent_t {
+//     #[doc = "!< GAP_MSG_EVENT and status"]
+//     pub hdr: tmos_event_hdr_t,
+//     #[doc = "!< GAP_PASSKEY_NEEDED_EVENT"]
+//     pub opcode: u8,
+//     #[doc = "!< address of device to pair with, and could be either public or random."]
+//     pub deviceAddr: [u8; 6usize],
+//     #[doc = "!< Connection handle"]
+//     pub connectionHandle: u16,
+//     #[doc = "!< Pairing User Interface Inputs - Ask user to input passcode"]
+//     pub uiInputs: u8,
+//     #[doc = "!< Pairing User Interface Outputs - Display passcode"]
+//     pub uiOutputs: u8,
+// }
+// #[allow(clippy::unnecessary_operation, clippy::identity_op)]
+// const _: () = {
+//     ["Size of gapPasskeyNeededEvent_t"][::core::mem::size_of::<gapPasskeyNeededEvent_t>() - 14usize];
+//     ["Alignment of gapPasskeyNeededEvent_t"][::core::mem::align_of::<gapPasskeyNeededEvent_t>() - 2usize];
+//     ["Offset of field: gapPasskeyNeededEvent_t::hdr"][::core::mem::offset_of!(gapPasskeyNeededEvent_t, hdr) - 0usize];
+//     ["Offset of field: gapPasskeyNeededEvent_t::opcode"]
+//         [::core::mem::offset_of!(gapPasskeyNeededEvent_t, opcode) - 2usize];
+//     ["Offset of field: gapPasskeyNeededEvent_t::deviceAddr"]
+//         [::core::mem::offset_of!(gapPasskeyNeededEvent_t, deviceAddr) - 3usize];
+//     ["Offset of field: gapPasskeyNeededEvent_t::connectionHandle"]
+//         [::core::mem::offset_of!(gapPasskeyNeededEvent_t, connectionHandle) - 10usize];
+//     ["Offset of field: gapPasskeyNeededEvent_t::uiInputs"]
+//         [::core::mem::offset_of!(gapPasskeyNeededEvent_t, uiInputs) - 12usize];
+//     ["Offset of field: gapPasskeyNeededEvent_t::uiOutputs"]
+//         [::core::mem::offset_of!(gapPasskeyNeededEvent_t, uiOutputs) - 13usize];
+// };
+// #[doc = " Passcode Callback Function"]
+// pub type pfnPasscodeCB_t = ::core::option::Option<
+//     unsafe extern "C" fn(deviceAddr: *mut u8, connectionHandle: u16, uiInputs: u8, uiOutputs: u8),
+// >;
+// #[doc = " Pairing State Callback Function"]
+// pub type pfnPairStateCB_t = ::core::option::Option<unsafe extern "C" fn(connectionHandle: u16, state: u8, status: u8)>;
+// #[repr(C)]
+// #[derive(Debug, Copy, Clone)]
+// pub struct gapOobNeededEvent_t {
+//     #[doc = "!< GAP_MSG_EVENT and status"]
+//     pub hdr: tmos_event_hdr_t,
+//     #[doc = "!< GAP_O0B_NEEDED_EVENT"]
+//     pub opcode: u8,
+//     #[doc = "!< address of device to pair with, and could be either public or random."]
+//     pub deviceAddr: [u8; 6usize],
+//     #[doc = "!< Connection handle"]
+//     pub connectionHandle: u16,
+//     pub r_local: [u8; 16usize],
+//     pub c_local: [u8; 16usize],
+// }
+// #[allow(clippy::unnecessary_operation, clippy::identity_op)]
+// const _: () = {
+//     ["Size of gapOobNeededEvent_t"][::core::mem::size_of::<gapOobNeededEvent_t>() - 44usize];
+//     ["Alignment of gapOobNeededEvent_t"][::core::mem::align_of::<gapOobNeededEvent_t>() - 2usize];
+//     ["Offset of field: gapOobNeededEvent_t::hdr"][::core::mem::offset_of!(gapOobNeededEvent_t, hdr) - 0usize];
+//     ["Offset of field: gapOobNeededEvent_t::opcode"][::core::mem::offset_of!(gapOobNeededEvent_t, opcode) - 2usize];
+//     ["Offset of field: gapOobNeededEvent_t::deviceAddr"]
+//         [::core::mem::offset_of!(gapOobNeededEvent_t, deviceAddr) - 3usize];
+//     ["Offset of field: gapOobNeededEvent_t::connectionHandle"]
+//         [::core::mem::offset_of!(gapOobNeededEvent_t, connectionHandle) - 10usize];
+//     ["Offset of field: gapOobNeededEvent_t::r_local"][::core::mem::offset_of!(gapOobNeededEvent_t, r_local) - 12usize];
+//     ["Offset of field: gapOobNeededEvent_t::c_local"][::core::mem::offset_of!(gapOobNeededEvent_t, c_local) - 28usize];
+// };
+// #[doc = " OOB Callback Function"]
+// pub type pfnOobCB_t = ::core::option::Option<
+//     unsafe extern "C" fn(deviceAddr: *mut u8, connectionHandle: u16, r_local: *mut u8, c_local: *mut u8),
+// >;
+// #[doc = " Callback Registration Structure"]
+// #[repr(C)]
+// #[derive(Debug, Copy, Clone)]
+// pub struct gapBondCBs_t {
+//     #[doc = "!< Passcode callback"]
+//     pub passcodeCB: pfnPasscodeCB_t,
+//     #[doc = "!< Pairing state callback"]
+//     pub pairStateCB: pfnPairStateCB_t,
+//     #[doc = "!< oob callback"]
+//     pub oobCB: pfnOobCB_t,
+// }
+// #[allow(clippy::unnecessary_operation, clippy::identity_op)]
+// const _: () = {
+//     ["Size of gapBondCBs_t"][::core::mem::size_of::<gapBondCBs_t>() - 24usize];
+//     ["Alignment of gapBondCBs_t"][::core::mem::align_of::<gapBondCBs_t>() - 8usize];
+//     ["Offset of field: gapBondCBs_t::passcodeCB"][::core::mem::offset_of!(gapBondCBs_t, passcodeCB) - 0usize];
+//     ["Offset of field: gapBondCBs_t::pairStateCB"][::core::mem::offset_of!(gapBondCBs_t, pairStateCB) - 8usize];
+//     ["Offset of field: gapBondCBs_t::oobCB"][::core::mem::offset_of!(gapBondCBs_t, oobCB) - 16usize];
+// };
+// pub type pfnEcc_key_t =
+//     ::core::option::Option<unsafe extern "C" fn(pub_: *mut u8, priv_: *mut u8) -> ::core::ffi::c_int>;
+// pub type pfnEcc_dhkey_t = ::core::option::Option<
+//     unsafe extern "C" fn(
+//         peer_pub_key_x: *mut u8,
+//         peer_pub_key_y: *mut u8,
+//         our_priv_key: *mut u8,
+//         out_dhkey: *mut u8,
+//     ) -> ::core::ffi::c_int,
+// >;
+// pub type pfnEcc_alg_f4_t = ::core::option::Option<
+//     unsafe extern "C" fn(u: *mut u8, v: *mut u8, x: *mut u8, z: u8, out_enc_data: *mut u8) -> ::core::ffi::c_int,
+// >;
+// pub type pfnEcc_alg_g2_t = ::core::option::Option<
+//     unsafe extern "C" fn(u: *mut u8, v: *mut u8, x: *mut u8, y: *mut u8, passkey: *mut u32) -> ::core::ffi::c_int,
+// >;
+// pub type pfnEcc_alg_f5_t = ::core::option::Option<
+//     unsafe extern "C" fn(
+//         w: *mut u8,
+//         n1: *mut u8,
+//         n2: *mut u8,
+//         a1t: u8,
+//         a1: *mut u8,
+//         a2t: u8,
+//         a2: *mut u8,
+//         mackey: *mut u8,
+//         ltk: *mut u8,
+//     ) -> ::core::ffi::c_int,
+// >;
+// pub type pfnEcc_alg_f6_t = ::core::option::Option<
+//     unsafe extern "C" fn(
+//         w: *mut u8,
+//         n1: *mut u8,
+//         n2: *mut u8,
+//         r: *mut u8,
+//         iocap: *mut u8,
+//         a1t: u8,
+//         a1: *mut u8,
+//         a2t: u8,
+//         a2: *mut u8,
+//         check: *mut u8,
+//     ) -> ::core::ffi::c_int,
+// >;
+// #[doc = " Callback Registration Structure"]
+// #[repr(C)]
+// #[derive(Debug, Copy, Clone)]
+// pub struct gapEccCBs_t {
+//     pub gen_key_pair: pfnEcc_key_t,
+//     pub gen_dhkey: pfnEcc_dhkey_t,
+//     #[doc = "!< LE Secure Connections confirm value generation function f4"]
+//     pub alg_f4: pfnEcc_alg_f4_t,
+//     #[doc = "!< LE Secure Connections numeric comparison value generation function g2"]
+//     pub alg_g2: pfnEcc_alg_g2_t,
+//     #[doc = "!< LE Secure Connect ions key generation function  f5"]
+//     pub alg_f5: pfnEcc_alg_f5_t,
+//     #[doc = "!< LE Secure  Connections check value generation function  f6"]
+//     pub alg_f6: pfnEcc_alg_f6_t,
+// }
+// #[allow(clippy::unnecessary_operation, clippy::identity_op)]
+// const _: () = {
+//     ["Size of gapEccCBs_t"][::core::mem::size_of::<gapEccCBs_t>() - 48usize];
+//     ["Alignment of gapEccCBs_t"][::core::mem::align_of::<gapEccCBs_t>() - 8usize];
+//     ["Offset of field: gapEccCBs_t::gen_key_pair"][::core::mem::offset_of!(gapEccCBs_t, gen_key_pair) - 0usize];
+//     ["Offset of field: gapEccCBs_t::gen_dhkey"][::core::mem::offset_of!(gapEccCBs_t, gen_dhkey) - 8usize];
+//     ["Offset of field: gapEccCBs_t::alg_f4"][::core::mem::offset_of!(gapEccCBs_t, alg_f4) - 16usize];
+//     ["Offset of field: gapEccCBs_t::alg_g2"][::core::mem::offset_of!(gapEccCBs_t, alg_g2) - 24usize];
+//     ["Offset of field: gapEccCBs_t::alg_f5"][::core::mem::offset_of!(gapEccCBs_t, alg_f5) - 32usize];
+//     ["Offset of field: gapEccCBs_t::alg_f6"][::core::mem::offset_of!(gapEccCBs_t, alg_f6) - 40usize];
+// };
+// #[repr(C)]
+// #[derive(Debug, Copy, Clone)]
+// pub struct powerList_t {
+//     #[doc = "!< Number of lists"]
+//     pub powerVal: [u8; 40usize],
+// }
+// #[allow(clippy::unnecessary_operation, clippy::identity_op)]
+// const _: () = {
+//     ["Size of powerList_t"][::core::mem::size_of::<powerList_t>() - 40usize];
+//     ["Alignment of powerList_t"][::core::mem::align_of::<powerList_t>() - 1usize];
+//     ["Offset of field: powerList_t::powerVal"][::core::mem::offset_of!(powerList_t, powerVal) - 0usize];
+// };
+// #[doc = " gapRole_States_t defined"]
+// pub type gapRole_States_t = ::core::ffi::c_ulong;
+// #[doc = " gapRole Event Structure"]
+// #[repr(C)]
+// #[derive(Copy, Clone)]
+// pub union gapRoleEvent_t {
+//     #[doc = "!< GAP_MSG_EVENT and status."]
+//     pub gap: gapEventHdr_t,
+//     #[doc = "!< GAP initialization done."]
+//     pub initDone: gapDeviceInitDoneEvent_t,
+//     #[doc = "!< Discovery device information event structure."]
+//     pub deviceInfo: gapDeviceInfoEvent_t,
+//     #[doc = "!< Discovery direct device information event structure."]
+//     pub deviceDirectInfo: gapDirectDeviceInfoEvent_t,
+//     #[doc = "!< Advertising Data Update is complete."]
+//     pub dataUpdate: gapAdvDataUpdateEvent_t,
+//     #[doc = "!< Discovery periodic device information event structure."]
+//     pub devicePeriodicInfo: gapPeriodicAdvDeviceInfoEvent_t,
+//     #[doc = "!< Discovery extend advertising device information event structure."]
+//     pub deviceExtAdvInfo: gapExtAdvDeviceInfoEvent_t,
+//     #[doc = "!< Discovery complete event structure."]
+//     pub discCmpl: gapDevDiscEvent_t,
+//     #[doc = "!< sync established event structure."]
+//     pub syncEstEvt: gapSyncEstablishedEvent_t,
+//     #[doc = "!< sync lost event structure."]
+//     pub syncLostEvt: gapSyncLostEvent_t,
+//     #[doc = "!< Scan_Request_Received event structure."]
+//     pub scanReqEvt: gapScanReqReseiveEvent_t,
+//     #[doc = "!< Link complete event structure."]
+//     pub linkCmpl: gapEstLinkReqEvent_t,
+//     #[doc = "!< Link update event structure."]
+//     pub linkUpdate: gapLinkUpdateEvent_t,
+//     #[doc = "!< Link terminated event structure."]
+//     pub linkTerminate: gapTerminateLinkEvent_t,
+//     #[doc = "!< Link phy update event structure."]
+//     pub linkPhyUpdate: gapPhyUpdateEvent_t,
+// }
+// #[allow(clippy::unnecessary_operation, clippy::identity_op)]
+// const _: () = {
+//     ["Size of gapRoleEvent_t"][::core::mem::size_of::<gapRoleEvent_t>() - 40usize];
+//     ["Alignment of gapRoleEvent_t"][::core::mem::align_of::<gapRoleEvent_t>() - 8usize];
+//     ["Offset of field: gapRoleEvent_t::gap"][::core::mem::offset_of!(gapRoleEvent_t, gap) - 0usize];
+//     ["Offset of field: gapRoleEvent_t::initDone"][::core::mem::offset_of!(gapRoleEvent_t, initDone) - 0usize];
+//     ["Offset of field: gapRoleEvent_t::deviceInfo"][::core::mem::offset_of!(gapRoleEvent_t, deviceInfo) - 0usize];
+//     ["Offset of field: gapRoleEvent_t::deviceDirectInfo"]
+//         [::core::mem::offset_of!(gapRoleEvent_t, deviceDirectInfo) - 0usize];
+//     ["Offset of field: gapRoleEvent_t::dataUpdate"][::core::mem::offset_of!(gapRoleEvent_t, dataUpdate) - 0usize];
+//     ["Offset of field: gapRoleEvent_t::devicePeriodicInfo"]
+//         [::core::mem::offset_of!(gapRoleEvent_t, devicePeriodicInfo) - 0usize];
+//     ["Offset of field: gapRoleEvent_t::deviceExtAdvInfo"]
+//         [::core::mem::offset_of!(gapRoleEvent_t, deviceExtAdvInfo) - 0usize];
+//     ["Offset of field: gapRoleEvent_t::discCmpl"][::core::mem::offset_of!(gapRoleEvent_t, discCmpl) - 0usize];
+//     ["Offset of field: gapRoleEvent_t::syncEstEvt"][::core::mem::offset_of!(gapRoleEvent_t, syncEstEvt) - 0usize];
+//     ["Offset of field: gapRoleEvent_t::syncLostEvt"][::core::mem::offset_of!(gapRoleEvent_t, syncLostEvt) - 0usize];
+//     ["Offset of field: gapRoleEvent_t::scanReqEvt"][::core::mem::offset_of!(gapRoleEvent_t, scanReqEvt) - 0usize];
+//     ["Offset of field: gapRoleEvent_t::linkCmpl"][::core::mem::offset_of!(gapRoleEvent_t, linkCmpl) - 0usize];
+//     ["Offset of field: gapRoleEvent_t::linkUpdate"][::core::mem::offset_of!(gapRoleEvent_t, linkUpdate) - 0usize];
+//     ["Offset of field: gapRoleEvent_t::linkTerminate"][::core::mem::offset_of!(gapRoleEvent_t, linkTerminate) - 0usize];
+//     ["Offset of field: gapRoleEvent_t::linkPhyUpdate"][::core::mem::offset_of!(gapRoleEvent_t, linkPhyUpdate) - 0usize];
+// };
+// #[doc = " Type of device."]
+// #[repr(C)]
+// #[derive(Debug, Copy, Clone)]
+// pub struct gapScanRec_t {
+//     #[doc = "!< Indicates advertising event type used by the advertiser: @ref GAP_ADVERTISEMENT_REPORT_TYPE_DEFINES"]
+//     pub eventType: u8,
+//     #[doc = "!< Scan Address Type:0x00-Public Device Address or Public Identity Address 0x01-Random Device Address or Random (static) Identity Address"]
+//     pub addrType: u8,
+//     #[doc = "!< Device's Address"]
+//     pub addr: [u8; 6usize],
+//     pub rssi: i8,
+// }
+// #[allow(clippy::unnecessary_operation, clippy::identity_op)]
+// const _: () = {
+//     ["Size of gapScanRec_t"][::core::mem::size_of::<gapScanRec_t>() - 9usize];
+//     ["Alignment of gapScanRec_t"][::core::mem::align_of::<gapScanRec_t>() - 1usize];
+//     ["Offset of field: gapScanRec_t::eventType"][::core::mem::offset_of!(gapScanRec_t, eventType) - 0usize];
+//     ["Offset of field: gapScanRec_t::addrType"][::core::mem::offset_of!(gapScanRec_t, addrType) - 1usize];
+//     ["Offset of field: gapScanRec_t::addr"][::core::mem::offset_of!(gapScanRec_t, addr) - 2usize];
+//     ["Offset of field: gapScanRec_t::rssi"][::core::mem::offset_of!(gapScanRec_t, rssi) - 8usize];
+// };
+// #[doc = " Type of GAPRole_CreateSync command parameters."]
+// #[repr(C)]
+// #[derive(Debug, Copy, Clone)]
+// pub struct gapCreateSync_t {
+//     pub options: u8,
+//     #[doc = "!< if used, specifies the value that must match the Advertising SID"]
+//     pub advertising_SID: u8,
+//     #[doc = "!< Scan Address Type: @ref GAP_ADDR_TYPE_DEFINES"]
+//     pub addrType: u8,
+//     #[doc = "!< Device's Address"]
+//     pub addr: [u8; 6usize],
+//     #[doc = "!< the maximum number of consecutive periodic advertising events that the receiver may skip after\n!< successfully receiving a periodic advertising packet.Range: 0x0000 to 0x01F3"]
+//     pub skip: u16,
+//     #[doc = "!< the maximum permitted time between successful receives. If this time is exceeded, synchronization is lost.\n!< Time = N*10 ms.Range: 0x000A to 0x4000"]
+//     pub syncTimeout: u16,
+//     #[doc = "!< specifies whether to only synchronize to periodic advertising with certain types of Constant Tone Extension\n!< (a value of 0 indicates that the presence or absence of a Constant Tone Extension is irrelevant)."]
+//     pub syncCTEType: u8,
+// }
+// #[allow(clippy::unnecessary_operation, clippy::identity_op)]
+// const _: () = {
+//     ["Size of gapCreateSync_t"][::core::mem::size_of::<gapCreateSync_t>() - 16usize];
+//     ["Alignment of gapCreateSync_t"][::core::mem::align_of::<gapCreateSync_t>() - 2usize];
+//     ["Offset of field: gapCreateSync_t::options"][::core::mem::offset_of!(gapCreateSync_t, options) - 0usize];
+//     ["Offset of field: gapCreateSync_t::advertising_SID"]
+//         [::core::mem::offset_of!(gapCreateSync_t, advertising_SID) - 1usize];
+//     ["Offset of field: gapCreateSync_t::addrType"][::core::mem::offset_of!(gapCreateSync_t, addrType) - 2usize];
+//     ["Offset of field: gapCreateSync_t::addr"][::core::mem::offset_of!(gapCreateSync_t, addr) - 3usize];
+//     ["Offset of field: gapCreateSync_t::skip"][::core::mem::offset_of!(gapCreateSync_t, skip) - 10usize];
+//     ["Offset of field: gapCreateSync_t::syncTimeout"][::core::mem::offset_of!(gapCreateSync_t, syncTimeout) - 12usize];
+//     ["Offset of field: gapCreateSync_t::syncCTEType"][::core::mem::offset_of!(gapCreateSync_t, syncCTEType) - 14usize];
+// };
+// #[doc = " Type of GAPRole_SetPathLossReporting command parameters."]
+// #[repr(C)]
+// #[derive(Debug, Copy, Clone)]
+// pub struct gapRoleSetPathLossReporting_t {
+//     #[doc = "!< Used to identify the Connection handle"]
+//     pub connHandle: u16,
+//     #[doc = "!< High threshold for the path loss.Units: dB"]
+//     pub highThreshold: i8,
+//     #[doc = "!< Hysteresis value for the high threshold.Units: dB"]
+//     pub highHysteresis: i8,
+//     #[doc = "!< High threshold for the path loss.Units: dB"]
+//     pub lowThreshold: i8,
+//     #[doc = "!< Hysteresis value for the high threshold.Units: dB"]
+//     pub lowHysteresis: i8,
+//     #[doc = "!< Minimum time in number of connection events to be observed\n!< once the path crosses the threshold before an event is generated."]
+//     pub minTimeSpent: u16,
+//     #[doc = "!< 0x00:Reporting disabled 0x01:Reporting enabled"]
+//     pub enable: u8,
+// }
+// #[allow(clippy::unnecessary_operation, clippy::identity_op)]
+// const _: () = {
+//     ["Size of gapRoleSetPathLossReporting_t"][::core::mem::size_of::<gapRoleSetPathLossReporting_t>() - 10usize];
+//     ["Alignment of gapRoleSetPathLossReporting_t"][::core::mem::align_of::<gapRoleSetPathLossReporting_t>() - 2usize];
+//     ["Offset of field: gapRoleSetPathLossReporting_t::connHandle"]
+//         [::core::mem::offset_of!(gapRoleSetPathLossReporting_t, connHandle) - 0usize];
+//     ["Offset of field: gapRoleSetPathLossReporting_t::highThreshold"]
+//         [::core::mem::offset_of!(gapRoleSetPathLossReporting_t, highThreshold) - 2usize];
+//     ["Offset of field: gapRoleSetPathLossReporting_t::highHysteresis"]
+//         [::core::mem::offset_of!(gapRoleSetPathLossReporting_t, highHysteresis) - 3usize];
+//     ["Offset of field: gapRoleSetPathLossReporting_t::lowThreshold"]
+//         [::core::mem::offset_of!(gapRoleSetPathLossReporting_t, lowThreshold) - 4usize];
+//     ["Offset of field: gapRoleSetPathLossReporting_t::lowHysteresis"]
+//         [::core::mem::offset_of!(gapRoleSetPathLossReporting_t, lowHysteresis) - 5usize];
+//     ["Offset of field: gapRoleSetPathLossReporting_t::minTimeSpent"]
+//         [::core::mem::offset_of!(gapRoleSetPathLossReporting_t, minTimeSpent) - 6usize];
+//     ["Offset of field: gapRoleSetPathLossReporting_t::enable"]
+//         [::core::mem::offset_of!(gapRoleSetPathLossReporting_t, enable) - 8usize];
+// };
+// #[repr(C)]
+// #[derive(Debug, Copy, Clone)]
+// pub struct gapRolePowerlevelManagement_t {
+//     #[doc = "!< Used to identify the Connection handle"]
+//     pub connHandle: u16,
+//     #[doc = "!< High threshold for the peer power levels.Units: dB"]
+//     pub lowRxThreshold: i8,
+//     #[doc = "!< High threshold for the peer power levels.Units: dB"]
+//     pub highRxThreshold: i8,
+//     #[doc = "!< Minimum transmit power level.Units: dB"]
+//     pub minTxPower: i8,
+//     #[doc = "!< Maximum transmit power level.Units: dB"]
+//     pub maxTxPower: i8,
+// }
+// #[allow(clippy::unnecessary_operation, clippy::identity_op)]
+// const _: () = {
+//     ["Size of gapRolePowerlevelManagement_t"][::core::mem::size_of::<gapRolePowerlevelManagement_t>() - 6usize];
+//     ["Alignment of gapRolePowerlevelManagement_t"][::core::mem::align_of::<gapRolePowerlevelManagement_t>() - 2usize];
+//     ["Offset of field: gapRolePowerlevelManagement_t::connHandle"]
+//         [::core::mem::offset_of!(gapRolePowerlevelManagement_t, connHandle) - 0usize];
+//     ["Offset of field: gapRolePowerlevelManagement_t::lowRxThreshold"]
+//         [::core::mem::offset_of!(gapRolePowerlevelManagement_t, lowRxThreshold) - 2usize];
+//     ["Offset of field: gapRolePowerlevelManagement_t::highRxThreshold"]
+//         [::core::mem::offset_of!(gapRolePowerlevelManagement_t, highRxThreshold) - 3usize];
+//     ["Offset of field: gapRolePowerlevelManagement_t::minTxPower"]
+//         [::core::mem::offset_of!(gapRolePowerlevelManagement_t, minTxPower) - 4usize];
+//     ["Offset of field: gapRolePowerlevelManagement_t::maxTxPower"]
+//         [::core::mem::offset_of!(gapRolePowerlevelManagement_t, maxTxPower) - 5usize];
+// };
+// #[doc = " Callback when the device has been started.  Callback event to\n the Notify of a state change."]
+// pub type gapRolesBroadcasterStateNotify_t = ::core::option::Option<unsafe extern "C" fn(newState: gapRole_States_t)>;
+// pub type gapRolesScanReqRecv_t = ::core::option::Option<unsafe extern "C" fn(pEvent: *mut gapScanRec_t)>;
+// #[repr(C)]
+// #[derive(Debug, Copy, Clone)]
+// pub struct gapRolesBroadcasterCBs_t {
+//     #[doc = "!< Whenever the device changes state"]
+//     pub pfnStateChange: gapRolesBroadcasterStateNotify_t,
+//     pub pfnScanRecv: gapRolesScanReqRecv_t,
+// }
+// #[allow(clippy::unnecessary_operation, clippy::identity_op)]
+// const _: () = {
+//     ["Size of gapRolesBroadcasterCBs_t"][::core::mem::size_of::<gapRolesBroadcasterCBs_t>() - 16usize];
+//     ["Alignment of gapRolesBroadcasterCBs_t"][::core::mem::align_of::<gapRolesBroadcasterCBs_t>() - 8usize];
+//     ["Offset of field: gapRolesBroadcasterCBs_t::pfnStateChange"]
+//         [::core::mem::offset_of!(gapRolesBroadcasterCBs_t, pfnStateChange) - 0usize];
+//     ["Offset of field: gapRolesBroadcasterCBs_t::pfnScanRecv"]
+//         [::core::mem::offset_of!(gapRolesBroadcasterCBs_t, pfnScanRecv) - 8usize];
+// };
+// #[doc = " Observer Event Callback Function"]
+// pub type pfnGapObserverRoleEventCB_t = ::core::option::Option<unsafe extern "C" fn(pEvent: *mut gapRoleEvent_t)>;
+// #[doc = " Observer Callback Structure"]
+// #[repr(C)]
+// #[derive(Debug, Copy, Clone)]
+// pub struct gapRoleObserverCB_t {
+//     #[doc = "!< Event callback."]
+//     pub eventCB: pfnGapObserverRoleEventCB_t,
+// }
+// #[allow(clippy::unnecessary_operation, clippy::identity_op)]
+// const _: () = {
+//     ["Size of gapRoleObserverCB_t"][::core::mem::size_of::<gapRoleObserverCB_t>() - 8usize];
+//     ["Alignment of gapRoleObserverCB_t"][::core::mem::align_of::<gapRoleObserverCB_t>() - 8usize];
+//     ["Offset of field: gapRoleObserverCB_t::eventCB"][::core::mem::offset_of!(gapRoleObserverCB_t, eventCB) - 0usize];
+// };
+// #[doc = " Callback when the device has read an new RSSI value during a connection."]
+// pub type gapRolesRssiRead_t = ::core::option::Option<unsafe extern "C" fn(connHandle: u16, newRSSI: i8)>;
+// #[doc = " Callback when the device has been started.  Callback event to\n the Notify of a state change."]
+// pub type gapRolesStateNotify_t =
+//     ::core::option::Option<unsafe extern "C" fn(newState: gapRole_States_t, pEvent: *mut gapRoleEvent_t)>;
+// #[doc = " Callback when the connection parameteres are updated."]
+// pub type gapRolesParamUpdateCB_t = ::core::option::Option<
+//     unsafe extern "C" fn(connHandle: u16, connInterval: u16, connSlaveLatency: u16, connTimeout: u16),
+// >;
+// #[doc = " Callback structure - must be setup by the application and used when gapRoles_StartDevice() is called."]
+// #[repr(C)]
+// #[derive(Debug, Copy, Clone)]
+// pub struct gapRolesCBs_t {
+//     #[doc = "!< Whenever the device changes state"]
+//     pub pfnStateChange: gapRolesStateNotify_t,
+//     #[doc = "!< When a valid RSSI is read from controller"]
+//     pub pfnRssiRead: gapRolesRssiRead_t,
+//     #[doc = "!< When the connection parameteres are updated"]
+//     pub pfnParamUpdate: gapRolesParamUpdateCB_t,
+// }
+// #[allow(clippy::unnecessary_operation, clippy::identity_op)]
+// const _: () = {
+//     ["Size of gapRolesCBs_t"][::core::mem::size_of::<gapRolesCBs_t>() - 24usize];
+//     ["Alignment of gapRolesCBs_t"][::core::mem::align_of::<gapRolesCBs_t>() - 8usize];
+//     ["Offset of field: gapRolesCBs_t::pfnStateChange"][::core::mem::offset_of!(gapRolesCBs_t, pfnStateChange) - 0usize];
+//     ["Offset of field: gapRolesCBs_t::pfnRssiRead"][::core::mem::offset_of!(gapRolesCBs_t, pfnRssiRead) - 8usize];
+//     ["Offset of field: gapRolesCBs_t::pfnParamUpdate"]
+//         [::core::mem::offset_of!(gapRolesCBs_t, pfnParamUpdate) - 16usize];
+// };
+// #[doc = " Central Event Callback Function"]
+// pub type pfnGapCentralRoleEventCB_t = ::core::option::Option<unsafe extern "C" fn(pEvent: *mut gapRoleEvent_t)>;
+// #[doc = " HCI Data Length Change Event Callback Function"]
+// pub type pfnHciDataLenChangeEvCB_t =
+//     ::core::option::Option<unsafe extern "C" fn(connHandle: u16, maxTxOctets: u16, maxRxOctets: u16)>;
+// #[doc = " Central Callback Structure"]
+// #[repr(C)]
+// #[derive(Debug, Copy, Clone)]
+// pub struct gapCentralRoleCB_t {
+//     #[doc = "!< RSSI callback."]
+//     pub rssiCB: gapRolesRssiRead_t,
+//     #[doc = "!< Event callback."]
+//     pub eventCB: pfnGapCentralRoleEventCB_t,
+//     #[doc = "!< Length Change Event Callback ."]
+//     pub ChangCB: pfnHciDataLenChangeEvCB_t,
+// }
+// #[allow(clippy::unnecessary_operation, clippy::identity_op)]
+// const _: () = {
+//     ["Size of gapCentralRoleCB_t"][::core::mem::size_of::<gapCentralRoleCB_t>() - 24usize];
+//     ["Alignment of gapCentralRoleCB_t"][::core::mem::align_of::<gapCentralRoleCB_t>() - 8usize];
+//     ["Offset of field: gapCentralRoleCB_t::rssiCB"][::core::mem::offset_of!(gapCentralRoleCB_t, rssiCB) - 0usize];
+//     ["Offset of field: gapCentralRoleCB_t::eventCB"][::core::mem::offset_of!(gapCentralRoleCB_t, eventCB) - 8usize];
+//     ["Offset of field: gapCentralRoleCB_t::ChangCB"][::core::mem::offset_of!(gapCentralRoleCB_t, ChangCB) - 16usize];
+// };
+// #[doc = " RFRole Event Callback Function"]
+// pub type pfnRFStatusCB_t = ::core::option::Option<unsafe extern "C" fn(sta: u8, rsr: u8, rxBuf: *mut u8)>;
+// #[repr(C)]
+// #[derive(Debug, Copy, Clone)]
+// pub struct tag_rf_config {
+//     #[doc = "!< BIT0   0=basic, 1=auto def@LLE_MODE_TYPE\n!< BIT1   0=whitening on, 1=whitening off def@LLE_WHITENING_TYPE\n!< BIT4-5 00-1M  01-2M  10/11-resv def@LLE_PHY_TYPE\n!< BIT6   0=data channel(0-39)\n!<        1=rf frequency (2400000kHz-2483500kHz)\n!< BIT7   0=the first byte of the receive buffer is rssi\n!<        1=the first byte of the receive buffer is package type"]
+//     pub LLEMode: u8,
+//     #[doc = "!< rf channel(0-39)"]
+//     pub Channel: u8,
+//     #[doc = "!< rf frequency (2400000kHz-2483500kHz)"]
+//     pub Frequency: u32,
+//     #[doc = "!< access address,32bit PHY address"]
+//     pub accessAddress: u32,
+//     #[doc = "!< crc initial value"]
+//     pub CRCInit: u32,
+//     #[doc = "!< status call back"]
+//     pub rfStatusCB: pfnRFStatusCB_t,
+//     #[doc = "!< indicating  Used and Unused data channels.Every channel is represented with a\n!< bit positioned as per the data channel index,The LSB represents data channel index 0"]
+//     pub ChannelMap: u32,
+//     pub Resv: u8,
+//     #[doc = "!< The heart package interval shall be an integer multiple of 100ms"]
+//     pub HeartPeriod: u8,
+//     #[doc = "!< hop period( T=32n*RTC clock ),default is 8"]
+//     pub HopPeriod: u8,
+//     #[doc = "!< indicate the hopIncrement used in the data channel selection algorithm,default is 17"]
+//     pub HopIndex: u8,
+//     #[doc = "!< Maximum data length received in rf-mode(default 251)"]
+//     pub RxMaxlen: u8,
+//     #[doc = "!< Maximum data length transmit in rf-mode(default 251)"]
+//     pub TxMaxlen: u8,
+// }
+// #[allow(clippy::unnecessary_operation, clippy::identity_op)]
+// const _: () = {
+//     ["Size of tag_rf_config"][::core::mem::size_of::<tag_rf_config>() - 40usize];
+//     ["Alignment of tag_rf_config"][::core::mem::align_of::<tag_rf_config>() - 8usize];
+//     ["Offset of field: tag_rf_config::LLEMode"][::core::mem::offset_of!(tag_rf_config, LLEMode) - 0usize];
+//     ["Offset of field: tag_rf_config::Channel"][::core::mem::offset_of!(tag_rf_config, Channel) - 1usize];
+//     ["Offset of field: tag_rf_config::Frequency"][::core::mem::offset_of!(tag_rf_config, Frequency) - 4usize];
+//     ["Offset of field: tag_rf_config::accessAddress"][::core::mem::offset_of!(tag_rf_config, accessAddress) - 8usize];
+//     ["Offset of field: tag_rf_config::CRCInit"][::core::mem::offset_of!(tag_rf_config, CRCInit) - 12usize];
+//     ["Offset of field: tag_rf_config::rfStatusCB"][::core::mem::offset_of!(tag_rf_config, rfStatusCB) - 16usize];
+//     ["Offset of field: tag_rf_config::ChannelMap"][::core::mem::offset_of!(tag_rf_config, ChannelMap) - 24usize];
+//     ["Offset of field: tag_rf_config::Resv"][::core::mem::offset_of!(tag_rf_config, Resv) - 28usize];
+//     ["Offset of field: tag_rf_config::HeartPeriod"][::core::mem::offset_of!(tag_rf_config, HeartPeriod) - 29usize];
+//     ["Offset of field: tag_rf_config::HopPeriod"][::core::mem::offset_of!(tag_rf_config, HopPeriod) - 30usize];
+//     ["Offset of field: tag_rf_config::HopIndex"][::core::mem::offset_of!(tag_rf_config, HopIndex) - 31usize];
+//     ["Offset of field: tag_rf_config::RxMaxlen"][::core::mem::offset_of!(tag_rf_config, RxMaxlen) - 32usize];
+//     ["Offset of field: tag_rf_config::TxMaxlen"][::core::mem::offset_of!(tag_rf_config, TxMaxlen) - 33usize];
+// };
+// pub type rfConfig_t = tag_rf_config;
+// unsafe extern "C" {
+//     #[doc = " UUID defined\n/\n/**\n GATT Services"]
+//     pub static gapServiceUUID: [u8; 0usize];
+// }
+// unsafe extern "C" {
+//     pub static gattServiceUUID: [u8; 0usize];
+// }
+// unsafe extern "C" {
+//     #[doc = " GATT Attribute Types"]
+//     pub static primaryServiceUUID: [u8; 0usize];
+// }
+// unsafe extern "C" {
+//     pub static secondaryServiceUUID: [u8; 0usize];
+// }
+// unsafe extern "C" {
+//     pub static includeUUID: [u8; 0usize];
+// }
+// unsafe extern "C" {
+//     pub static characterUUID: [u8; 0usize];
+// }
+// unsafe extern "C" {
+//     #[doc = " GATT Characteristic Descriptors"]
+//     pub static charExtPropsUUID: [u8; 0usize];
+// }
+// unsafe extern "C" {
+//     pub static charUserDescUUID: [u8; 0usize];
+// }
+// unsafe extern "C" {
+//     pub static clientCharCfgUUID: [u8; 0usize];
+// }
+// unsafe extern "C" {
+//     pub static servCharCfgUUID: [u8; 0usize];
+// }
+// unsafe extern "C" {
+//     pub static charFormatUUID: [u8; 0usize];
+// }
+// unsafe extern "C" {
+//     pub static charAggFormatUUID: [u8; 0usize];
+// }
+// unsafe extern "C" {
+//     pub static validRangeUUID: [u8; 0usize];
+// }
+// unsafe extern "C" {
+//     pub static extReportRefUUID: [u8; 0usize];
+// }
+// unsafe extern "C" {
+//     pub static reportRefUUID: [u8; 0usize];
+// }
+// unsafe extern "C" {
+//     #[doc = " GATT Characteristic Types"]
+//     pub static deviceNameUUID: [u8; 0usize];
+// }
+// unsafe extern "C" {
+//     pub static appearanceUUID: [u8; 0usize];
+// }
+// unsafe extern "C" {
+//     pub static periPrivacyFlagUUID: [u8; 0usize];
+// }
+// unsafe extern "C" {
+//     pub static reconnectAddrUUID: [u8; 0usize];
+// }
+// unsafe extern "C" {
+//     pub static periConnParamUUID: [u8; 0usize];
+// }
+// unsafe extern "C" {
+//     pub static serviceChangedUUID: [u8; 0usize];
+// }
+// unsafe extern "C" {
+//     pub static centAddrResUUID: [u8; 0usize];
+// }
+// unsafe extern "C" {
+//     #[doc = " PUBLIC FUNCTIONS"]
+//     pub fn tmos_rand() -> u32;
+// }
+// unsafe extern "C" {
+//     pub fn tmos_memcmp(src1: *const ::core::ffi::c_void, src2: *const ::core::ffi::c_void, len: u32) -> BOOL;
+// }
+// unsafe extern "C" {
+//     pub fn tmos_isbufset(buf: *mut u8, val: u8, len: u32) -> BOOL;
+// }
+// unsafe extern "C" {
+//     pub fn tmos_strlen(pString: *mut ::core::ffi::c_char) -> u32;
+// }
+// unsafe extern "C" {
+//     pub fn tmos_memset(pDst: *mut ::core::ffi::c_void, Value: u8, len: u32);
+// }
+// unsafe extern "C" {
+//     pub fn tmos_memcpy(dst: *mut ::core::ffi::c_void, src: *const ::core::ffi::c_void, len: u32);
+// }
+// unsafe extern "C" {
+//     #[doc = " @brief   start a event immediately\n\n @param   taskID - task ID of event\n @param   event - event value\n\n @return  0 - SUCCESS."]
+//     pub fn tmos_set_event(taskID: tmosTaskID, event: tmosEvents) -> bStatus_t;
+// }
+// unsafe extern "C" {
+//     #[doc = " @brief   clear a event already timeout, cannot be used in it own event function.\n\n @param   taskID - task ID of event\n @param   event - event value\n\n @return  0 - SUCCESS."]
+//     pub fn tmos_clear_event(taskID: tmosTaskID, event: tmosEvents) -> bStatus_t;
+// }
+// unsafe extern "C" {
+//     #[doc = " @brief   start a event after period of time\n\n @param   taskID - task ID to set event for\n @param   event - event to be notified with\n @param   time - timeout value\n\n @return  TRUE,FALSE."]
+//     pub fn tmos_start_task(taskID: tmosTaskID, event: tmosEvents, time: tmosTimer) -> BOOL;
+// }
+// unsafe extern "C" {
+//     #[doc = " @brief   This function is called to start a timer to expire in n system clock time.\n          When the timer expires, the calling task will get the specified event\n          and the timer will be reloaded with the timeout value.\n\n @param   taskID - task ID to set timer for\n @param   event - event to be notified with\n @param   time - timeout value\n\n @return  SUCCESS, or NO_TIMER_AVAIL."]
+//     pub fn tmos_start_reload_task(taskID: tmosTaskID, event: tmosEvents, time: tmosTimer) -> bStatus_t;
+// }
+// unsafe extern "C" {
+//     #[doc = " @brief   stop a event\n\n @param   taskID - task ID of event\n @param   event - event value\n\n @param   None.\n\n @return  SUCCESS."]
+//     pub fn tmos_stop_task(taskID: tmosTaskID, event: tmosEvents) -> bStatus_t;
+// }
+// unsafe extern "C" {
+//     #[doc = " @brief   get last period of time for this event\n\n @param   taskID - task ID of event\n @param   event - event value\n\n @return  the timer's tick count if found, zero otherwise."]
+//     pub fn tmos_get_task_timer(taskID: tmosTaskID, event: tmosEvents) -> tmosTimer;
+// }
+// unsafe extern "C" {
+//     #[doc = " @brief   send msg to a task,callback events&SYS_EVENT_MSG\n\n @param   taskID - task ID of task need to send msg\n @param  *msg_ptr - point of msg\n\n @return  SUCCESS, INVALID_TASK, INVALID_MSG_POINTER"]
+//     pub fn tmos_msg_send(taskID: tmosTaskID, msg_ptr: *mut u8) -> bStatus_t;
+// }
+// unsafe extern "C" {
+//     #[doc = " @brief   delete a msg\n\n @param  *msg_ptr - point of msg\n\n @return  SUCCESS."]
+//     pub fn tmos_msg_deallocate(msg_ptr: *mut u8) -> bStatus_t;
+// }
+// unsafe extern "C" {
+//     #[doc = " @brief   receive a msg\n\n @param   taskID  - task ID of task need to receive msg\n\n @return *uint8_t - message information or NULL if no message"]
+//     pub fn tmos_msg_receive(taskID: tmosTaskID) -> *mut u8;
+// }
+// unsafe extern "C" {
+//     #[doc = " @brief   allocate buffer for msg when need to send msg\n\n @param   len  - length of msg\n\n @return  pointer to allocated buffer or NULL if allocation failed."]
+//     pub fn tmos_msg_allocate(len: u16) -> *mut u8;
+// }
+// unsafe extern "C" {
+//     #[doc = " @brief   read a data item to NV.\n\n @param   id   - Valid NV item Id.\n @param   len  - Length of data to read.\n @param  *pBuf - Data to read.\n\n @return  SUCCESS if successful, NV_OPER_FAILED if failed."]
+//     pub fn tmos_snv_read(id: tmosSnvId_t, len: tmosSnvLen_t, pBuf: *mut ::core::ffi::c_void) -> bStatus_t;
+// }
+// unsafe extern "C" {
+//     #[doc = " @brief   tmos system timer initialization\n\n @note    must initialization before call tmos task\n\n @param   fnGetClock - system clock select extend input,if NULL select HSE as the clock source\n\n @return  SUCCESS if successful, FAILURE if failed."]
+//     pub fn TMOS_TimerInit(pClockConfig: *mut bleClockConfig_t) -> bStatus_t;
+// }
+// unsafe extern "C" {
+//     #[doc = " @brief   interrupt handler.\n\n @param   None\n\n @return  None"]
+//     pub fn TMOS_TimerIRQHandler(time: *mut u32) -> bStatus_t;
+// }
+// unsafe extern "C" {
+//     #[doc = " @brief   Process system\n\n @param   None.\n\n @return  None."]
+//     pub fn TMOS_SystemProcess();
+// }
+// unsafe extern "C" {
+//     #[doc = " @brief   Get current system clock\n\n @param   None.\n\n @return  current system clock (in 0.625ms)"]
+//     pub fn TMOS_GetSystemClock() -> u32;
+// }
+// unsafe extern "C" {
+//     #[doc = " @brief   register process event callback function\n\n @param   eventCb-events callback function\n\n @return  0xFF - error,others-task id"]
+//     pub fn TMOS_ProcessEventRegister(eventCb: pTaskEventHandlerFn) -> tmosTaskID;
+// }
+// unsafe extern "C" {
+//     #[doc = " @brief   Add a device address into white list ( support SNVNum MAX )\n\n @param   addrType - Type of device address\n @param   devAddr  - first address of device address\n\n @return  Command Status."]
+//     pub fn LL_AddWhiteListDevice(addrType: u8, devAddr: *mut u8) -> bStatus_t;
+// }
+// unsafe extern "C" {
+//     #[doc = " @brief   Remove a device address from white list\n\n @param   addrType - Type of device address\n @param   devAddr  - first address of device address\n\n @return  Command Status."]
+//     pub fn LL_RemoveWhiteListDevice(addrType: u8, devAddr: *mut u8) -> bStatus_t;
+// }
+// unsafe extern "C" {
+//     #[doc = " @brief   Clear white list\n\n @param   None\n\n @return  Command Status."]
+//     pub fn LL_ClearWhiteList() -> bStatus_t;
+// }
+// unsafe extern "C" {
+//     #[doc = " @brief   Encrypt data\n\n @param   key - key\n @param   plaintextData - original data\n @param   encryptData - encrypted data\n\n @return  Command Status."]
+//     pub fn LL_Encrypt(key: *mut u8, plaintextData: *mut u8, encryptData: *mut u8) -> bStatus_t;
+// }
+// unsafe extern "C" {
+//     #[doc = " @brief   Decrypt data\n\n @param   key - key\n @param   plaintextData - original data\n @param   decryptData - decrypted data\n\n @return  Command Status."]
+//     pub fn LL_Decrypt(key: *mut u8, plaintextData: *mut u8, decryptData: *mut u8) -> bStatus_t;
+// }
+// unsafe extern "C" {
+//     #[doc = " @brief   get number of unAck packet in current connect buffer\n\n @param   handle - connect handle\n\n @return  0xFFFFFFFF-handle error,number of packets not receiving ack"]
+//     pub fn LL_GetNumberOfUnAckPacket(handle: u16) -> u32;
+// }
+// unsafe extern "C" {
+//     #[doc = " @brief   Register a callback function will be called after each connect event.\n          Only effect in single connection\n\n @param   connEventCB - callback function\n\n @return  None."]
+//     pub fn LL_ConnectEventRegister(connEventCB: pfnEventCB);
+// }
+// unsafe extern "C" {
+//     #[doc = " @brief   Register a callback function will be called after each advertise event.\n\n @param   advEventCB - callback function\n\n @return  None."]
+//     pub fn LL_AdvertiseEventRegister(advEventCB: pfnEventCB);
+// }
+// unsafe extern "C" {
+//     #[doc = " @brief   set tx power level\n\n @param   power - tx power level\n\n @return  Command Status."]
+//     pub fn LL_SetTxPowerLevel(power: u8) -> bStatus_t;
+// }
+// unsafe extern "C" {
+//     #[doc = " @brief   set tx power level\n\n @param   pList - tx power list(global variable)\n\n @return  Command Status."]
+//     pub fn LL_SetTxPowerList(pList: *mut powerList_t) -> bStatus_t;
+// }
+// unsafe extern "C" {
+//     #[doc = " @brief   read rssi\n\n @param   None.\n\n @return  the value of rssi."]
+//     pub fn BLE_ReadRssi() -> i8;
+// }
+// unsafe extern "C" {
+//     #[doc = " @brief   read cfo\n\n @param   None.\n\n @return  the value of cfo."]
+//     pub fn BLE_ReadCfo() -> i16;
+// }
+// unsafe extern "C" {
+//     #[doc = " @brief   pa control init\n\n @note    Can't be called until  role Init\n\n @param   paControl - pa control parameters(global variable)\n\n @return  Command Status."]
+//     pub fn BLE_PAControlInit(paControl: *mut blePaControlConfig_t);
+// }
+// unsafe extern "C" {
+//     #[doc = " @brief   ble register reset and rf calibration\n\n @param   None\n\n @return  None"]
+//     pub fn BLE_RegInit();
+// }
+// unsafe extern "C" {
+//     #[doc = " @brief   Init BLE lib. RTC will be occupied at the same time.\n\n @param   pCfg - config of BLE lib\n\n @return  0-success. error defined @ ERR_LIB_INIT"]
+//     pub fn BLE_LibInit(pCfg: *mut bleConfig_t) -> bStatus_t;
+// }
+// unsafe extern "C" {
+//     #[doc = " @brief   interrupt handler.\n\n @param   None\n\n @return  None"]
+//     pub fn BB_IRQLibHandler();
+// }
+// unsafe extern "C" {
+//     #[doc = " @brief   interrupt handler.\n\n @param   None\n\n @return  None"]
+//     pub fn LLE_IRQLibHandler();
+// }
+// unsafe extern "C" {
+//     #[doc = " @brief   generate a valid access address\n\n @param   None.\n\n @return  access address\n the Access Address meets the following requirements:\n It shall have no more than six consecutive zeros or ones.\n It shall not be t he advertising channel packets�� Access Address.\n It shall not be a sequence that differ s from the advertising channel packets' Access Address by only one bit.\n It shall not have all four octets equal.\n It shall have no more  than 24 transitions.\n It shall have a minimum of two transitions in the most significant six bits."]
+//     pub fn BLE_AccessAddressGenerate() -> u32;
+// }
+// unsafe extern "C" {
+//     pub fn linkDB_Register(pFunc: pfnLinkDBCB_t) -> u8;
+// }
+// unsafe extern "C" {
+//     pub fn linkDB_State(connectionHandle: u16, state: u8) -> u8;
+// }
+// unsafe extern "C" {
+//     pub fn linkDB_PerformFunc(cb: pfnPerformFuncCB_t);
+// }
+// unsafe extern "C" {
+//     #[doc = " @brief   This function is used to get the MTU size of a connection.\n\n @param   connHandle - connection handle.\n\n @return  connection MTU size.<BR>"]
+//     pub fn ATT_GetMTU(connHandle: u16) -> u16;
+// }
+// unsafe extern "C" {
+//     #[doc = " @brief   Send Handle Value Confirmation.\n\n @param   connHandle - connection to use\n\n @return  SUCCESS: Confirmation was sent successfully.<BR>\n          INVALIDPARAMETER: Invalid confirmation field.<BR>\n          MSG_BUFFER_NOT_AVAIL: No HCI buffer is available.<BR>\n          bleNotConnected: Connection is down.<BR>\n          bleMemAllocError: Memory allocation error occurred.<BR>"]
+//     pub fn ATT_HandleValueCfm(connHandle: u16) -> bStatus_t;
+// }
+// unsafe extern "C" {
+//     pub fn ATT_CompareUUID(pUUID1: *const u8, len1: u16, pUUID2: *const u8, len2: u16) -> u8;
+// }
+// unsafe extern "C" {
+//     #[doc = " @brief   Initialize the Generic Attribute Profile Client.\n\n @return  SUCCESS: Client initialized successfully.<BR>\n          bleMemAllocError: Memory allocation error occurred.<BR>"]
+//     pub fn GATT_InitClient() -> bStatus_t;
+// }
+// unsafe extern "C" {
+//     #[doc = " @brief   Register to receive incoming ATT Indications or Notifications\n          of attribute values.\n\n @param   taskId ?task to forward indications or notifications to\n\n @return  void"]
+//     pub fn GATT_RegisterForInd(taskId: u8);
+// }
+// unsafe extern "C" {
+//     #[doc = " @brief   Find the attribute record for a given handle\n\n @param   handle - handle to look for\n @param   pHandle - handle of owner of attribute (to be returned)\n\n @return  Pointer to attribute record. NULL, otherwise."]
+//     pub fn GATT_FindHandle(handle: u16, pHandle: *mut u16) -> *mut gattAttribute_t;
+// }
+// unsafe extern "C" {
+//     #[doc = " @brief   This sub-procedure is used when a server is configured to\n          indicate a characteristic value to a client and expects an\n          attribute protocol layer acknowledgement that the indication\n          was successfully received.\n\n          The ATT Handle Value Indication is used in this sub-procedure.\n\n          If the return status from this function is SUCCESS, the calling\n          application task will receive an tmos GATT_MSG_EVENT message.\n          The type of the message will be ATT_HANDLE_VALUE_CFM.\n\n @note    This sub-procedure is complete when ATT_HANDLE_VALUE_CFM\n          (with SUCCESS or bleTimeoutstatus) is received by the calling application task.\n\n @param   connHandle - connection to use\n @param   pInd - pointer to indication to be sent\n @param   authenticated - whether an authenticated link is required\n @param   taskId - task to be notified of response\n\n @return  SUCCESS: Indication was sent successfully.<BR>\n          INVALIDPARAMETER: Invalid connection handle or request field.<BR>\n          MSG_BUFFER_NOT_AVAIL: No HCI buffer is available.<BR>\n          bleNotConnected: Connection is down.<BR>\n          blePending: A confirmation is pending with this client.<BR>\n          bleMemAllocError: Memory allocation error occurred.<BR>\n          bleTimeout: Previous transaction timed out.<BR>"]
+//     pub fn GATT_Indication(connHandle: u16, pInd: *mut attHandleValueInd_t, authenticated: u8, taskId: u8)
+//         -> bStatus_t;
+// }
+// unsafe extern "C" {
+//     #[doc = " @brief   This sub-procedure is used when a server is configured to\n          notify a characteristic value to a client without expecting\n          any attribute protocol layer acknowledgement that the\n          notification was successfully received.\n\n          The ATT Handle Value Notification is used in this sub-procedure.\n\n @note    A notification may be sent at any time and does not invoke a confirmation.\n          No confirmation will be sent to the calling application task for\n          this sub-procedure.\n\n @param   connHandle - connection to use\n @param   pNoti - pointer to notification to be sent\n @param   authenticated - whether an authenticated link is required\n\n @return  SUCCESS: Notification was sent successfully.<BR>\n          INVALIDPARAMETER: Invalid connection handle or request field.<BR>\n          MSG_BUFFER_NOT_AVAIL: No HCI buffer is available.<BR>\n          bleNotConnected: Connection is down.<BR>\n          bleMemAllocError: Memory allocation error occurred.<BR>\n          bleTimeout: Previous transaction timed out.<BR>"]
+//     pub fn GATT_Notification(connHandle: u16, pNoti: *mut attHandleValueNoti_t, authenticated: u8) -> bStatus_t;
+// }
+// unsafe extern "C" {
+//     #[doc = " @brief   This sub-procedure is used by the client to set the ATT_MTU\n          to the maximum possible value that can be supported by both\n          devices when the client supports a value greater than the\n          default ATT_MTU for the Attribute Protocol. This sub-procedure\n          shall only be initiated once during a connection.\n\n          The ATT Exchange MTU Request is used by this sub-procedure.\n\n          If the return status from this function is SUCCESS, the calling\n          application task will receive an tmos GATT_MSG_EVENT message.\n          The type of the message will be either ATT_EXCHANGE_MTU_RSP or\n          ATT_ERROR_RSP (if an error occurred on the server).\n\n @note    This sub-procedure is complete when either ATT_EXCHANGE_MTU_RSP\n          (with SUCCESS or bleTimeout status) or ATT_ERROR_RSP\n          (with SUCCESS status) is received by the calling application task.\n\n @param   connHandle - connection to use\n @param   pReq - pointer to request to be sent\n @param   taskId - task to be notified of response\n\n @return  SUCCESS: Request was sent successfully.<BR>\n          INVALIDPARAMETER: Invalid connection handle or request field.<BR>\n          MSG_BUFFER_NOT_AVAIL: No HCI buffer is available.<BR>\n          bleNotConnected: Connection is down.<BR>\n          blePending: A response is pending with this server.<BR>\n          bleMemAllocError: Memory allocation error occurred.<BR>\n          bleTimeout: Previous transaction timed out.<BR>"]
+//     pub fn GATT_ExchangeMTU(connHandle: u16, pReq: *mut attExchangeMTUReq_t, taskId: u8) -> bStatus_t;
+// }
+// unsafe extern "C" {
+//     #[doc = " @brief   This sub-procedure is used by a client to discover all\n          the primary services on a server.\n\n          The ATT Read By Group Type Request is used with the Attribute\n          Type parameter set to the UUID for \"Primary Service\". The\n          Starting Handle is set to 0x0001 and the Ending Handle is\n          set to 0xFFFF.\n\n          If the return status from this function is SUCCESS, the calling\n          application task will receive multiple tmos GATT_MSG_EVENT messages.\n          The type of the messages will be either ATT_READ_BY_GRP_TYPE_RSP\n          or ATT_ERROR_RSP (if an error occurred on the server).\n\n @note    This sub-procedure is complete when either ATT_READ_BY_GRP_TYPE_RSP\n          (with bleProcedureComplete or bleTimeout status) or ATT_ERROR_RSP\n          (with SUCCESS status) is received by the calling application task.\n\n @param   connHandle - connection to use\n @param   taskId - task to be notified of response\n\n @return  SUCCESS: Request was sent successfully.<BR>\n          INVALIDPARAMETER: Invalid connection handle or request field.<BR>\n          MSG_BUFFER_NOT_AVAIL: No HCI buffer is available.<BR>\n          bleNotConnected: Connection is down.<BR>\n          blePending: A response is pending with this server.<BR>\n          bleMemAllocError: Memory allocation error occurred.<BR>\n          bleTimeout: Previous transaction timed out.<BR>"]
+//     pub fn GATT_DiscAllPrimaryServices(connHandle: u16, taskId: u8) -> bStatus_t;
+// }
+// unsafe extern "C" {
+//     #[doc = " @brief   This sub-procedure is used by a client to discover a specific\n          primary service on a server when only the Service UUID is\n          known. The primary specific service may exist multiple times\n          on a server. The primary service being discovered is identified\n          by the service UUID.\n\n          The ATT Find By Type Value Request is used with the Attribute\n          Type parameter set to the UUID for \"Primary Service\" and the\n          Attribute Value set to the 16-bit Bluetooth UUID or 128-bit\n          UUID for the specific primary service. The Starting Handle shall\n          be set to 0x0001 and the Ending Handle shall be set to 0xFFFF.\n\n          If the return status from this function is SUCCESS, the calling\n          application task will receive multiple tmos GATT_MSG_EVENT messages.\n          The type of the messages will be either ATT_FIND_BY_TYPE_VALUE_RSP\n          or ATT_ERROR_RSP (if an error occurred on the server).\n\n @note    This sub-procedure is complete when either ATT_FIND_BY_TYPE_VALUE_RSP\n          (with bleProcedureComplete or bleTimeout status) or ATT_ERROR_RSP\n          (with SUCCESS status) is received by the calling application task.\n\n @param   connHandle - connection to use\n @param   pUUID - pointer to service UUID to look for\n @param   len - length of value\n @param   taskId - task to be notified of response\n\n @return  SUCCESS: Request was sent successfully.<BR>\n          INVALIDPARAMETER: Invalid connection handle or request field.<BR>\n          MSG_BUFFER_NOT_AVAIL: No HCI buffer is available.<BR>\n          bleNotConnected: Connection is down.<BR>\n          blePending: A response is pending with this server.<BR>\n          bleMemAllocError: Memory allocation error occurred.<BR>\n          bleTimeout: Previous transaction timed out.<BR>"]
+//     pub fn GATT_DiscPrimaryServiceByUUID(connHandle: u16, pUUID: *mut u8, len: u8, taskId: u8) -> bStatus_t;
+// }
+// unsafe extern "C" {
+//     #[doc = " @brief   This sub-procedure is used by a client to find include\n          service declarations within a service definition on a\n          server. The service specified is identified by the service\n          handle range.\n\n          The ATT Read By Type Request is used with the Attribute\n          Type parameter set to the UUID for \"Included Service\". The\n          Starting Handle is set to starting handle of the specified\n          service and the Ending Handle is set to the ending handle\n          of the specified service.\n\n          If the return status from this function is SUCCESS, the calling\n          application task will receive multiple tmos GATT_MSG_EVENT messages.\n          The type of the messages will be either ATT_READ_BY_TYPE_RSP\n          or ATT_ERROR_RSP (if an error occurred on the server).\n\n @note    This sub-procedure is complete when either ATT_READ_BY_TYPE_RSP\n          (with bleProcedureCompleteor bleTimeout status)or ATT_ERROR_RSP\n          (with SUCCESS status) is received by the calling application task.\n\n @param   connHandle - connection to use\n @param   startHandle - starting handle\n @param   endHandle - end handle\n @param   taskId - task to be notified of response\n\n @return  SUCCESS: Request was sent successfully.<BR>\n          INVALIDPARAMETER: Invalid connection handle or request field.<BR>\n          MSG_BUFFER_NOT_AVAIL: No HCI buffer is available.<BR>\n          bleNotConnected: Connection is down.<BR>\n          blePending: A response is pending with this server.<BR>\n          bleMemAllocError: Memory allocation error occurred.<BR>\n          bleTimeout: Previous transaction timed out.<BR>"]
+//     pub fn GATT_FindIncludedServices(connHandle: u16, startHandle: u16, endHandle: u16, taskId: u8) -> bStatus_t;
+// }
+// unsafe extern "C" {
+//     #[doc = " @brief   This sub-procedure is used by a client to find all the\n          characteristic declarations within a service definition on\n          a server when only the service handle range is known. The\n          service specified is identified by the service handle range.\n\n          The ATT Read By Type Request is used with the Attribute Type\n          parameter set to the UUID for \"Characteristic\". The Starting\n          Handle is set to starting handle of the specified service and\n          the Ending Handle is set to the ending handle of the specified\n          service.\n\n          If the return status from this function is SUCCESS, the calling\n          application task will receive multiple tmos GATT_MSG_EVENT messages.\n          The type of the messages will be either ATT_READ_BY_TYPE_RSP\n          or ATT_ERROR_RSP (if an error occurred on the server).\n\n @note    This sub-procedure is complete when either ATT_READ_BY_TYPE_RSP\n          (with bleProcedureComplete or bleTimeout status)or ATT_ERROR_RSP\n          (with SUCCESS status) is received by the calling application task.\n\n @param   connHandle - connection to use\n @param   startHandle - starting handle\n @param   endHandle - end handle\n @param   taskId - task to be notified of response\n\n @return  SUCCESS: Request was sent successfully.<BR>\n          INVALIDPARAMETER: Invalid connection handle or request field.<BR>\n          MSG_BUFFER_NOT_AVAIL: No HCI buffer is available.<BR>\n          bleNotConnected: Connection is down.<BR>\n          blePending: A response is pending with this server.<BR>\n          bleMemAllocError: Memory allocation error occurred.<BR>\n          bleTimeout: Previous transaction timed out.<BR>"]
+//     pub fn GATT_DiscAllChars(connHandle: u16, startHandle: u16, endHandle: u16, taskId: u8) -> bStatus_t;
+// }
+// unsafe extern "C" {
+//     #[doc = " @brief   This sub-procedure is used by a client to discover service\n          characteristics on a server when only the service handle\n          ranges are known and the characteristic UUID is known.\n          The specific service may exist multiple times on a server.\n          The characteristic being discovered is identified by the\n          characteristic UUID.\n\n          The ATT Read By Type Request is used with the Attribute Type\n          is set to the UUID for \"Characteristic\" and the Starting\n          Handle and Ending Handle parameters is set to the service\n          handle range.\n\n          If the return status from this function is SUCCESS, the calling\n          application task will receive multiple tmos GATT_MSG_EVENT messages.\n          The type of the messages will be either ATT_READ_BY_TYPE_RSP\n          or ATT_ERROR_RSP (if an error occurred on the server).\n\n @note    This sub-procedure is complete when either ATT_READ_BY_TYPE_RSP\n          (with bleProcedureComplete or bleTimeout status) or ATT_ERROR_RSP\n          (with SUCCESS status) is received by the calling application task.\n\n @param   connHandle - connection to use\n @param   pReq - pointer to request to be sent\n @param   taskId - task to be notified of response\n\n @return  SUCCESS: Request was sent successfully.<BR>\n          INVALIDPARAMETER: Invalid connection handle or request field.<BR>\n          MSG_BUFFER_NOT_AVAIL: No HCI buffer is available.<BR>\n          bleNotConnected: Connection is down.<BR>\n          blePending: A response is pending with this server.<BR>\n          bleMemAllocError: Memory allocation error occurred.<BR>\n          bleTimeout: Previous transaction timed out.<BR>"]
+//     pub fn GATT_DiscCharsByUUID(connHandle: u16, pReq: *mut attReadByTypeReq_t, taskId: u8) -> bStatus_t;
+// }
+// unsafe extern "C" {
+//     #[doc = " @brief   This sub-procedure is used by a client to find all the\n          characteristic descriptors Attribute Handles and Attribute\n          Types within a characteristic definition when only the\n          characteristic handle range is known. The characteristic\n          specified is identified by the characteristic handle range.\n\n          The ATT Find Information Request is used with the Starting\n          Handle set to starting handle of the specified characteristic\n          and the Ending Handle set to the ending handle of the specified\n          characteristic. The UUID Filter parameter is NULL (zero length).\n\n          If the return status from this function is SUCCESS, the calling\n          application task will receive multiple tmos GATT_MSG_EVENT messages.\n          The type of the messages will be either ATT_FIND_INFO_RSP or\n          ATT_ERROR_RSP (if an error occurred on the server).\n\n @note    This sub-procedure is complete when either ATT_FIND_INFO_RSP\n          (with bleProcedureComplete or bleTimeout status) or ATT_ERROR_RSP\n          (with SUCCESS status) is received by the calling application task.\n\n @param   connHandle - connection to use\n @param   startHandle - starting handle\n @param   endHandle - end handle\n @param   taskId - task to be notified of response\n\n @return  SUCCESS: Request was sent successfully.<BR>\n          INVALIDPARAMETER: Invalid connection handle or request field.<BR>\n          MSG_BUFFER_NOT_AVAIL: No HCI buffer is available.<BR>\n          bleNotConnected: Connection is down.<BR>\n          blePending: A response is pending with this server.<BR>\n          bleMemAllocError: Memory allocation error occurred.<BR>\n          bleTimeout: Previous transaction timed out.<BR>"]
+//     pub fn GATT_DiscAllCharDescs(connHandle: u16, startHandle: u16, endHandle: u16, taskId: u8) -> bStatus_t;
+// }
+// unsafe extern "C" {
+//     #[doc = " @brief   This sub-procedure is used to read a Characteristic Value\n          from a server when the client knows the Characteristic Value\n          Handle. The ATT Read Request is used with the Attribute Handle\n          parameter set to the Characteristic Value Handle. The Read\n          Response returns the Characteristic Value in the Attribute\n          Value parameter.\n\n          The Read Response only contains a Characteristic Value that\n          is less than or equal to (ATT_MTU ?1) octets in length. If\n          the Characteristic Value is greater than (ATT_MTU - 1) octets\n          in length, the Read Long Characteristic Value procedure may\n          be used if the rest of the Characteristic Value is required.\n\n          If the return status from this function is SUCCESS, the calling\n          application task will receive an tmos GATT_MSG_EVENT message.\n          The type of the message will be either ATT_READ_RSP or\n          ATT_ERROR_RSP (if an error occurred on the server).\n\n @note    This sub-procedure is complete when either ATT_READ_RSP\n          (with SUCCESS or bleTimeout status) or ATT_ERROR_RSP\n          (with SUCCESS status) is received by the calling application task.\n\n @param   connHandle - connection to use\n @param   pReq - pointer to request to be sent\n @param   taskId - task to be notified of response\n\n @return  SUCCESS: Request was sent successfully.<BR>\n          INVALIDPARAMETER: Invalid connection handle or request field.<BR>\n          MSG_BUFFER_NOT_AVAIL: No HCI buffer is available.<BR>\n          bleNotConnected: Connection is down.<BR>\n          blePending: A response is pending with this server.<BR>\n          bleMemAllocError: Memory allocation error occurred.<BR>\n          bleTimeout: Previous transaction timed out.<BR>"]
+//     pub fn GATT_ReadCharValue(connHandle: u16, pReq: *mut attReadReq_t, taskId: u8) -> bStatus_t;
+// }
+// unsafe extern "C" {
+//     #[doc = " @brief   This sub-procedure is used to read a Characteristic Value\n          from a server when the client only knows the characteristic\n          UUID and does not know the handle of the characteristic.\n\n          The ATT Read By Type Request is used to perform the sub-procedure.\n          The Attribute Type is set to the known characteristic UUID and\n          the Starting Handle and Ending Handle parameters shall be set\n          to the range over which this read is to be performed. This is\n          typically the handle range for the service in which the\n          characteristic belongs.\n\n          If the return status from this function is SUCCESS, the calling\n          application task will receive an tmos GATT_MSG_EVENT messages.\n          The type of the message will be either ATT_READ_BY_TYPE_RSP\n          or ATT_ERROR_RSP (if an error occurred on the server).\n\n @note    This sub-procedure is complete when either ATT_READ_BY_TYPE_RSP\n          (with SUCCESS or bleTimeout status) or ATT_ERROR_RSP\n          (with SUCCESS status) is received by the calling application task.\n\n @param   connHandle - connection to use\n @param   pReq - pointer to request to be sent\n @param   taskId - task to be notified of response\n\n @return  SUCCESS: Request was sent successfully.<BR>\n          INVALIDPARAMETER: Invalid connection handle or request field.<BR>\n          MSG_BUFFER_NOT_AVAIL: No HCI buffer is available.<BR>\n          bleNotConnected: Connection is down.<BR>\n          blePending: A response is pending with this server.<BR>\n          bleMemAllocError: Memory allocation error occurred.<BR>\n          bleTimeout: Previous transaction timed out.<BR>"]
+//     pub fn GATT_ReadUsingCharUUID(connHandle: u16, pReq: *mut attReadByTypeReq_t, taskId: u8) -> bStatus_t;
+// }
+// unsafe extern "C" {
+//     #[doc = " @brief   This sub-procedure is used to read a Characteristic Value from\n          a server when the client knows the Characteristic Value Handle\n          and the length of the Characteristic Value is longer than can\n          be sent in a single Read Response Attribute Protocol message.\n\n          The ATT Read Blob Request is used in this sub-procedure.\n\n          If the return status from this function is SUCCESS, the calling\n          application task will receive multiple tmos GATT_MSG_EVENT messages.\n          The type of the messages will be either ATT_READ_BLOB_RSP or\n          ATT_ERROR_RSP (if an error occurred on the server).\n\n @note    This sub-procedure is complete when either ATT_READ_BLOB_RSP\n          (with bleProcedureComplete or bleTimeout status) or ATT_ERROR_RSP\n          (with SUCCESS status) is received by the calling application task.\n\n @param   connHandle - connection to use\n @param   pReq - pointer to request to be sent\n @param   taskId - task to be notified of response\n\n @return  SUCCESS: Request was sent successfully.<BR>\n          INVALIDPARAMETER: Invalid connection handle or request field.<BR>\n          MSG_BUFFER_NOT_AVAIL: No HCI buffer is available.<BR>\n          bleNotConnected: Connection is down.<BR>\n          blePending: A response is pending with this server.<BR>\n          bleMemAllocError: Memory allocation error occurred.<BR>\n          bleTimeout: Previous transaction timed out.<BR>"]
+//     pub fn GATT_ReadLongCharValue(connHandle: u16, pReq: *mut attReadBlobReq_t, taskId: u8) -> bStatus_t;
+// }
+// unsafe extern "C" {
+//     #[doc = " @brief   This sub-procedure is used to read multiple Characteristic Values\n          from a server when the client knows the Characteristic Value\n          Handles. The Attribute Protocol Read Multiple Requests is used\n          with the Set Of Handles parameter set to the Characteristic Value\n          Handles. The Read Multiple Response returns the Characteristic\n          Values in the Set Of Values parameter.\n\n          The ATT Read Multiple Request is used in this sub-procedure.\n\n          If the return status from this function is SUCCESS, the calling\n          application task will receive an tmos GATT_MSG_EVENT message.\n          The type of the message will be either ATT_READ_MULTI_RSP\n          or ATT_ERROR_RSP (if an error occurred on the server).\n\n @note    This sub-procedure is complete when either ATT_READ_MULTI_RSP\n          (with SUCCESS or bleTimeout status) or ATT_ERROR_RSP\n          (with SUCCESS status) is received by the calling application task.\n\n @param   connHandle - connection to use\n @param   pReq - pointer to request to be sent\n @param   taskId - task to be notified of response\n\n @return  SUCCESS: Request was sent successfully.<BR>\n          INVALIDPARAMETER: Invalid connection handle or request field.<BR>\n          MSG_BUFFER_NOT_AVAIL: No HCI buffer is available.<BR>\n          bleNotConnected: Connection is down.<BR>\n          blePending: A response is pending with this server.<BR>\n          bleMemAllocError: Memory allocation error occurred.<BR>\n          bleTimeout: Previous transaction timed out.<BR>"]
+//     pub fn GATT_ReadMultiCharValues(connHandle: u16, pReq: *mut attReadMultiReq_t, taskId: u8) -> bStatus_t;
+// }
+// unsafe extern "C" {
+//     #[doc = " @brief   This sub-procedure is used to write a Characteristic Value\n          to a server when the client knows the Characteristic Value\n          Handle and the client does not need an acknowledgement that\n          the write was successfully performed. This sub-procedure\n          only writes the first (ATT_MTU ?3) octets of a Characteristic\n          Value. This sub-procedure can not be used to write a long\n          characteristic; instead the Write Long Characteristic Values\n          sub-procedure should be used.\n\n          The ATT Write Command is used for this sub-procedure. The\n          Attribute Handle parameter shall be set to the Characteristic\n          Value Handle. The Attribute Value parameter shall be set to\n          the new Characteristic Value.\n\n          No response will be sent to the calling application task for this\n          sub-procedure. If the Characteristic Value write request is the\n          wrong size, or has an invalid value as defined by the profile,\n          then the write will not succeed and no error will be generated\n          by the server.\n\n @param   connHandle - connection to use\n @param   pReq - pointer to command to be sent\n\n @return  SUCCESS: Request was sent successfully.<BR>\n          INVALIDPARAMETER: Invalid connection handle or request field.<BR>\n          MSG_BUFFER_NOT_AVAIL: No HCI buffer is available.<BR>\n          bleNotConnected: Connection is down.<BR>\n          bleMemAllocError: Memory allocation error occurred.<BR>\n          bleTimeout: Previous transaction timed out.<BR>"]
+//     pub fn GATT_WriteNoRsp(connHandle: u16, pReq: *mut attWriteReq_t) -> bStatus_t;
+// }
+// unsafe extern "C" {
+//     #[doc = " @brief   This sub-procedure is used to write a Characteristic Value\n          to a server when the client knows the Characteristic Value\n          Handle and the ATT Bearer is not encrypted. This sub-procedure\n          shall only be used if the Characteristic Properties authenticated\n          bit is enabled and the client and server device share a bond as\n          defined in the GAP.\n\n          This sub-procedure only writes the first (ATT_MTU ?15) octets\n          of an Attribute Value. This sub-procedure cannot be used to\n          write a long Attribute.\n\n          The ATT Write Command is used for this sub-procedure. The\n          Attribute Handle parameter shall be set to the Characteristic\n          Value Handle. The Attribute Value parameter shall be set to\n          the new Characteristic Value authenticated by signing the\n          value, as defined in the Security Manager.\n\n          No response will be sent to the calling application task for this\n          sub-procedure. If the authenticated Characteristic Value that is\n          written is the wrong size, or has an invalid value as defined by\n          the profile, or the signed value does not authenticate the client,\n          then the write will not succeed and no error will be generated by\n          the server.\n\n @param   connHandle - connection to use\n @param   pReq - pointer to command to be sent\n\n @return  SUCCESS: Request was sent successfully.<BR>\n          INVALIDPARAMETER: Invalid connection handle or request field.<BR>\n          MSG_BUFFER_NOT_AVAIL: No HCI buffer is available.<BR>\n          bleNotConnected: Connection is down.<BR>\n          bleMemAllocError: Memory allocation error occurred.<BR>\n          bleLinkEncrypted: Connection is already encrypted.<BR>\n          bleTimeout: Previous transaction timed out.<BR>"]
+//     pub fn GATT_SignedWriteNoRsp(connHandle: u16, pReq: *mut attWriteReq_t) -> bStatus_t;
+// }
+// unsafe extern "C" {
+//     #[doc = " @brief   This sub-procedure is used to write a characteristic value\n          to a server when the client knows the characteristic value\n          handle. This sub-procedure only writes the first (ATT_MTU-3)\n          octets of a characteristic value. This sub-procedure can not\n          be used to write a long attribute; instead the Write Long\n          Characteristic Values sub-procedure should be used.\n\n          The ATT Write Request is used in this sub-procedure. The\n          Attribute Handle parameter shall be set to the Characteristic\n          Value Handle. The Attribute Value parameter shall be set to\n          the new characteristic.\n\n          If the return status from this function is SUCCESS, the calling\n          application task will receive an tmos GATT_MSG_EVENT message.\n          The type of the message will be either ATT_WRITE_RSP\n          or ATT_ERROR_RSP (if an error occurred on the server).\n\n @note    This sub-procedure is complete when either ATT_WRITE_RSP\n          (with SUCCESS or bleTimeout status) or ATT_ERROR_RSP\n          (with SUCCESS status) is received by the calling application task.\n\n @param   connHandle - connection to use\n @param   pReq - pointer to request to be sent\n @param   taskId - task to be notified of response\n\n @return  SUCCESS: Request was sent successfully.<BR>\n          INVALIDPARAMETER: Invalid connection handle or request field.<BR>\n          MSG_BUFFER_NOT_AVAIL: No HCI buffer is available.<BR>\n          bleNotConnected: Connection is down.<BR>\n          blePending: A response is pending with this server.<BR>\n          bleMemAllocError: Memory allocation error occurred.<BR>\n          bleTimeout: Previous transaction timed out.<BR>"]
+//     pub fn GATT_WriteCharValue(connHandle: u16, pReq: *mut attWriteReq_t, taskId: u8) -> bStatus_t;
+// }
+// unsafe extern "C" {
+//     #[doc = " @brief   This sub-procedure is used to write a Characteristic Value to\n          a server when the client knows the Characteristic Value Handle\n          but the length of the Characteristic Value is longer than can\n          be sent in a single Write Request Attribute Protocol message.\n\n          The ATT Prepare Write Request and Execute Write Request are\n          used to perform this sub-procedure.\n\n          If the return status from this function is SUCCESS, the calling\n          application task will receive multiple tmos GATT_MSG_EVENT messages.\n          The type of the messages will be either ATT_PREPARE_WRITE_RSP,\n          ATT_EXECUTE_WRITE_RSP or ATT_ERROR_RSP (if an error occurred on\n          the server).\n\n @note    This sub-procedure is complete when either ATT_PREPARE_WRITE_RSP\n          (with bleTimeout status), ATT_EXECUTE_WRITE_RSP\n          (with SUCCESS or bleTimeout status), or ATT_ERROR_RSP\n          (with SUCCESS status) is received by the calling application task.\n\n @note    The 'pReq->pValue' pointer will be freed when the sub-procedure is complete.\n\n @param   connHandle - connection to use\n @param   pReq - pointer to request to be sent\n @param   taskId - task to be notified of response\n\n @return  SUCCESS: Request was sent successfully.<BR>\n          INVALIDPARAMETER: Invalid connection handle or request field.<BR>\n          MSG_BUFFER_NOT_AVAIL: No HCI buffer is available.<BR>\n          bleNotConnected: Connection is down.<BR>\n          blePending: A response is pending with this server.<BR>\n          bleMemAllocError: Memory allocation error occurred.<BR>\n          bleTimeout: Previous transaction timed out.<BR>"]
+//     pub fn GATT_WriteLongCharValue(connHandle: u16, pReq: *mut attPrepareWriteReq_t, taskId: u8) -> bStatus_t;
+// }
+// unsafe extern "C" {
+//     #[doc = " @brief   This sub-procedure is used to write a Characteristic Value to\n          a server when the client knows the Characteristic Value Handle,\n          and assurance is required that the correct Characteristic Value\n          is going to be written by transferring the Characteristic Value\n          to be written in both directions before the write is performed.\n          This sub-procedure can also be used when multiple values must\n          be written, in order, in a single operation.\n\n          The sub-procedure has two phases, the first phase prepares the\n          characteristic values to be written.  Once this is complete,\n          the second phase performs the execution of all of the prepared\n          characteristic value writes on the server from this client.\n\n          In the first phase, the ATT Prepare Write Request is used.\n          In the second phase, the attribute protocol Execute Write\n          Request is used.\n\n          If the return status from this function is SUCCESS, the calling\n          application task will receive multiple tmos GATT_MSG_EVENT messages.\n          The type of the messages will be either ATT_PREPARE_WRITE_RSP,\n          ATT_EXECUTE_WRITE_RSP or ATT_ERROR_RSP (if an error occurred on\n          the server).\n\n @note    This sub-procedure is complete when either ATT_PREPARE_WRITE_RSP\n          (with bleTimeout status), ATT_EXECUTE_WRITE_RSP\n          (with SUCCESS or bleTimeout status), or ATT_ERROR_RSP\n          (with SUCCESS status) is received by the calling application task.\n\n @note    The 'pReqs' pointer will be freed when the sub-procedure is complete.\n\n @param   connHandle - connection to use\n @param   pReqs - pointer to requests to be sent\n @param   numReqs - number of requests in pReq\n @param   flags - execute write request flags\n @param   taskId - task to be notified of response\n\n @return  SUCCESS: Request was sent successfully.<BR>\n          INVALIDPARAMETER: Invalid connection handle or request field.<BR>\n          MSG_BUFFER_NOT_AVAIL: No HCI buffer is available.<BR>\n          bleNotConnected: Connection is down.<BR>\n          blePending: A response is pending with this server.<BR>\n          bleMemAllocError: Memory allocation error occurred.<BR>\n          bleTimeout: Previous transaction timed out.<BR>"]
+//     pub fn GATT_ReliableWrites(
+//         connHandle: u16,
+//         pReqs: *mut attPrepareWriteReq_t,
+//         numReqs: u8,
+//         flags: u8,
+//         taskId: u8,
+//     ) -> bStatus_t;
+// }
+// unsafe extern "C" {
+//     #[doc = " @brief   This sub-procedure is used to read a characteristic descriptor\n          from a server when the client knows the characteristic descriptor\n          declaration's Attribute handle.\n\n          The ATT Read Request is used for this sub-procedure. The Read\n          Request is used with the Attribute Handle parameter set to the\n          characteristic descriptor handle. The Read Response returns the\n          characteristic descriptor value in the Attribute Value parameter.\n\n          If the return status from this function is SUCCESS, the calling\n          application task will receive an tmos GATT_MSG_EVENT message.\n          The type of the message will be either ATT_READ_RSP or\n          ATT_ERROR_RSP (if an error occurred on the server).\n\n @note    This sub-procedure is complete when either ATT_READ_RSP\n          (with SUCCESS or bleTimeout status) or ATT_ERROR_RSP\n          (with SUCCESS status) is received by the calling application task.\n\n @param   connHandle - connection to use\n @param   pReq - pointer to request to be sent\n @param   taskId - task to be notified of response\n\n @return  SUCCESS: Request was sent successfully.<BR>\n          INVALIDPARAMETER: Invalid connection handle or request field.<BR>\n          MSG_BUFFER_NOT_AVAIL: No HCI buffer is available.<BR>\n          bleNotConnected: Connection is down.<BR>\n          blePending: A response is pending with this server.<BR>\n          bleMemAllocError: Memory allocation error occurred.<BR>\n          bleTimeout: Previous transaction timed out.<BR>"]
+//     pub fn GATT_ReadCharDesc(connHandle: u16, pReq: *mut attReadReq_t, taskId: u8) -> bStatus_t;
+// }
+// unsafe extern "C" {
+//     #[doc = " @brief   This sub-procedure is used to read a characteristic descriptor\n          from a server when the client knows the characteristic descriptor\n          declaration's Attribute handle and the length of the characteristic\n          descriptor declaration is longer than can be sent in a single Read\n          Response attribute protocol message.\n\n          The ATT Read Blob Request is used to perform this sub-procedure.\n          The Attribute Handle parameter shall be set to the characteristic\n          descriptor handle. The Value Offset parameter shall be the offset\n          within the characteristic descriptor to be read.\n\n          If the return status from this function is SUCCESS, the calling\n          application task will receive multiple tmos GATT_MSG_EVENT messages.\n          The type of the messages will be either ATT_READ_BLOB_RSP or\n          ATT_ERROR_RSP (if an error occurred on the server).\n\n @note    This sub-procedure is complete when either ATT_READ_BLOB_RSP\n          (with bleProcedureComplete or bleTimeout status) or ATT_ERROR_RSP\n          (with SUCCESS status) is received by the calling application task.\n\n @param   connHandle - connection to use\n @param   pReq - pointer to request to be sent\n @param   taskId - task to be notified of response\n\n @return  SUCCESS: Request was sent successfully.<BR>\n          INVALIDPARAMETER: Invalid connection handle or request field.<BR>\n          MSG_BUFFER_NOT_AVAIL: No HCI buffer is available.<BR>\n          bleNotConnected: Connection is down.<BR>\n          blePending: A response is pending with this server.<BR>\n          bleMemAllocError: Memory allocation error occurred.<BR>\n          bleTimeout: Previous transaction timed out.<BR>"]
+//     pub fn GATT_ReadLongCharDesc(connHandle: u16, pReq: *mut attReadBlobReq_t, taskId: u8) -> bStatus_t;
+// }
+// unsafe extern "C" {
+//     #[doc = " @brief   This sub-procedure is used to write a characteristic\n          descriptor value to a server when the client knows the\n          characteristic descriptor handle.\n\n          The ATT Write Request is used for this sub-procedure. The\n          Attribute Handle parameter shall be set to the characteristic\n          descriptor handle. The Attribute Value parameter shall be\n          set to the new characteristic descriptor value.\n\n          If the return status from this function is SUCCESS, the calling\n          application task will receive an tmos GATT_MSG_EVENT message.\n          The type of the message will be either ATT_WRITE_RSP\n          or ATT_ERROR_RSP (if an error occurred on the server).\n\n @note    This sub-procedure is complete when either ATT_WRITE_RSP\n          (with SUCCESS or bleTimeout status) or ATT_ERROR_RSP\n          (with SUCCESS status) is received by the calling application task.\n\n @param   connHandle - connection to use\n @param   pReq - pointer to request to be sent\n @param   taskId - task to be notified of response\n\n @return  SUCCESS: Request was sent successfully.<BR>\n          INVALIDPARAMETER: Invalid connection handle or request field.<BR>\n          MSG_BUFFER_NOT_AVAIL: No HCI buffer is available.<BR>\n          bleNotConnected: Connection is down.<BR>\n          blePending: A response is pending with this server.<BR>\n          bleMemAllocError: Memory allocation error occurred.<BR>\n          bleTimeout: Previous transaction timed out.<BR>"]
+//     pub fn GATT_WriteCharDesc(connHandle: u16, pReq: *mut attWriteReq_t, taskId: u8) -> bStatus_t;
+// }
+// unsafe extern "C" {
+//     #[doc = " @brief   This sub-procedure is used to write a Characteristic Value to\n          a server when the client knows the Characteristic Value Handle\n          but the length of the Characteristic Value is longer than can\n          be sent in a single Write Request Attribute Protocol message.\n\n          The ATT Prepare Write Request and Execute Write Request are\n          used to perform this sub-procedure.\n\n          If the return status from this function is SUCCESS, the calling\n          application task will receive multiple tmos GATT_MSG_EVENT messages.\n          The type of the messages will be either ATT_PREPARE_WRITE_RSP,\n          ATT_EXECUTE_WRITE_RSP or ATT_ERROR_RSP (if an error occurred on\n          the server).\n\n @note    This sub-procedure is complete when either ATT_PREPARE_WRITE_RSP\n          (with bleTimeout status), ATT_EXECUTE_WRITE_RSP\n          (with SUCCESS or bleTimeout status), or ATT_ERROR_RSP\n          (with SUCCESS status) is received by the calling application task.\n\n @note    The 'pReq->pValue' pointer will be freed when the sub-procedure is complete.\n\n @param   connHandle - connection to use\n @param   pReq - pointer to request to be sent\n @param   taskId - task to be notified of response\n\n @return  SUCCESS: Request was sent successfully.<BR>\n          INVALIDPARAMETER: Invalid connection handle or request field.v\n          MSG_BUFFER_NOT_AVAIL: No HCI buffer is available.<BR>\n          bleNotConnected: Connection is down.<BR>\n          blePending: A response is pending with this server.<BR>\n          bleMemAllocError: Memory allocation error occurred.<BR>\n          bleTimeout: Previous transaction timed out.<BR>"]
+//     pub fn GATT_WriteLongCharDesc(connHandle: u16, pReq: *mut attPrepareWriteReq_t, taskId: u8) -> bStatus_t;
+// }
+// unsafe extern "C" {
+//     #[doc = " @brief   GATT implementation of the allocator functionality.\n\n @note    This function should only be called by GATT and the upper layer protocol/application.\n\n @param   connHandle - connection that message is to be sent on.\n @param   opcode - opcode of message that buffer to be allocated for.\n @param   size - number of bytes to allocate from the heap.\n @param   pSizeAlloc - number of bytes allocated for the caller from the heap.\n @param   flag - .\n\n @return  pointer to the heap allocation; NULL if error or failure."]
+//     pub fn GATT_bm_alloc(
+//         connHandle: u16,
+//         opcode: u8,
+//         size: u16,
+//         pSizeAlloc: *mut u16,
+//         flag: u8,
+//     ) -> *mut ::core::ffi::c_void;
+// }
+// unsafe extern "C" {
+//     #[doc = " @brief   GATT implementation of the de-allocator functionality.\n\n @param   pMsg - pointer to GATT message containing the memory to free.\n @param   opcode - opcode of the message\n\n @return  none"]
+//     pub fn GATT_bm_free(pMsg: *mut gattMsg_t, opcode: u8);
+// }
+// unsafe extern "C" {
+//     #[doc = " @brief   Register a service's attribute list and callback functions with\n          the GATT Server Application.\n\n @param   pAttrs - Array of attribute records to be registered\n @param   numAttrs - Number of attributes in array\n @param   encKeySize - Minimum encryption key size required by service (7-16 bytes)\n @param   pServiceCBs - Service callback function pointers\n\n @return  SUCCESS: Service registered successfully.<BR>\n          INVALIDPARAMETER: Invalid service fields.<BR>\n          FAILURE: Not enough attribute handles available.<BR>\n          bleMemAllocError: Memory allocation error occurred.<BR>\n          bleInvalidRange: Encryption key size's out of range.<BR>"]
+//     pub fn GATTServApp_RegisterService(
+//         pAttrs: *mut gattAttribute_t,
+//         numAttrs: u16,
+//         encKeySize: u8,
+//         pServiceCBs: *mut gattServiceCBs_t,
+//     ) -> bStatus_t;
+// }
+// unsafe extern "C" {
+//     #[doc = " @brief   Add function for the GATT Service.\n\n @param   services - services to add. This is a bit map and can\n                     contain more than one service.\n\n @return  SUCCESS: Service added successfully.<BR>\n          INVALIDPARAMETER: Invalid service field.<BR>\n          FAILURE: Not enough attribute handles available.<BR>\n          bleMemAllocError: Memory allocation error occurred.<BR>"]
+//     pub fn GATTServApp_AddService(services: u32) -> bStatus_t;
+// }
+// unsafe extern "C" {
+//     #[doc = " @brief   Deregister a service's attribute list and callback functions from\n          the GATT Server Application.\n\n @note    It's the caller's responsibility to free the service attribute\n          list returned from this API.\n\n @param   handle - handle of service to be deregistered\n @param   p2pAttrs - pointer to array of attribute records (to be returned)\n\n @return  SUCCESS: Service deregistered successfully.<BR>\n          FAILURE: Service not found.<BR>"]
+//     pub fn GATTServApp_DeregisterService(handle: u16, p2pAttrs: *mut *mut gattAttribute_t) -> bStatus_t;
+// }
+// unsafe extern "C" {
+//     #[doc = " @brief   Initialize the client characteristic configuration table.\n\n @note    Each client has its own instantiation of the ClientCharacteristic Configuration.\n          Reads/Writes of the Client Characteristic Configuration only only affect the\n          configuration of that client.\n\n @param   connHandle - connection handle (0xFFFF for all connections).\n @param   charCfgTbl - client characteristic configuration table.\n\n @return  none"]
+//     pub fn GATTServApp_InitCharCfg(connHandle: u16, charCfgTbl: *mut gattCharCfg_t);
+// }
+// unsafe extern "C" {
+//     #[doc = " @brief   Send out a Service Changed Indication.\n\n @param   connHandle - connection to use\n @param   taskId - task to be notified of confirmation\n\n @return  SUCCESS: Indication was sent successfully.<BR>\n          FAILURE: Service Changed attribute not found.<BR>\n          INVALIDPARAMETER: Invalid connection handle or request field.<BR>\n          MSG_BUFFER_NOT_AVAIL: No HCI buffer is available.<BR>\n          bleNotConnected: Connection is down.<BR>\n          blePending: A confirmation is pending with this client.<BR>"]
+//     pub fn GATTServApp_SendServiceChangedInd(connHandle: u16, taskId: u8) -> bStatus_t;
+// }
+// unsafe extern "C" {
+//     #[doc = " @brief   Read the client characteristic configuration for a given client.\n\n @note    Each client has its own instantiation of the Client Characteristic Configuration.\n          Reads of the Client Characteristic Configuration only shows the configuration\n          for that client.\n\n @param   connHandle - connection handle.\n @param   charCfgTbl - client characteristic configuration table.\n\n @return  attribute value"]
+//     pub fn GATTServApp_ReadCharCfg(connHandle: u16, charCfgTbl: *mut gattCharCfg_t) -> u16;
+// }
+// unsafe extern "C" {
+//     #[doc = " @brief   Write the client characteristic configuration for a given client.\n\n @note    Each client has its own instantiation of the Client Characteristic Configuration.\n          Writes of the Client Characteristic Configuration only only affect the\n          configuration of that client.\n\n @param   connHandle - connection handle.\n @param   charCfgTbl - client characteristic configuration table.\n @param   value - attribute new value.\n\n @return  Success or Failure"]
+//     pub fn GATTServApp_WriteCharCfg(connHandle: u16, charCfgTbl: *mut gattCharCfg_t, value: u16) -> u8;
+// }
+// unsafe extern "C" {
+//     #[doc = " @brief   Process the client characteristic configuration\n          write request for a given client.\n\n @param   connHandle - connection message was received on.\n @param   pAttr - pointer to attribute.\n @param   pValue - pointer to data to be written.\n @param   len - length of data.\n @param   offset - offset of the first octet to be written.\n @param   validCfg - valid configuration.\n\n @return  Success or Failure"]
+//     pub fn GATTServApp_ProcessCCCWriteReq(
+//         connHandle: u16,
+//         pAttr: *mut gattAttribute_t,
+//         pValue: *mut u8,
+//         len: u16,
+//         offset: u16,
+//         validCfg: u16,
+//     ) -> bStatus_t;
+// }
+// unsafe extern "C" {
+//     #[doc = " @brief   Set a GAP GATT Server parameter.\n\n @param   param - Profile parameter ID<BR>\n @param   len - length of data to right\n @param   value - pointer to data to write.  This is dependent on\n          the parameter ID and WILL be cast to the appropriate\n          data type (example: data type of uint16_t will be cast to\n          uint16_t pointer).<BR>\n\n @return  bStatus_t"]
+//     pub fn GGS_SetParameter(param: u8, len: u8, value: *mut ::core::ffi::c_void) -> bStatus_t;
+// }
+// unsafe extern "C" {
+//     #[doc = " @brief   Get a GAP GATT Server parameter.\n\n @param   param - Profile parameter ID<BR>\n @param   value - pointer to data to put.  This is dependent on\n          the parameter ID and WILL be cast to the appropriate\n          data type (example: data type of uint16_t will be cast to\n          uint16_t pointer).<BR>\n\n @return  bStatus_t"]
+//     pub fn GGS_GetParameter(param: u8, value: *mut ::core::ffi::c_void) -> bStatus_t;
+// }
+// unsafe extern "C" {
+//     #[doc = " @brief   Add function for the GAP GATT Service.\n\n @param   services - services to add. This is a bit map and can\n                     contain more than one service.\n\n @return  SUCCESS: Service added successfully.<BR>\n          INVALIDPARAMETER: Invalid service field.<BR>\n          FAILURE: Not enough attribute handles available.<BR>\n          bleMemAllocError: Memory allocation error occurred.<BR>"]
+//     pub fn GGS_AddService(services: u32) -> bStatus_t;
+// }
+// unsafe extern "C" {
+//     #[doc = " @brief   Set a GAP Parameter value.  Use this function to change  the default GAP parameter values.\n\n @param   paramID - parameter ID: @ref GAP_PARAMETER_ID_DEFINES\n @param   paramValue - new param value\n\n @return  SUCCESS or INVALIDPARAMETER (invalid paramID)"]
+//     pub fn GAP_SetParamValue(paramID: u16, paramValue: u16) -> bStatus_t;
+// }
+// unsafe extern "C" {
+//     #[doc = " @brief   Get a GAP Parameter value.\n\n @param   paramID - parameter ID: @ref GAP_PARAMETER_ID_DEFINES\n\n @return  GAP Parameter value or 0xFFFF if invalid"]
+//     pub fn GAP_GetParamValue(paramID: u16) -> u16;
+// }
+// unsafe extern "C" {
+//     #[doc = " @brief   Setup the device's address type.  If ADDRTYPE_PRIVATE_RESOLVE is selected,\n          the address will change periodically.\n\n @param   addrType - @ref GAP_ADDR_TYPE_DEFINES\n @param   pStaticAddr - Only used with ADDRTYPE_STATIC or ADDRTYPE_PRIVATE_NONRESOLVE type\n                   NULL to auto generate otherwise the application can specify the address value\n\n @return  SUCCESS: address type updated,<BR>\n          bleNotReady: Can't be called until GAP_DeviceInit() is called\n                   and the init process is completed\n          bleIncorrectMode: can't change with an active connection,or INVALIDPARAMETER\n          If return value isn't SUCCESS, the address type remains the same as before this call."]
+//     pub fn GAP_ConfigDeviceAddr(addrType: u8, pStaticAddr: *mut u8) -> bStatus_t;
+// }
+// unsafe extern "C" {
+//     #[doc = " @brief   Resolves a private address against an IRK.\n\n @param(in)   pIRK - pointer to the IRK\n @param(in)   pAddr - pointer to the Resolvable Private address\n\n @param(out)  pIRK\n @param(out)  pAddr\n\n @return  SUCCESS: match,<BR>\n          FAILURE: don't match,<BR>\n          INVALIDPARAMETER: parameters invalid<BR>"]
+//     pub fn GAP_ResolvePrivateAddr(pIRK: *mut u8, pAddr: *mut u8) -> bStatus_t;
+// }
+// unsafe extern "C" {
+//     #[doc = " @brief   Setup or change advertising and scan response data.\n\n @note    if the return status from this function is SUCCESS,the task isn't complete\n          until the GAP_ADV_DATA_UPDATE_DONE_EVENT is sent to the calling application task.\n\n @param   taskID - task ID of the app requesting the change\n @param   adType - TRUE - advertisement data, FALSE  - scan response data\n @param   dataLen - Octet length of advertData\n @param   pAdvertData - advertising or scan response data\n\n @return  SUCCESS: data accepted\n          bleIncorrectMode: invalid profile role"]
+//     pub fn GAP_UpdateAdvertisingData(taskID: u8, adType: u8, dataLen: u16, pAdvertData: *mut u8) -> bStatus_t;
+// }
+// unsafe extern "C" {
+//     #[doc = " @brief       Set a GAP Bond Manager parameter.\n\n @note    You can call this function with a GAP Parameter ID and it will set the GAP Parameter.\n\n @param   param - Profile parameter ID: @ref GAPBOND_PROFILE_PARAMETERS\n @param   len - length of data to write\n @param   pValue - pointer to data to write.  This is dependent on\n          the parameter ID and WILL be cast to the appropriate\n          data type (example: data type of uint16_t will be cast to\n          uint16_t pointer).\n\n @return      SUCCESS or INVALIDPARAMETER (invalid paramID)"]
+//     pub fn GAPBondMgr_SetParameter(param: u16, len: u8, pValue: *mut ::core::ffi::c_void) -> bStatus_t;
+// }
+// unsafe extern "C" {
+//     #[doc = " @brief   Get a GAP Bond Manager parameter.\n\n @note    You can call this function with a GAP Parameter ID and it will get a GAP Parameter.\n\n @param   param - Profile parameter ID: @ref GAPBOND_PROFILE_PARAMETERS\n @param   pValue - pointer to location to get the value.  This is dependent on\n          the parameter ID and WILL be cast to the appropriate data type.\n          (example: data type of uint16_t will be cast to uint16_t pointer)\n\n @return      SUCCESS or INVALIDPARAMETER (invalid paramID)"]
+//     pub fn GAPBondMgr_GetParameter(param: u16, pValue: *mut ::core::ffi::c_void) -> bStatus_t;
+// }
+// unsafe extern "C" {
+//     #[doc = " @brief   Respond to a passcode request.\n\n @param   connectionHandle - connection handle of the connected device or 0xFFFF if all devices in database.\n @param   status - SUCCESS if passcode is available, otherwise see @ref SMP_PAIRING_FAILED_DEFINES.\n @param   passcode - integer value containing the passcode.\n\n @return  SUCCESS - bond record found and changed\n          bleIncorrectMode - Link not found."]
+//     pub fn GAPBondMgr_PasscodeRsp(connectionHandle: u16, status: u8, passcode: u32) -> bStatus_t;
+// }
+// unsafe extern "C" {
+//     #[doc = " @brief   Respond to a passcode request.\n\n @param   connHandle - connection handle of the connected device or 0xFFFF if all devices in database.\n @param   status - SUCCESS if oob data is available, otherwise see @ref SMP_PAIRING_FAILED_DEFINES.\n @param   oob - containing the oob data.\n @param   c_peer - containing the peer confirm.\n\n @return  SUCCESS - bond record found and changed\n          bleIncorrectMode - Link not found."]
+//     pub fn GAPBondMgr_OobRsp(connHandle: u16, status: u8, oob: *mut u8, c_peer: *mut u8) -> bStatus_t;
+// }
+// unsafe extern "C" {
+//     #[doc = " @brief   Initialization function for the ecc-function callback.\n\n @param   pEcc - callback registration Structure @ref gapEccCBs_t.\n\n @return  null."]
+//     pub fn GAPBondMgr_EccInit(pEcc: *mut gapEccCBs_t);
+// }
+// unsafe extern "C" {
+//     #[doc = " @brief   Send a security request\n\n @param   connHandle - connection handle\n\n @return  SUCCESS: will send\n          bleNotConnected: Link not found\n          bleIncorrectMode: wrong GAP role, must be a Peripheral Role"]
+//     pub fn GAPBondMgr_PeriSecurityReq(connHandle: u16) -> bStatus_t;
+// }
+// unsafe extern "C" {
+//     #[doc = " @brief   Set a GAP Role parameter.\n\n @note    You can call this function with a GAP Parameter ID and it will set a GAP Parameter.\n\n @param   param - Profile parameter ID: @ref GAPROLE_PROFILE_PARAMETERS\n @param   len - length of data to write\n @param   pValue - pointer to data to write.  This is dependent on the parameter ID and\n                   WILL be cast to the appropriate data type (example: data type of uint16_t\n                   will be cast to uint16_t pointer).\n\n @return  SUCCESS or INVALIDPARAMETER (invalid paramID)"]
+//     pub fn GAPRole_SetParameter(param: u16, len: u16, pValue: *mut ::core::ffi::c_void) -> bStatus_t;
+// }
+// unsafe extern "C" {
+//     #[doc = " @brief   Get a GAP Role parameter.\n\n @note    You can call this function with a GAP Parameter ID and it will get a GAP Parameter.\n\n @param   param - Profile parameter ID: @ref GAPROLE_PROFILE_PARAMETERS\n @param   pValue - pointer to location to get the value.  This is dependent on\n          the parameter ID and WILL be cast to the appropriate\n          data type (example: data type of uint16_t will be cast to\n          uint16_t pointer).\n\n @return      SUCCESS or INVALIDPARAMETER (invalid paramID)"]
+//     pub fn GAPRole_GetParameter(param: u16, pValue: *mut ::core::ffi::c_void) -> bStatus_t;
+// }
+// unsafe extern "C" {
+//     #[doc = " @brief       Terminates the existing connection.\n\n @return      SUCCESS or bleIncorrectMode"]
+//     pub fn GAPRole_TerminateLink(connHandle: u16) -> bStatus_t;
+// }
+// unsafe extern "C" {
+//     #[doc = " @brief   Read Rssi Cmd.\n\n @param   connHandle - connection handle\n\n @return  bStatus_t: HCI Error Code.<BR>\n"]
+//     pub fn GAPRole_ReadRssiCmd(connHandle: u16) -> bStatus_t;
+// }
+// unsafe extern "C" {
+//     #[doc = " @brief   used to synchronize with a periodic advertising train from an advertiser and\n          begin receiving periodic advertising packets.\n\n @param   pSync - sync parameters@ gapCreateSync_t\n\n @return  bStatus_t: HCI Error Code.<BR>\n"]
+//     pub fn GAPRole_CreateSync(pSync: *mut gapCreateSync_t) -> bStatus_t;
+// }
+// unsafe extern "C" {
+//     #[doc = " @brief   used to cancel the HCI_LE_Periodic_Advertising_Create_Sync command while\n          it is pending.\n\n @param   None.\n\n @return  bStatus_t: HCI Error Code.<BR>\n"]
+//     pub fn GAPRole_CancelSync() -> bStatus_t;
+// }
+// unsafe extern "C" {
+//     #[doc = " @brief   used to stop reception of the periodic advertising train identified\n          by the Sync_Handle parameter.\n\n @param   syncHandle-identifying the periodic advertising train\n\n @return  bStatus_t: HCI Error Code.<BR>\n"]
+//     pub fn GAPRole_TerminateSync(syncHandle: u16) -> bStatus_t;
+// }
+// unsafe extern "C" {
+//     #[doc = " @brief   Update the link connection parameters.\n\n @param   connHandle - connection handle\n @param   connIntervalMin - minimum connection interval in 1.25ms units\n @param   connIntervalMax - maximum connection interval in 1.25ms units\n @param   connLatency - number of LL latency connection events\n @param   connTimeout - connection timeout in 10ms units\n\n @return  SUCCESS: Connection update started started.<BR>\n          bleIncorrectMode: No connection to update.<BR>"]
+//     pub fn GAPRole_UpdateLink(
+//         connHandle: u16,
+//         connIntervalMin: u16,
+//         connIntervalMax: u16,
+//         connLatency: u16,
+//         connTimeout: u16,
+//     ) -> bStatus_t;
+// }
+// unsafe extern "C" {
+//     #[doc = " @brief   Update the connection phy.\n\n @param   connHandle - connection handle\n @param   all_phys - a bit field that  allows the Host to specify, for each direction\n                     set BIT0:The Host has no preference among the transmitter PHYs supported by the Controller\n                     set BIT1:The Host has no preference among the receiver PHYs supported by the Controller\n @param   tx_phys - a bit field that indicates the transmitter PHYs.(GAP_PHY_BIT_TYPE)\n @param   rx_phys - a bit field that indicates the receiver PHYs.(GAP_PHY_BIT_TYPE)\n @param   phy_options - resv\n\n @return  SUCCESS: PHY update started started .<BR>\n          bleIncorrectMode: No connection to update.<BR>"]
+//     pub fn GAPRole_UpdatePHY(connHandle: u16, all_phys: u8, tx_phys: u8, rx_phys: u8, phy_options: u16) -> bStatus_t;
+// }
+// unsafe extern "C" {
+//     #[doc = " @brief   used to allow the Host to specify the privacy mode to be used  for a given entry on the resolving list.\n\n @note    This command shall not be used when address resolution is enabled in the Controller and:\n          Advertising (other than periodic advertising) is enabled,\n          Scanning is enabled, or\n          an GAPRole_CentralEstablishLink, or GAPRole_CreateSync command is pending.\n\n @param   addrTypePeer - 0x00:Public Identity Address 0x01:Random (static) Identity Address\n @param   peerAddr - Public Identity Address or Random (static) Identity Address of the advertiser\n @param   privacyMode - 0x00:Use Network Privacy Mode for this peer device (default)\n                        0x01:Use Device Privacy Mode for this peer device\n\n @return  Command Status.\n"]
+//     pub fn GAPRole_SetPrivacyMode(addrTypePeer: u8, peerAddr: *mut u8, privacyMode: u8) -> bStatus_t;
+// }
+// unsafe extern "C" {
+//     #[doc = " @brief   used to set the path loss threshold reporting parameters.\n\n @param   pParm - set path loss parameters@ gapRoleSetPathLossReporting_t\n\n @return  Command Status.\n"]
+//     pub fn GAPRole_SetPathLossReporting(pParm: *mut gapRoleSetPathLossReporting_t) -> bStatus_t;
+// }
+// unsafe extern "C" {
+//     #[doc = " @brief   used to set power level management.\n\n @param   pParm - set power level parameters@ gapRolePowerlevelManagement_t\n\n @return  Command Status.\n"]
+//     pub fn GAPRole_SetPowerlevel(pParm: *mut gapRolePowerlevelManagement_t) -> bStatus_t;
+// }
+// unsafe extern "C" {
+//     #[doc = " @brief   Initialization function for the GAP Role Task.\n\n @param   None.\n\n @return  SUCCESS,bleInvalidRange"]
+//     pub fn GAPRole_BroadcasterInit() -> bStatus_t;
+// }
+// unsafe extern "C" {
+//     #[doc = " @brief   Does the device initialization.  Only call this function once.\n\n @param   pAppCallbacks - pointer to application callbacks.\n\n @return  SUCCESS or bleAlreadyInRequestedMode"]
+//     pub fn GAPRole_BroadcasterStartDevice(pAppCallbacks: *mut gapRolesBroadcasterCBs_t) -> bStatus_t;
+// }
+// unsafe extern "C" {
+//     #[doc = " @brief   Does the Broadcaster receive scan request call initialization.\n\n @param   pAppCallbacks - pointer to application callbacks.\n\n @return  None"]
+//     pub fn GAPRole_BroadcasterSetCB(pAppCallbacks: *mut gapRolesBroadcasterCBs_t);
+// }
+// unsafe extern "C" {
+//     #[doc = " @internal\n\n @brief   Observer Profile Task initialization function.\n\n @param   None.\n\n @return  SUCCESS,bleInvalidRange"]
+//     pub fn GAPRole_ObserverInit() -> bStatus_t;
+// }
+// unsafe extern "C" {
+//     #[doc = " @brief   Start the device in Observer role.  This function is typically\n          called once during system startup.\n\n @param   pAppCallbacks - pointer to application callbacks\n\n @return  SUCCESS: Operation successful.<BR>\n          bleAlreadyInRequestedMode: Device already started.<BR>"]
+//     pub fn GAPRole_ObserverStartDevice(pAppCallbacks: *mut gapRoleObserverCB_t) -> bStatus_t;
+// }
+// unsafe extern "C" {
+//     #[doc = " @brief   Start a device discovery scan.\n\n @param   mode - discovery mode: @ref GAP_DEVDISC_MODE_DEFINES\n @param   activeScan - TRUE to perform active scan\n @param   whiteList - TRUE to only scan for devices in the white list\n\n @return  SUCCESS: Discovery scan started.<BR>\n          bleIncorrectMode: Invalid profile role.<BR>\n          bleAlreadyInRequestedMode: Not available.<BR>"]
+//     pub fn GAPRole_ObserverStartDiscovery(mode: u8, activeScan: u8, whiteList: u8) -> bStatus_t;
+// }
+// unsafe extern "C" {
+//     #[doc = " @brief   Cancel a device discovery scan.\n\n @return  SUCCESS: Cancel started.<BR>\n          bleInvalidTaskID: Not the task that started discovery.<BR>\n          bleIncorrectMode: Not in discovery mode.<BR>"]
+//     pub fn GAPRole_ObserverCancelDiscovery() -> bStatus_t;
+// }
+// unsafe extern "C" {
+//     #[doc = " @internal\n\n @brief   Initialization function for the GAP Role Task.\n          This is called during initialization and should contain\n          any application specific initialization (ie. hardware\n          initialization/setup, table initialization, power up\n          notificaiton ... ).\n\n @param   None.\n\n @return  SUCCESS,bleInvalidRange"]
+//     pub fn GAPRole_PeripheralInit() -> bStatus_t;
+// }
+// unsafe extern "C" {
+//     #[doc = " @brief   Does the device initialization.  Only call this function once.\n\n @param   pAppCallbacks - pointer to application callbacks.\n\n @return  SUCCESS or bleAlreadyInRequestedMode"]
+//     pub fn GAPRole_PeripheralStartDevice(
+//         taskid: u8,
+//         pCB: *mut gapBondCBs_t,
+//         pAppCallbacks: *mut gapRolesCBs_t,
+//     ) -> bStatus_t;
+// }
+// unsafe extern "C" {
+//     #[doc = " @brief   Update the parameters of an existing connection\n\n @param   connHandle - the connection Handle\n @param   connIntervalMin - minimum connection interval in 1.25ms units\n @param   connIntervalMax - maximum connection interval in 1.25ms units\n @param   latency - the new slave latency\n @param   connTimeout - the new timeout value\n @param   taskId - taskID will recv L2CAP_SIGNAL_EVENT message\n\n @return  SUCCESS, bleNotConnected or bleInvalidRange"]
+//     pub fn GAPRole_PeripheralConnParamUpdateReq(
+//         connHandle: u16,
+//         connIntervalMin: u16,
+//         connIntervalMax: u16,
+//         latency: u16,
+//         connTimeout: u16,
+//         taskId: u8,
+//     ) -> bStatus_t;
+// }
+// unsafe extern "C" {
+//     #[doc = " @internal\n\n @brief   Central Profile Task initialization function.\n\n @param   None.\n\n @return  SUCCESS,bleInvalidRange"]
+//     pub fn GAPRole_CentralInit() -> bStatus_t;
+// }
+// unsafe extern "C" {
+//     #[doc = " @brief   Start the device in Central role.  This function is typically\n          called once during system startup.\n\n @param   pAppCallbacks - pointer to application callbacks\n\n @return  SUCCESS: Operation successful.<BR>\n          bleAlreadyInRequestedMode: Device already started.<BR>"]
+//     pub fn GAPRole_CentralStartDevice(
+//         taskid: u8,
+//         pCB: *mut gapBondCBs_t,
+//         pAppCallbacks: *mut gapCentralRoleCB_t,
+//     ) -> bStatus_t;
+// }
+// unsafe extern "C" {
+//     #[doc = " @brief   Start a device discovery scan.\n\n @param   mode - discovery mode: @ref GAP_DEVDISC_MODE_DEFINES\n @param   activeScan - TRUE to perform active scan\n @param   whiteList - TRUE to only scan for devices in the white list\n\n @return  SUCCESS: Discovery scan started.<BR>\n          bleIncorrectMode: Invalid profile role.<BR>\n          bleAlreadyInRequestedMode: Not available.<BR>"]
+//     pub fn GAPRole_CentralStartDiscovery(mode: u8, activeScan: u8, whiteList: u8) -> bStatus_t;
+// }
+// unsafe extern "C" {
+//     #[doc = " @brief   Cancel a device discovery scan.\n\n @return  SUCCESS: Cancel started.<BR>\n          bleInvalidTaskID: Not the task that started discovery.<BR>\n          bleIncorrectMode: Not in discovery mode.<BR>"]
+//     pub fn GAPRole_CentralCancelDiscovery() -> bStatus_t;
+// }
+// unsafe extern "C" {
+//     #[doc = " @brief   This API is called by the Central to update the Host data channels\n          initiating an Update Data Channel control procedure.\n\n @note    While it isn't specified,it is assumed that the Host expects an\n          update channel map on all active connections and periodic advertise.\n\n input parameters\n\n @param  chanMap - A five byte array containing one bit per data channel\n                   where a 1 means the channel is \"used\".\n\n @return  SUCCESS"]
+//     pub fn GAPRole_SetHostChanClassification(chanMap: *mut u8);
+// }
+// unsafe extern "C" {
+//     #[doc = " @brief   Establish a link to a peer device.\n\n @param   highDutyCycle -  TRUE to high duty cycle scan, FALSE if not\n @param   whiteList - determines use of the white list: TRUE-enable\n @param   addrTypePeer - address type of the peer device: @ref GAP_ADDR_TYPE_DEFINES\n @param   peerAddr - peer device address\n\n @return  SUCCESS: started establish link process.<BR>\n          bleIncorrectMode: invalid profile role.<BR>\n          bleNotReady: a scan is in progress.<BR>\n          bleAlreadyInRequestedMode: can't process now.<BR>\n          bleNoResources: too many links.<BR>"]
+//     pub fn GAPRole_CentralEstablishLink(
+//         highDutyCycle: u8,
+//         whiteList: u8,
+//         addrTypePeer: u8,
+//         peerAddr: *mut u8,
+//     ) -> bStatus_t;
+// }
+// unsafe extern "C" {
+//     #[doc = " @brief   RF_PHY Profile Task initialization function.\n\n @param   None.\n\n @return  0 - success."]
+//     pub fn RF_RoleInit() -> bStatus_t;
+// }
+// unsafe extern "C" {
+//     #[doc = " @brief   rf config.\n\n @param   pConfig - rf config parameters\n\n @return  0 - success."]
+//     pub fn RF_Config(pConfig: *mut rfConfig_t) -> bStatus_t;
+// }
+// unsafe extern "C" {
+//     #[doc = " @brief   rx mode.\n\n @param   txBuf - rx mode tx data\n @param   txLen - rx mode tx length(0-251)\n @param   pktRxType - rx mode rx package type\n                      broadcast type(0xFF):receive all matching types,\n                      others:receive match type or broadcast type\n @param   pktTxType - rx mode tx package type(auto mode)\n                      broadcast type(0xFF):received by all matching types;\n                      others:only received by matching type\n\n @return  0 - success. 1-access address error 2-busy"]
+//     pub fn RF_Rx(txBuf: *mut u8, txLen: u8, pktRxType: u8, pktTxType: u8) -> bStatus_t;
+// }
+// unsafe extern "C" {
+//     #[doc = " @brief   tx mode.\n\n @param   txBuf - tx mode tx data\n @param   txLen - tx mode tx length(0-251)\n @param   pktTxType - tx mode tx package type\n                      broadcast type(0xFF):received by all matching types;\n                      others:only received by matching type\n @param   pktRxType - tx mode rx package type(auto mode)\n                      broadcast type(0xFF):receive all matching types,\n                      others:receive match type or broadcast type\n\n @return  0 - success. 1-access address error 2-busy"]
+//     pub fn RF_Tx(txBuf: *mut u8, txLen: u8, pktTxType: u8, pktRxType: u8) -> bStatus_t;
+// }
+// unsafe extern "C" {
+//     #[doc = " @brief   shut down,stop tx/rx mode.\n\n @param   None.\n\n @return  0 - success."]
+//     pub fn RF_Shut() -> bStatus_t;
+// }
+// unsafe extern "C" {
+//     #[doc = " @brief   rf mode set radio channel/frequency.\n\n @param   channel.\n\n @return  0 - success."]
+//     pub fn RF_SetChannel(channel: u32);
+// }
+// unsafe extern "C" {
+//     #[doc = " @brief   rf mode set radio frequency and whitening channel index\n  note: LLEMode bit6 set 1\n\n @param   frequency -\n @param   ch - the whitening channel index\n\n @return  0 - success."]
+//     pub fn RF_SetFrequency(frequency: u32, ch: u8) -> bStatus_t;
+// }
+// unsafe extern "C" {
+//     #[doc = " @brief   shut down rf frequency hopping\n\n @param   None.\n\n @return  None."]
+//     pub fn RF_FrequencyHoppingShut();
+// }
+// unsafe extern "C" {
+//     #[doc = " @brief\n\n @param   resendCount - Maximum count of sending HOP_TX pdu,0 = unlimited.\n\n @return  0 - success."]
+//     pub fn RF_FrequencyHoppingTx(resendCount: u8) -> u8;
+// }
+// unsafe extern "C" {
+//     #[doc = " @brief\n\n @param   timeoutMS - Maximum time to wait for receiving HOP_TX pdu(Time = n * 1mSec),0 = unlimited.\n\n @return  0 - success.1-fail.2-LLEMode error(shall AUTO)"]
+//     pub fn RF_FrequencyHoppingRx(timeoutMS: u32) -> u8;
+// }
+// unsafe extern "C" {
+//     #[doc = " @brief   Erase FH bonded device\n\n @param   None.\n\n @return  None."]
+//     pub fn RF_BondingErase();
+// }
+// unsafe extern "C" {
+//     #[doc = " @brief   single channel mode.\n\n @param   ch - rf channel,f=2402+ch*2 MHz, ch=0,...,39\n\n @return  0 - success."]
+//     pub fn LL_SingleChannel(ch: u8) -> bStatus_t;
+// }
+// unsafe extern "C" {
+//     #[doc = " @brief   used to stop any test which is in progress.\n\n @param(in)   pPktNum - null\n\n @param(out)  the number of received packets.\n\n @return  0 - success."]
+//     pub fn LL_TestEnd(pPktNum: *mut u8) -> bStatus_t;
+// }
+// unsafe extern "C" {
+//     #[doc = " @brief   used to start a test where the DUT receives test reference packets at a fixed interval\n\n input parameters\n\n @param   opcode = 0x201D\n              pParm0 - RX_Channel\n\n          opcode = 0x2033\n              pParm0 - RX_Channel\n              pParm1 - PHY\n              pParm2 - Modulation_Index\n\n @return  0 - success."]
+//     pub fn API_LE_ReceiverTestCmd(pParm: *mut u8, opcode: u16) -> bStatus_t;
+// }
+// unsafe extern "C" {
+//     #[doc = " @brief   used to start a test where the DUT generates test reference packets at a fixed interval\n\n @param   opcode = 0x201E\n              pParm 0 - TX_Channel\n              pParm 1 - Test_Data_Length\n              pParm 2 - Packet_Payload\n\n          opcode = 0x2034\n              pParm 0 - TX_Channel\n              pParm 1 - Test_Data_Length\n              pParm 2 - Packet_Payload\n              pParm 3 - PHY\n\n @return  0 - success."]
+//     pub fn API_LE_TransmitterTestCmd(pParm: *mut u8, opcode: u16) -> bStatus_t;
+// }
+// unsafe extern "C" {
+//     #[doc = " @brief   used to stop any test which is in progress\n\n @param   None\n\n @return  0 - success."]
+//     pub fn API_LE_TestEndCmd() -> bStatus_t;
+// }
+// unsafe extern "C" {
+//     #[doc = " @brief   resv\n\n @param   None\n\n @return  None."]
+//     pub fn RFEND_SetSensitivity();
+// }
+// unsafe extern "C" {
+//     #[doc = " @brief   used to set rf TxCtune value\n\n @param   pParm(in) - Must provide length of parameter followed by 6 bytes parameter\n\n @return  Command Status."]
+//     pub fn RFEND_TXCtuneSet(pParm: *mut u8) -> bStatus_t;
+// }
+// unsafe extern "C" {
+//     #[doc = " @brief   used to get rf TxCtune value\n\n @param   pParm(out) - length of parameter(6) followed by 6 bytes parameter\n\n @return  Command Status."]
+//     pub fn RFEND_TXCtuneGet(pParm: *mut u8) -> bStatus_t;
+// }
 
-#define bleInvalidTaskID                INVALID_TASK  //!< Task ID isn't setup properly
-#define bleEecKeyRequestRejected        0x06   //!< key missing
-#define bleNotReady                     0x10   //!< Not ready to perform task
-#define bleAlreadyInRequestedMode       0x11   //!< Already performing that task
-#define bleIncorrectMode                0x12   //!< Not setup properly to perform that task
-#define bleMemAllocError                0x13   //!< Memory allocation error occurred
-#define bleNotConnected                 0x14   //!< Can't perform function when not in a connection
-#define bleNoResources                  0x15   //!< There are no resource available
-#define blePending                      0x16   //!< Waiting
-#define bleTimeout                      0x17   //!< Timed out performing function
-#define bleInvalidRange                 0x18   //!< A parameter is out of range
-#define bleLinkEncrypted                0x19   //!< The link is already encrypted
-#define bleProcedureComplete            0x1A   //!< The Procedure is completed
-#define bleInvalidMtuSize               0x1B   //!< SDU size is larger than peer MTU.
- */
+// ========================================
 
-// UNSAFE: size_of is 1
-#[allow(improper_ctypes)]
-pub type bStatus_t = Result<(), NonZeroU8>;
+/* automatically generated by rust-bindgen 0.72.1 */
 
-pub type tmosTaskID = u8;
-pub type tmosEvents = u16;
-pub type tmosTimer = u32;
-pub type BOOL = u8;
-
-/*** Opcode fields: bitmasks ***/
-/// Size of 16-bit Bluetooth UUID
-pub const ATT_BT_UUID_SIZE: u8 = 2;
-/// Size of 128-bit UUID
-pub const ATT_UUID_SIZE: u8 = 16;
-
-/* Tx_POWER define(Accuracy:±2dBm) */
-pub const LL_TX_POWEER_MINUS_16_DBM: u8 = 0x01;
-pub const LL_TX_POWEER_MINUS_12_DBM: u8 = 0x02;
-pub const LL_TX_POWEER_MINUS_8_DBM: u8 = 0x04;
-pub const LL_TX_POWEER_MINUS_5_DBM: u8 = 0x07;
-pub const LL_TX_POWEER_MINUS_3_DBM: u8 = 0x09;
-pub const LL_TX_POWEER_MINUS_1_DBM: u8 = 0x0B;
-pub const LL_TX_POWEER_0_DBM: u8 = 0x0D;
-pub const LL_TX_POWEER_1_DBM: u8 = 0x0F;
-pub const LL_TX_POWEER_2_DBM: u8 = 0x13;
-pub const LL_TX_POWEER_3_DBM: u8 = 0x17;
-pub const LL_TX_POWEER_4_DBM: u8 = 0x1D;
-pub const LL_TX_POWEER_5_DBM: u8 = 0x29;
-pub const LL_TX_POWEER_6_DBM: u8 = 0x3D;
-
-/// BLE library config struct
-/// Library initialization call BLE_LibInit function
-#[repr(C)]
-#[derive(Debug, Copy, Clone)]
-pub struct bleConfig_t {
-    /// library memory start address
-    pub MEMAddr: u32,
-    /// library memory size, > 4k
-    pub MEMLen: u16,
-    /// SNV flash start address( if NULL,bonding information will not be saved )
-    pub SNVAddr: u32,
-    /// SNV flash block size ( default 256 )
-    pub SNVBlock: u16,
-    /// SNV flash block number ( default 1 )
-    pub SNVNum: u8,
-    /// Maximum number of sent and received packages cached by the controller( default 5 )
-    /// Must be greater than the number of connections.
-    pub BufNumber: u8,
-    /// Maximum length (in octets) of the data portion of each HCI data packet( default 27 )
-    // SC enable,must be greater than 69
-    // ATT_MTU = BufMaxLen-4,Range[23,ATT_MAX_MTU_SIZE]
-    pub BufMaxLen: u16,
-    /// Maximum number of TX data in a connection event ( default 1 )
-    pub TxNumEvent: u8,
-    /// Maximum number of RX data in a connection event ( default equal to BufNumber )
-    pub RxNumEvent: u8,
-    /// Transmit power level( default LL_TX_POWEER_0_DBM(0dBm) )
-    pub TxPower: u8,
-    /// Wake up time value in one system count
-    pub WakeUpTime: u8,
-    /// system clock select
-    /// bit0-1 00: LSE(32768Hz) 01:LSI(32000Hz) 10:LSI(32768Hz)
-    /// bit7:  1: ble timer(HSE)(must disable sleep)
-    pub SelRTCClock: u8,
-    /// Connect number,lower two bits are peripheral number,followed by central number
-    pub ConnectNumber: u8,
-    /// Wait rf start window(us)
-    pub WindowWidening: u8,
-    /// Wait event arrive window in one system clock
-    pub WaitWindow: u8,
-    /// MAC address, little-endian
-    pub MacAddr: [u8; 6usize],
-    /// Register a program that generate a random seed
-    /// SYS_GetSysTickCnt
-    pub srandCB: Option<unsafe extern "C" fn() -> u32>,
-    /// Register a program that set idle
-    pub sleepCB: Option<unsafe extern "C" fn(arg1: u32) -> u32>,
-    /// Register a program that read the current temperature,determine whether calibration is need
-    /// HAL_GetInterTempValue
-    pub tsCB: Option<unsafe extern "C" fn() -> u16>,
-    /// Register a program that LSI clock calibration
-    /// Lib_Calibration_LSI
-    pub rcCB: Option<unsafe extern "C" fn()>,
-    /// Register a program that library status callback
-    pub staCB: Option<unsafe extern "C" fn(code: u8, status: u32)>,
-    /// Register a program that read flash
-    pub readFlashCB: Option<unsafe extern "C" fn(addr: u32, num: u32, pBuf: *mut u32) -> u32>,
-    /// Register a program that write flash
-    pub writeFlashCB: Option<unsafe extern "C" fn(addr: u32, num: u32, pBuf: *mut u32) -> u32>,
-}
-
-#[repr(C)]
-#[derive(Debug, Copy, Clone)]
-pub struct bleClockConfig_t {
-    pub getClockValue: Option<unsafe extern "C" fn() -> u32>,
-    /// The maximum count value
-    pub ClockMaxCount: u32,
-    /// The timing clock frequency(Hz)
-    pub ClockFrequency: u16,
-    /// The timing clock accuracy(ppm)
-    pub ClockAccuracy: u16,
-    pub irqEnable: u8,
-}
-
-pub const LLE_MODE_BASIC: u8 = 0;
-pub const LLE_MODE_AUTO: u8 = 1;
-
-pub const LLE_WHITENING_ON: u8 = 0;
-pub const LLE_WHITENING_OFF: u8 = 2;
-
-pub const LLE_MODE_PHY_MODE_MASK: u8 = 48;
-pub const LLE_MODE_PHY_1M: u8 = 0;
-pub const LLE_MODE_PHY_2M: u8 = 16;
-pub const LLE_MODE_PHY_CODED_S8: u8 = 32;
-pub const LLE_MODE_PHY_CODED_S2: u8 = 48;
-pub const LLE_MODE_EX_CHANNEL: u8 = 64;
-
-pub const LLE_MODE_NON_RSSI: u8 = 128;
-
-// `sta` in rfStatusCB
-// RF_Tx
-pub const TX_MODE_TX_FINISH: u32 = 1;
-pub const TX_MODE_TX_FAIL: u32 = 17;
-pub const TX_MODE_TX_TIMEOUT: u32 = 17;
-/// auto tx mode receive data(ack) and enter idle state
-pub const TX_MODE_RX_DATA: u32 = 2;
-pub const TX_MODE_RX_TIMEOUT: u32 = 18;
-pub const TX_MODE_HOP_SHUT: u32 = 34;
-
-// RF_Rx
-/// basic or auto rx mode receive data
-pub const RX_MODE_RX_DATA: u32 = 3;
-/// auto rx mode sends data(ack) successfully and enters idle state
-pub const RX_MODE_TX_FINISH: u32 = 4;
-/// auto rx mode fail to send data and enter idle state
-pub const RX_MODE_TX_FAIL: u32 = 20;
-pub const RX_MODE_TX_TIMEOUT: u32 = 20;
-pub const RX_MODE_HOP_SHUT: u32 = 36;
-
-#[repr(C)]
-#[derive(Debug, Copy, Clone)]
-pub struct rfConfig_t {
-    #[doc = "!< BIT0   0=basic, 1=auto def@LLE_MODE_TYPE\n!< BIT1   0=whitening on, 1=whitening off def@LLE_WHITENING_TYPE\n!< BIT4-5 00-1M  01-2M  10-coded(S8) 11-coded(S2) def@LLE_PHY_TYPE\n!< BIT6   0=data channel(0-39)\n!<        1=rf frequency (2400000kHz-2483500kHz)\n!< BIT7   0=the first byte of the receive buffer is rssi\n!<        1=the first byte of the receive buffer is package type"]
-    pub LLEMode: u8,
-    #[doc = "!< rf channel(0-39)"]
-    pub Channel: u8,
-    #[doc = "!< rf frequency (2400000kHz-2483500kHz)"]
-    pub Frequency: u32,
-    #[doc = "!< access address,32bit PHY address"]
-    pub accessAddress: u32,
-    #[doc = "!< crc initial value"]
-    pub CRCInit: u32,
-    #[doc = "!< status call back"]
-    pub rfStatusCB: Option<unsafe extern "C" fn(sta: u8, rsr: u8, rxBuf: *mut u8)>,
-    #[doc = "!< indicating  Used and Unused data channels.Every channel is represented with a\n!< bit positioned as per the data channel index,The LSB represents data channel index 0"]
-    pub ChannelMap: u32,
-    pub _Resv: u8,
-    #[doc = "!< The heart package interval shall be an integer multiple of 100ms"]
-    pub HeartPeriod: u8,
-    #[doc = "!< hop period( T=32n*RTC clock ),default is 8"]
-    pub HopPeriod: u8,
-    #[doc = "!< indicate the hopIncrement used in the data channel selection algorithm,default is 17"]
-    pub HopIndex: u8,
-    #[doc = "!< Maximum data length received in rf-mode(default 251)"]
-    pub RxMaxlen: u8,
-    #[doc = "!< Maximum data length transmit in rf-mode(default 251)"]
-    pub TxMaxlen: u8,
-}
-
-#[repr(C)]
-#[derive(Debug, Copy, Clone)]
-pub struct blePaControlConfig_t {
-    pub txEnableGPIO: u32,
-    pub txDisableGPIO: u32,
-    pub tx_pin: u32,
-    pub rxEnableGPIO: u32,
-    pub rxDisableGPIO: u32,
-    pub rx_pin: u32,
-}
-
-#[link(name = "CH58xBLE")]
-extern "C" {
-    /// "CH58x_BLE_LIB_V1.9"
-    pub static VER_LIB: [core::ffi::c_char; 0];
-
-    #[doc = " @brief   Init BLE lib. RTC will be occupied at the same time.\n\n @param   pCfg - config of BLE lib\n\n @return  0-success. error defined @ ERR_LIB_INIT"]
-    pub fn BLE_LibInit(pCfg: *const bleConfig_t) -> bStatus_t;
-
-    #[doc = " @brief   ble register reset and rf calibration\n\n @param   None\n\n @return  None"]
-    pub fn BLE_RegInit();
-
-    #[doc = " @brief   generate a valid access address\n\n @param   None.\n\n @return  access address\n the Access Address meets the following requirements:\n It shall have no more than six consecutive zeros or ones.\n It shall not be t he advertising channel packets�� Access Address.\n It shall not be a sequence that differ s from the advertising channel packets' Access Address by only one bit.\n It shall not have all four octets equal.\n It shall have no more  than 24 transitions.\n It shall have a minimum of two transitions in the most significant six bits."]
-    pub fn BLE_AccessAddressGenerate() -> u32;
-
-    // lifetime: 'static
-    #[doc = " @brief   pa control init\n\n @note    Can't be called until  role Init\n\n @param   paControl - pa control parameters(global variable)\n\n @return  Command Status."]
-    pub fn BLE_PAControlInit(paControl: &'static blePaControlConfig_t);
-
-    #[doc = " @brief   read rssi\n\n @param   None.\n\n @return  the value of rssi."]
-    pub fn BLE_ReadRssi() -> i8;
-
-    #[doc = " @brief   read cfo\n\n @param   None.\n\n @return  the value of cfo."]
-    pub fn BLE_ReadCfo() -> i16;
-}
-
-// RF
-extern "C" {
-    #[doc = " @brief   RF_PHY Profile Task initialization function.\n\n @param   None.\n\n @return  0 - success."]
-    pub fn RF_RoleInit() -> bStatus_t;
-    #[doc = " @brief   rf config.\n\n @param   pConfig - rf config parameters\n\n @return  0 - success."]
-    pub fn RF_Config(pConfig: *mut rfConfig_t) -> bStatus_t;
-    #[doc = " @brief   rx mode.\n\n @param   txBuf - rx mode tx data\n @param   txLen - rx mode tx length(0-251)\n @param   pktRxType - rx mode rx package type\n                      broadcast type(0xFF):receive all matching types,\n                      others:receive match type or broadcast type\n @param   pktTxType - rx mode tx package type(auto mode)\n                      broadcast type(0xFF):received by all matching types;\n                      others:only received by matching type\n\n @return  0 - success. 1-access address error 2-busy"]
-    pub fn RF_Rx(txBuf: *mut u8, txLen: u8, pktRxType: u8, pktTxType: u8) -> bStatus_t;
-    #[doc = " @brief   tx mode.\n\n @param   txBuf - tx mode tx data\n @param   txLen - tx mode tx length(0-251)\n @param   pktTxType - tx mode tx package type\n                      broadcast type(0xFF):received by all matching types;\n                      others:only received by matching type\n @param   pktRxType - tx mode rx package type(auto mode)\n                      broadcast type(0xFF):receive all matching types,\n                      others:receive match type or broadcast type\n\n @return  0 - success. 1-access address error 2-busy"]
-    pub fn RF_Tx(txBuf: *mut u8, txLen: u8, pktTxType: u8, pktRxType: u8) -> bStatus_t;
-    #[doc = " @brief   shut down,stop tx/rx mode.\n\n @param   None.\n\n @return  0 - success."]
-    pub fn RF_Shut() -> bStatus_t;
-    #[doc = " @brief   rf mode set radio channel/frequency.\n\n @param   channel.\n\n @return  0 - success."]
-    pub fn RF_SetChannel(channel: u32);
-    #[doc = " @brief   shut down rf frequency hopping\n\n @param   None.\n\n @return  None."]
-    pub fn RF_FrequencyHoppingShut();
-    #[doc = " @brief\n\n @param   resendCount - Maximum count of sending HOP_TX pdu,0 = unlimited.\n\n @return  0 - success."]
-    pub fn RF_FrequencyHoppingTx(resendCount: u8) -> u8;
-    #[doc = " @brief\n\n @param   timeoutMS - Maximum time to wait for receiving HOP_TX pdu(Time = n * 1mSec),0 = unlimited.\n\n @return  0 - success.1-fail.2-LLEMode error(shall AUTO)"]
-    pub fn RF_FrequencyHoppingRx(timeoutMS: u32) -> u8;
-    #[doc = " @brief   Erase FH bonded device\n\n @param   None.\n\n @return  None."]
-    pub fn RF_BondingErase();
-}
-
-#[repr(C)]
-#[derive(Debug, Copy, Clone)]
-pub struct tmos_event_hdr_t {
-    pub event: u8,
-    pub status: u8,
-}
-
-/// A message is waiting event
-pub const SYS_EVENT_MSG: u16 = 0x8000;
-
-/// Task ID isn't setup properly
-pub const INVALID_TASK_ID: u8 = 0xFF;
-pub const TASK_NO_TASK: u8 = 0xFF;
-
-// TMOS
-extern "C" {
-
-    // tmos
-    // tmosTaskID, u8
-    // tmosEvents, u16
-
-    #[doc = " @brief   register process event callback function\n\n @param   eventCb-events callback function\n\n @return  0xFF - error,others-task id"]
-    pub fn TMOS_ProcessEventRegister(
-        eventCb: Option<unsafe extern "C" fn(taskID: tmosTaskID, event: tmosEvents) -> tmosEvents>,
-    ) -> tmosTaskID;
-
-    #[doc = " @brief   tmos system timer initialization\n\n @note    must initialization before call tmos task\n\n @param   fnGetClock - 0:system clock select RTC timer\n                   valid:system clock select extend input\n\n @return  SUCCESS if successful, FAILURE if failed."]
-    pub fn TMOS_TimerInit(pClockConfig: *const bleClockConfig_t) -> bStatus_t;
-
-    #[doc = " @brief   start a event after period of time\n\n @param   taskID - task ID to set event for\n @param   event - event to be notified with\n @param   time - timeout value\n\n @return  TRUE,FALSE."]
-    pub fn tmos_start_task(taskID: tmosTaskID, event: tmosEvents, time: tmosTimer) -> BOOL;
-
-    #[doc = " @brief   receive a msg\n\n @param   taskID  - task ID of task need to receive msg\n\n @return *uint8_t - message information or NULL if no message"]
-    pub fn tmos_msg_receive(taskID: tmosTaskID) -> *mut u8;
-
-    #[doc = " @brief   delete a msg\n\n @param  *msg_ptr - point of msg\n\n @return  SUCCESS."]
-    pub fn tmos_msg_deallocate(msg_ptr: *mut u8) -> bStatus_t;
-
-    #[doc = " @brief   Process system\n\n @param   None.\n\n @return  None."]
-    pub fn TMOS_SystemProcess();
-
-    #[doc = " @brief   Get current system clock\n\n @param   None.\n\n @return  current system clock (in 0.625ms)"]
-    pub fn TMOS_GetSystemClock() -> u32;
-}
-
-// GAP Role
-
-// GAPRole_SetParameter() parameters
-// GAPROLE_PROFILE_PARAMETERS GAP Role Manager Parameters
-pub const GAPROLE_PROFILEROLE: u16 = 768;
-pub const GAPROLE_IRK: u16 = 769;
-pub const GAPROLE_SRK: u16 = 770;
-pub const GAPROLE_SIGNCOUNTER: u16 = 771;
-pub const GAPROLE_BD_ADDR: u16 = 772;
-pub const GAPROLE_ADVERT_ENABLED: u16 = 773;
-pub const GAPROLE_ADVERT_DATA: u16 = 774;
-pub const GAPROLE_SCAN_RSP_DATA: u16 = 775;
-pub const GAPROLE_ADV_EVENT_TYPE: u16 = 776;
-pub const GAPROLE_ADV_DIRECT_TYPE: u16 = 777;
-pub const GAPROLE_ADV_DIRECT_ADDR: u16 = 778;
-pub const GAPROLE_ADV_CHANNEL_MAP: u16 = 779;
-pub const GAPROLE_ADV_FILTER_POLICY: u16 = 780;
-pub const GAPROLE_STATE: u16 = 781;
-pub const GAPROLE_MAX_SCAN_RES: u16 = 782;
-pub const GAPROLE_MIN_CONN_INTERVAL: u16 = 785;
-pub const GAPROLE_MAX_CONN_INTERVAL: u16 = 786;
-// v5.x
-pub const GAPROLE_PHY_TX_SUPPORTED: u16 = 787;
-pub const GAPROLE_PHY_RX_SUPPORTED: u16 = 788;
-pub const GAPROLE_PERIODIC_ADVERT_DATA: u16 = 789;
-/// bit0:Enable/Disable Periodic Advertising. Read/Write. Size is uint8_t. Default is FALSE=Disable.
-/// bit1:Include the ADI field in AUX_SYNC_IND PDUs
-pub const GAPROLE_PERIODIC_ADVERT_ENABLED: u16 = 790;
-pub const GAPROLE_CTE_CONNECTIONLESS_ENABLED: u16 = 791;
-
-pub const TGAP_GEN_DISC_ADV_MIN: u16 = 0;
-pub const TGAP_LIM_ADV_TIMEOUT: u16 = 1;
-pub const TGAP_DISC_SCAN: u16 = 2;
-pub const TGAP_DISC_ADV_INT_MIN: u16 = 3;
-pub const TGAP_DISC_ADV_INT_MAX: u16 = 4;
-pub const TGAP_DISC_SCAN_INT: u16 = 5;
-pub const TGAP_DISC_SCAN_WIND: u16 = 6;
-pub const TGAP_CONN_EST_INT_MIN: u16 = 7;
-pub const TGAP_CONN_EST_INT_MAX: u16 = 8;
-pub const TGAP_CONN_EST_SCAN_INT: u16 = 9;
-pub const TGAP_CONN_EST_SCAN_WIND: u16 = 10;
-pub const TGAP_CONN_EST_HIGH_SCAN_INT: u16 = 11;
-pub const TGAP_CONN_EST_HIGH_SCAN_WIND: u16 = 12;
-pub const TGAP_CONN_EST_SUPERV_TIMEOUT: u16 = 13;
-pub const TGAP_CONN_EST_LATENCY: u16 = 14;
-pub const TGAP_CONN_EST_MIN_CE_LEN: u16 = 15;
-pub const TGAP_CONN_EST_MAX_CE_LEN: u16 = 16;
-pub const TGAP_PRIVATE_ADDR_INT: u16 = 17;
-pub const TGAP_SM_TIMEOUT: u16 = 18;
-pub const TGAP_SM_MIN_KEY_LEN: u16 = 19;
-pub const TGAP_SM_MAX_KEY_LEN: u16 = 20;
-pub const TGAP_FILTER_ADV_REPORTS: u16 = 21;
-pub const TGAP_SCAN_RSSI_MIN: u16 = 22;
-pub const TGAP_REJECT_CONN_PARAMS: u16 = 23;
-pub const TGAP_AUTH_TASK_ID: u16 = 24;
-pub const TGAP_ADV_TX_POWER: u16 = 25;
-pub const TGAP_ADV_PRIMARY_PHY: u16 = 26;
-pub const TGAP_ADV_SECONDARY_PHY: u16 = 27;
-pub const TGAP_ADV_SECONDARY_MAX_SKIP: u16 = 28;
-pub const TGAP_ADV_ADVERTISING_SID: u16 = 29;
-pub const TGAP_ADV_SCAN_REQ_NOTIFY: u16 = 30;
-pub const TGAP_ADV_ADVERTISING_DURATION: u16 = 31;
-pub const TGAP_ADV_MAX_EVENTS: u16 = 32;
-pub const TGAP_DISC_SCAN_PHY: u16 = 33;
-pub const TGAP_DISC_SCAN_CODED_INT: u16 = 34;
-pub const TGAP_DISC_SCAN_CODED_WIND: u16 = 35;
-pub const TGAP_DISC_SCAN_DURATION: u16 = 36;
-pub const TGAP_DISC_SCAN_PERIOD: u16 = 37;
-pub const TGAP_CONN_EST_INT_PHY: u16 = 38;
-pub const TGAP_CONN_EST_2M_INT_MIN: u16 = 39;
-pub const TGAP_CONN_EST_2M_INT_MAX: u16 = 40;
-pub const TGAP_CONN_EST_2M_SUPERV_TIMEOUT: u16 = 41;
-pub const TGAP_CONN_EST_2M_LATENCY: u16 = 42;
-pub const TGAP_CONN_EST_2M_MIN_CE_LEN: u16 = 43;
-pub const TGAP_CONN_EST_2M_MAX_CE_LEN: u16 = 44;
-pub const TGAP_CONN_EST_CODED_INT_MIN: u16 = 45;
-pub const TGAP_CONN_EST_CODED_INT_MAX: u16 = 46;
-pub const TGAP_CONN_EST_CODED_SCAN_INT: u16 = 47;
-pub const TGAP_CONN_EST_CODED_SCAN_WIND: u16 = 48;
-pub const TGAP_CONN_EST_CODED_HIGH_SCAN_INT: u16 = 49;
-pub const TGAP_CONN_EST_CODED_HIGH_SCAN_WIND: u16 = 50;
-pub const TGAP_CONN_EST_CODED_SUPERV_TIMEOUT: u16 = 51;
-pub const TGAP_CONN_EST_CODED_LATENCY: u16 = 52;
-pub const TGAP_CONN_EST_CODED_MIN_CE_LEN: u16 = 53;
-pub const TGAP_CONN_EST_CODED_MAX_CE_LEN: u16 = 54;
-pub const TGAP_PERIODIC_ADV_INT_MIN: u16 = 55;
-pub const TGAP_PERIODIC_ADV_INT_MAX: u16 = 56;
-pub const TGAP_PERIODIC_ADV_PROPERTIES: u16 = 57;
-pub const TGAP_SCAN_MAX_LENGTH: u16 = 58;
-pub const TGAP_AFH_CHANNEL_MDOE: u16 = 59;
-pub const TGAP_CTE_TYPE: u16 = 60;
-pub const TGAP_CTE_LENGTH: u16 = 61;
-pub const TGAP_CTE_COUNT: u16 = 62;
-pub const TGAP_LENGTH_OF_SWITCHING_PATTERN: u16 = 63;
-pub const TGAP_ADV_PRIMARY_PHY_OPTIONS: u16 = 64;
-pub const TGAP_ADV_SECONDARY_PHY_OPTIONS: u16 = 65;
-pub const TGAP_PARAMID_MAX: u16 = 66;
-
-// GAPROLE_SCAN_RSP_DATA
-// GAP_ADTYPE_DEFINES GAP Advertisement Data Types
-pub const GAP_ADTYPE_FLAGS: u8 = 1;
-pub const GAP_ADTYPE_16BIT_MORE: u8 = 2;
-pub const GAP_ADTYPE_16BIT_COMPLETE: u8 = 3;
-pub const GAP_ADTYPE_32BIT_MORE: u8 = 4;
-pub const GAP_ADTYPE_32BIT_COMPLETE: u8 = 5;
-pub const GAP_ADTYPE_128BIT_MORE: u8 = 6;
-/// Service: Complete list of 128-bit UUIDs
-pub const GAP_ADTYPE_128BIT_COMPLETE: u8 = 7;
-/// Shortened local name
-pub const GAP_ADTYPE_LOCAL_NAME_SHORT: u8 = 8;
-pub const GAP_ADTYPE_LOCAL_NAME_COMPLETE: u8 = 9;
-/// TX Power Level: -127 to +127 dBm
-pub const GAP_ADTYPE_POWER_LEVEL: u8 = 10;
-pub const GAP_ADTYPE_OOB_CLASS_OF_DEVICE: u8 = 13;
-pub const GAP_ADTYPE_OOB_SIMPLE_PAIRING_HASHC: u8 = 14;
-pub const GAP_ADTYPE_OOB_SIMPLE_PAIRING_RANDR: u8 = 15;
-pub const GAP_ADTYPE_SM_TK: u8 = 16;
-pub const GAP_ADTYPE_SM_OOB_FLAG: u8 = 17;
-/// Min and Max values of the connection interval (2 octets Min, 2 octets Max) (0xFFFF indicates no conn interval min or max)
-pub const GAP_ADTYPE_SLAVE_CONN_INTERVAL_RANGE: u8 = 18;
-pub const GAP_ADTYPE_SIGNED_DATA: u8 = 19;
-pub const GAP_ADTYPE_SERVICES_LIST_16BIT: u8 = 20;
-pub const GAP_ADTYPE_SERVICES_LIST_128BIT: u8 = 21;
-pub const GAP_ADTYPE_SERVICE_DATA: u8 = 22;
-pub const GAP_ADTYPE_PUBLIC_TARGET_ADDR: u8 = 23;
-pub const GAP_ADTYPE_RANDOM_TARGET_ADDR: u8 = 24;
-pub const GAP_ADTYPE_APPEARANCE: u8 = 25;
-pub const GAP_ADTYPE_ADV_INTERVAL: u8 = 26;
-pub const GAP_ADTYPE_LE_BD_ADDR: u8 = 27;
-pub const GAP_ADTYPE_LE_ROLE: u8 = 28;
-pub const GAP_ADTYPE_SIMPLE_PAIRING_HASHC_256: u8 = 29;
-pub const GAP_ADTYPE_SIMPLE_PAIRING_RANDR_256: u8 = 30;
-pub const GAP_ADTYPE_SERVICE_DATA_32BIT: u8 = 32;
-pub const GAP_ADTYPE_SERVICE_DATA_128BIT: u8 = 33;
-pub const GAP_ADTYPE_LE_SC_CONFIRMATION_VALUE: u8 = 34;
-pub const GAP_ADTYPE_LE_SC_RANDOM_VALUE: u8 = 35;
-pub const GAP_ADTYPE_URI: u8 = 36;
-pub const GAP_ADTYPE_INDOOR_POSITION: u8 = 37;
-pub const GAP_ADTYPE_TRAN_DISCOVERY_DATA: u8 = 38;
-pub const GAP_ADTYPE_SUPPORTED_FEATURES: u8 = 39;
-pub const GAP_ADTYPE_CHANNEL_MAP_UPDATE: u8 = 40;
-pub const GAP_ADTYPE_PB_ADV: u8 = 41;
-pub const GAP_ADTYPE_MESH_MESSAGE: u8 = 42;
-pub const GAP_ADTYPE_MESH_BEACON: u8 = 43;
-pub const GAP_ADTYPE_BIG_INFO: u8 = 44;
-pub const GAP_ADTYPE_BROADCAST_CODE: u8 = 45;
-pub const GAP_ADTYPE_RSL_SET_IDENT: u8 = 46;
-pub const GAP_ADTYPE_ADV_INTERVAL_LONG: u8 = 47;
-pub const GAP_ADTYPE_BROADCAST_NAME: u8 = 48;
-pub const GAP_ADTYPE_ENCRYPTED_ADV_DATA: u8 = 49;
-pub const GAP_ADTYPE_PERI_ADV_RSP_TIMING_INFO: u8 = 50;
-pub const GAP_ADTYPE_ELECTRONIC_SHELF_LABEL: u8 = 52;
-pub const GAP_ADTYPE_3D_INFO_DATA: u8 = 61;
-/// Manufacturer Specific Data: first 2 octets contain the Company Identifier Code followed by the additional manufacturer specific data.
-pub const GAP_ADTYPE_MANUFACTURER_SPECIFIC: u8 = 255;
-
-/// GAP_ADTYPE_FLAGS_MODES GAP ADTYPE Flags Discovery Modes
-pub const GAP_ADTYPE_FLAGS_LIMITED: u8 = 1;
-pub const GAP_ADTYPE_FLAGS_GENERAL: u8 = 2;
-pub const GAP_ADTYPE_FLAGS_BREDR_NOT_SUPPORTED: u8 = 4;
-
-// GAP_ADVERTISEMENT_TYPE_DEFINES GAP Advertising Event Types
-pub const GAP_ADTYPE_ADV_IND: u8 = 0;
-pub const GAP_ADTYPE_ADV_HDC_DIRECT_IND: u8 = 1;
-pub const GAP_ADTYPE_ADV_SCAN_IND: u8 = 2;
-pub const GAP_ADTYPE_ADV_NONCONN_IND: u8 = 3;
-pub const GAP_ADTYPE_ADV_LDC_DIRECT_IND: u8 = 4;
-//v5.x
-pub const GAP_ADTYPE_EXT_CONN_DIRECT: u8 = 5;
-pub const GAP_ADTYPE_EXT_SCAN_UNDIRECT: u8 = 6;
-pub const GAP_ADTYPE_EXT_NONCONN_NONSCAN_UNDIRECT: u8 = 7;
-pub const GAP_ADTYPE_EXT_CONN_UNDIRECT: u8 = 8;
-pub const GAP_ADTYPE_EXT_SCAN_DIRECT: u8 = 9;
-pub const GAP_ADTYPE_EXT_NONCONN_NONSCAN_DIRECT: u8 = 10;
-
-// GAP_ADVERTISEMENT_TYPE_DEFINES GAP Advertising PHY VAL TYPE(GAP_PHY_VAL_TYPE)
-pub const GAP_PHY_VAL_LE_1M: u16 = 1;
-pub const GAP_PHY_VAL_LE_2M: u16 = 2;
-pub const GAP_PHY_VAL_LE_CODED: u16 = 3;
-
-// GAP_ADVERTISEMENT_TYPE_DEFINES GAP Scan PHY VAL TYPE(GAP_PHY_BIT_TYPE)
-pub const GAP_PHY_BIT_LE_1M: u16 = 1;
-pub const GAP_PHY_BIT_LE_2M: u16 = 2;
-pub const GAP_PHY_BIT_LE_CODED: u16 = 4;
-pub const GAP_PHY_BIT_ALL: u16 = 7;
-pub const GAP_PHY_BIT_LE_CODED_S2: u16 = 8;
-
-// PHY_OPTIONS preferred coding when transmitting on the LE Coded PHY
-pub const GAP_PHY_OPTIONS_NOPRE: u32 = 0;
-pub const GAP_PHY_OPTIONS_S2: u32 = 1;
-pub const GAP_PHY_OPTIONS_S8: u32 = 2;
-pub const GAP_PHY_OPTIONS_S2_REQUIRES: u32 = 3;
-pub const GAP_PHY_OPTIONS_S8_REQUIRES: u32 = 4;
-
-// GAP_ADVERTISEMENT_TYPE_DEFINES GAP Periodic Advertising Properties
-pub const GAP_PERI_PROPERTIES_INCLUDE_TXPOWER: u16 = 64;
-
-// gapRole_States_t
+pub const _STDINT_H: u32 = 1;
+pub const _FEATURES_H: u32 = 1;
+pub const _DEFAULT_SOURCE: u32 = 1;
+pub const __GLIBC_USE_ISOC2Y: u32 = 0;
+pub const __GLIBC_USE_ISOC23: u32 = 0;
+pub const __USE_ISOC11: u32 = 1;
+pub const __USE_ISOC99: u32 = 1;
+pub const __USE_ISOC95: u32 = 1;
+pub const __USE_POSIX_IMPLICITLY: u32 = 1;
+pub const _POSIX_SOURCE: u32 = 1;
+pub const _POSIX_C_SOURCE: u32 = 200809;
+pub const __USE_POSIX: u32 = 1;
+pub const __USE_POSIX2: u32 = 1;
+pub const __USE_POSIX199309: u32 = 1;
+pub const __USE_POSIX199506: u32 = 1;
+pub const __USE_XOPEN2K: u32 = 1;
+pub const __USE_XOPEN2K8: u32 = 1;
+pub const _ATFILE_SOURCE: u32 = 1;
+pub const __WORDSIZE: u32 = 64;
+pub const __WORDSIZE_TIME64_COMPAT32: u32 = 1;
+pub const __SYSCALL_WORDSIZE: u32 = 64;
+pub const __TIMESIZE: u32 = 64;
+pub const __USE_TIME_BITS64: u32 = 1;
+pub const __USE_MISC: u32 = 1;
+pub const __USE_ATFILE: u32 = 1;
+pub const __USE_FORTIFY_LEVEL: u32 = 0;
+pub const __GLIBC_USE_DEPRECATED_GETS: u32 = 0;
+pub const __GLIBC_USE_DEPRECATED_SCANF: u32 = 0;
+pub const __GLIBC_USE_C23_STRTOL: u32 = 0;
+pub const _STDC_PREDEF_H: u32 = 1;
+pub const __STDC_IEC_559__: u32 = 1;
+pub const __STDC_IEC_60559_BFP__: u32 = 201404;
+pub const __STDC_IEC_559_COMPLEX__: u32 = 1;
+pub const __STDC_IEC_60559_COMPLEX__: u32 = 201404;
+pub const __STDC_ISO_10646__: u32 = 201706;
+pub const __GNU_LIBRARY__: u32 = 6;
+pub const __GLIBC__: u32 = 2;
+pub const __GLIBC_MINOR__: u32 = 42;
+pub const _SYS_CDEFS_H: u32 = 1;
+pub const __glibc_c99_flexarr_available: u32 = 1;
+pub const __LDOUBLE_REDIRECTS_TO_FLOAT128_ABI: u32 = 0;
+pub const __HAVE_GENERIC_SELECTION: u32 = 1;
+pub const __GLIBC_USE_LIB_EXT2: u32 = 0;
+pub const __GLIBC_USE_IEC_60559_BFP_EXT: u32 = 0;
+pub const __GLIBC_USE_IEC_60559_BFP_EXT_C23: u32 = 0;
+pub const __GLIBC_USE_IEC_60559_EXT: u32 = 0;
+pub const __GLIBC_USE_IEC_60559_FUNCS_EXT: u32 = 0;
+pub const __GLIBC_USE_IEC_60559_FUNCS_EXT_C23: u32 = 0;
+pub const __GLIBC_USE_IEC_60559_TYPES_EXT: u32 = 0;
+pub const _BITS_TYPES_H: u32 = 1;
+pub const _BITS_TYPESIZES_H: u32 = 1;
+pub const __OFF_T_MATCHES_OFF64_T: u32 = 1;
+pub const __INO_T_MATCHES_INO64_T: u32 = 1;
+pub const __RLIM_T_MATCHES_RLIM64_T: u32 = 1;
+pub const __STATFS_MATCHES_STATFS64: u32 = 1;
+pub const __KERNEL_OLD_TIMEVAL_MATCHES_TIMEVAL64: u32 = 1;
+pub const __FD_SETSIZE: u32 = 1024;
+pub const _BITS_TIME64_H: u32 = 1;
+pub const _BITS_WCHAR_H: u32 = 1;
+pub const _BITS_STDINT_INTN_H: u32 = 1;
+pub const _BITS_STDINT_UINTN_H: u32 = 1;
+pub const _BITS_STDINT_LEAST_H: u32 = 1;
+pub const INT8_MIN: i32 = -128;
+pub const INT16_MIN: i32 = -32768;
+pub const INT32_MIN: i32 = -2147483648;
+pub const INT8_MAX: u32 = 127;
+pub const INT16_MAX: u32 = 32767;
+pub const INT32_MAX: u32 = 2147483647;
+pub const UINT8_MAX: u32 = 255;
+pub const UINT16_MAX: u32 = 65535;
+pub const UINT32_MAX: u32 = 4294967295;
+pub const INT_LEAST8_MIN: i32 = -128;
+pub const INT_LEAST16_MIN: i32 = -32768;
+pub const INT_LEAST32_MIN: i32 = -2147483648;
+pub const INT_LEAST8_MAX: u32 = 127;
+pub const INT_LEAST16_MAX: u32 = 32767;
+pub const INT_LEAST32_MAX: u32 = 2147483647;
+pub const UINT_LEAST8_MAX: u32 = 255;
+pub const UINT_LEAST16_MAX: u32 = 65535;
+pub const UINT_LEAST32_MAX: u32 = 4294967295;
+pub const INT_FAST8_MIN: i32 = -128;
+pub const INT_FAST16_MIN: i64 = -9223372036854775808;
+pub const INT_FAST32_MIN: i64 = -9223372036854775808;
+pub const INT_FAST8_MAX: u32 = 127;
+pub const INT_FAST16_MAX: u64 = 9223372036854775807;
+pub const INT_FAST32_MAX: u64 = 9223372036854775807;
+pub const UINT_FAST8_MAX: u32 = 255;
+pub const UINT_FAST16_MAX: i32 = -1;
+pub const UINT_FAST32_MAX: i32 = -1;
+pub const INTPTR_MIN: i64 = -9223372036854775808;
+pub const INTPTR_MAX: u64 = 9223372036854775807;
+pub const UINTPTR_MAX: i32 = -1;
+pub const PTRDIFF_MIN: i64 = -9223372036854775808;
+pub const PTRDIFF_MAX: u64 = 9223372036854775807;
+pub const SIG_ATOMIC_MIN: i32 = -2147483648;
+pub const SIG_ATOMIC_MAX: u32 = 2147483647;
+pub const SIZE_MAX: i32 = -1;
+pub const WINT_MIN: u32 = 0;
+pub const WINT_MAX: u32 = 4294967295;
+pub const TRUE: u32 = 1;
+pub const FALSE: u32 = 0;
+pub const NULL: u32 = 0;
+pub const SUCCESS: u32 = 0;
+pub const SYS_EVENT_MSG: u32 = 32768;
+pub const INVALID_TASK_ID: u32 = 255;
+pub const TASK_NO_TASK: u32 = 255;
+pub const VER_FILE: &[u8; 19] = b"CH59x_BLE_LIB_V1.4\0";
+pub const SYSTEM_TIME_MICROSEN: u32 = 625;
+pub const TMOS_TIME_VALID: u32 = 30000000;
+pub const LL_TX_PWR_MINUS_20_DBM: u32 = 1;
+pub const LL_TX_PWR_MINUS_15_DBM: u32 = 3;
+pub const LL_TX_PWR_MINUS_10_DBM: u32 = 5;
+pub const LL_TX_PWR_MINUS_8_DBM: u32 = 7;
+pub const LL_TX_PWR_MINUS_5_DBM: u32 = 11;
+pub const LL_TX_PWR_MINUS_3_DBM: u32 = 15;
+pub const LL_TX_PWR_MINUS_1_DBM: u32 = 19;
+pub const LL_TX_PWR_0_DBM: u32 = 21;
+pub const LL_TX_PWR_1_DBM: u32 = 27;
+pub const LL_TX_PWR_2_DBM: u32 = 35;
+pub const LL_TX_PWR_3_DBM: u32 = 43;
+pub const LL_TX_PWR_4_DBM: u32 = 59;
+pub const LL_TX_PWR_9_DBM: u32 = 191;
+pub const ERR_LLE_IRQ_HANDLE: u32 = 1;
+pub const ERR_MEM_ALLOCATE_SIZE: u32 = 2;
+pub const ERR_SET_MAC_ADDR: u32 = 3;
+pub const ERR_GAP_ROLE_CONFIG: u32 = 4;
+pub const ERR_CONNECT_NUMBER_CONFIG: u32 = 5;
+pub const ERR_SNV_ADDR_CONFIG: u32 = 6;
+pub const ERR_CLOCK_SELECT_CONFIG: u32 = 7;
+pub const B_ADDR_LEN: u32 = 6;
+pub const B_RANDOM_NUM_SIZE: u32 = 8;
+pub const KEYLEN: u32 = 16;
+pub const PUBLIC_KEY_LEN: u32 = 64;
+pub const B_MAX_ADV_LEN: u32 = 31;
+pub const B_MAX_ADV_EXT_LEN: u32 = 460;
+pub const B_MAX_ADV_PERIODIC_LEN: u32 = 460;
+pub const FAILURE: u32 = 1;
+pub const INVALIDPARAMETER: u32 = 2;
+pub const INVALID_TASK: u32 = 3;
+pub const MSG_BUFFER_NOT_AVAIL: u32 = 4;
+pub const INVALID_MSG_POINTER: u32 = 5;
+pub const INVALID_EVENT_ID: u32 = 6;
+pub const INVALID_TIMEOUT: u32 = 7;
+pub const NO_TIMER_AVAIL: u32 = 8;
+pub const NV_OPER_FAILED: u32 = 10;
+pub const INVALID_MEM_SIZE: u32 = 11;
+pub const bleInvalidTaskID: u32 = 3;
+pub const bleEecKeyRequestRejected: u32 = 6;
+pub const bleNotReady: u32 = 16;
+pub const bleAlreadyInRequestedMode: u32 = 17;
+pub const bleIncorrectMode: u32 = 18;
+pub const bleMemAllocError: u32 = 19;
+pub const bleNotConnected: u32 = 20;
+pub const bleNoResources: u32 = 21;
+pub const blePending: u32 = 22;
+pub const bleTimeout: u32 = 23;
+pub const bleInvalidRange: u32 = 24;
+pub const bleLinkEncrypted: u32 = 25;
+pub const bleProcedureComplete: u32 = 26;
+pub const bleInvalidMtuSize: u32 = 27;
+pub const INVALID_CONNHANDLE: u32 = 65535;
+pub const LOOPBACK_CONNHANDLE: u32 = 65534;
+pub const LINK_NOT_CONNECTED: u32 = 0;
+pub const LINK_CONNECTED: u32 = 1;
+pub const LINK_AUTHENTICATED: u32 = 2;
+pub const LINK_BOUND: u32 = 4;
+pub const LINK_ENCRYPTED: u32 = 16;
+pub const LINKDB_STATUS_UPDATE_NEW: u32 = 0;
+pub const LINKDB_STATUS_UPDATE_REMOVED: u32 = 1;
+pub const LINKDB_STATUS_UPDATE_STATEFLAGS: u32 = 2;
+pub const GAP_SERVICE_UUID: u32 = 6144;
+pub const GATT_SERVICE_UUID: u32 = 6145;
+pub const GATT_PRIMARY_SERVICE_UUID: u32 = 10240;
+pub const GATT_SECONDARY_SERVICE_UUID: u32 = 10241;
+pub const GATT_INCLUDE_UUID: u32 = 10242;
+pub const GATT_CHARACTER_UUID: u32 = 10243;
+pub const GATT_CHAR_EXT_PROPS_UUID: u32 = 10496;
+pub const GATT_CHAR_USER_DESC_UUID: u32 = 10497;
+pub const GATT_CLIENT_CHAR_CFG_UUID: u32 = 10498;
+pub const GATT_SERV_CHAR_CFG_UUID: u32 = 10499;
+pub const GATT_CHAR_FORMAT_UUID: u32 = 10500;
+pub const GATT_CHAR_AGG_FORMAT_UUID: u32 = 10501;
+pub const GATT_VALID_RANGE_UUID: u32 = 10502;
+pub const GATT_EXT_REPORT_REF_UUID: u32 = 10503;
+pub const GATT_REPORT_REF_UUID: u32 = 10504;
+pub const DEVICE_NAME_UUID: u32 = 10752;
+pub const APPEARANCE_UUID: u32 = 10753;
+pub const PERI_PRIVACY_FLAG_UUID: u32 = 10754;
+pub const RECONNECT_ADDR_UUID: u32 = 10755;
+pub const PERI_CONN_PARAM_UUID: u32 = 10756;
+pub const SERVICE_CHANGED_UUID: u32 = 10757;
+pub const CENTRAL_ADDRESS_RESOLUTION_UUID: u32 = 10918;
+pub const IMMEDIATE_ALERT_SERV_UUID: u32 = 6146;
+pub const LINK_LOSS_SERV_UUID: u32 = 6147;
+pub const TX_PWR_LEVEL_SERV_UUID: u32 = 6148;
+pub const CURRENT_TIME_SERV_UUID: u32 = 6149;
+pub const REF_TIME_UPDATE_SERV_UUID: u32 = 6150;
+pub const NEXT_DST_CHANGE_SERV_UUID: u32 = 6151;
+pub const GLUCOSE_SERV_UUID: u32 = 6152;
+pub const THERMOMETER_SERV_UUID: u32 = 6153;
+pub const DEVINFO_SERV_UUID: u32 = 6154;
+pub const NWA_SERV_UUID: u32 = 6155;
+pub const HEARTRATE_SERV_UUID: u32 = 6157;
+pub const PHONE_ALERT_STS_SERV_UUID: u32 = 6158;
+pub const BATT_SERV_UUID: u32 = 6159;
+pub const BLOODPRESSURE_SERV_UUID: u32 = 6160;
+pub const ALERT_NOTIF_SERV_UUID: u32 = 6161;
+pub const HID_SERV_UUID: u32 = 6162;
+pub const SCAN_PARAM_SERV_UUID: u32 = 6163;
+pub const RSC_SERV_UUID: u32 = 6164;
+pub const CSC_SERV_UUID: u32 = 6166;
+pub const CYCPWR_SERV_UUID: u32 = 6168;
+pub const LOC_NAV_SERV_UUID: u32 = 6169;
+pub const ALERT_LEVEL_UUID: u32 = 10758;
+pub const TX_PWR_LEVEL_UUID: u32 = 10759;
+pub const DATE_TIME_UUID: u32 = 10760;
+pub const DAY_OF_WEEK_UUID: u32 = 10761;
+pub const DAY_DATE_TIME_UUID: u32 = 10762;
+pub const EXACT_TIME_256_UUID: u32 = 10764;
+pub const DST_OFFSET_UUID: u32 = 10765;
+pub const TIME_ZONE_UUID: u32 = 10766;
+pub const LOCAL_TIME_INFO_UUID: u32 = 10767;
+pub const TIME_WITH_DST_UUID: u32 = 10769;
+pub const TIME_ACCURACY_UUID: u32 = 10770;
+pub const TIME_SOURCE_UUID: u32 = 10771;
+pub const REF_TIME_INFO_UUID: u32 = 10772;
+pub const TIME_UPDATE_CTRL_PT_UUID: u32 = 10774;
+pub const TIME_UPDATE_STATE_UUID: u32 = 10775;
+pub const GLUCOSE_MEAS_UUID: u32 = 10776;
+pub const BATT_LEVEL_UUID: u32 = 10777;
+pub const TEMP_MEAS_UUID: u32 = 10780;
+pub const TEMP_TYPE_UUID: u32 = 10781;
+pub const IMEDIATE_TEMP_UUID: u32 = 10782;
+pub const MEAS_INTERVAL_UUID: u32 = 10785;
+pub const BOOT_KEY_INPUT_UUID: u32 = 10786;
+pub const SYSTEM_ID_UUID: u32 = 10787;
+pub const MODEL_NUMBER_UUID: u32 = 10788;
+pub const SERIAL_NUMBER_UUID: u32 = 10789;
+pub const FIRMWARE_REV_UUID: u32 = 10790;
+pub const HARDWARE_REV_UUID: u32 = 10791;
+pub const SOFTWARE_REV_UUID: u32 = 10792;
+pub const MANUFACTURER_NAME_UUID: u32 = 10793;
+pub const IEEE_11073_CERT_DATA_UUID: u32 = 10794;
+pub const CURRENT_TIME_UUID: u32 = 10795;
+pub const SCAN_REFRESH_UUID: u32 = 10801;
+pub const BOOT_KEY_OUTPUT_UUID: u32 = 10802;
+pub const BOOT_MOUSE_INPUT_UUID: u32 = 10803;
+pub const GLUCOSE_CONTEXT_UUID: u32 = 10804;
+pub const BLOODPRESSURE_MEAS_UUID: u32 = 10805;
+pub const IMEDIATE_CUFF_PRESSURE_UUID: u32 = 10806;
+pub const HEARTRATE_MEAS_UUID: u32 = 10807;
+pub const BODY_SENSOR_LOC_UUID: u32 = 10808;
+pub const HEARTRATE_CTRL_PT_UUID: u32 = 10809;
+pub const NETWORK_AVAIL_UUID: u32 = 10814;
+pub const ALERT_STATUS_UUID: u32 = 10815;
+pub const RINGER_CTRL_PT_UUID: u32 = 10816;
+pub const RINGER_SETTING_UUID: u32 = 10817;
+pub const ALERT_CAT_ID_BMASK_UUID: u32 = 10818;
+pub const ALERT_CAT_ID_UUID: u32 = 10819;
+pub const ALERT_NOTIF_CTRL_PT_UUID: u32 = 10820;
+pub const UNREAD_ALERT_STATUS_UUID: u32 = 10821;
+pub const NEW_ALERT_UUID: u32 = 10822;
+pub const SUP_NEW_ALERT_CAT_UUID: u32 = 10823;
+pub const SUP_UNREAD_ALERT_CAT_UUID: u32 = 10824;
+pub const BLOODPRESSURE_FEATURE_UUID: u32 = 10825;
+pub const HID_INFORMATION_UUID: u32 = 10826;
+pub const REPORT_MAP_UUID: u32 = 10827;
+pub const HID_CTRL_PT_UUID: u32 = 10828;
+pub const REPORT_UUID: u32 = 10829;
+pub const PROTOCOL_MODE_UUID: u32 = 10830;
+pub const SCAN_INTERVAL_WINDOW_UUID: u32 = 10831;
+pub const PNP_ID_UUID: u32 = 10832;
+pub const GLUCOSE_FEATURE_UUID: u32 = 10833;
+pub const RECORD_CTRL_PT_UUID: u32 = 10834;
+pub const RSC_MEAS_UUID: u32 = 10835;
+pub const RSC_FEATURE_UUID: u32 = 10836;
+pub const SC_CTRL_PT_UUID: u32 = 10837;
+pub const CSC_MEAS_UUID: u32 = 10843;
+pub const CSC_FEATURE_UUID: u32 = 10844;
+pub const SENSOR_LOC_UUID: u32 = 10845;
+pub const CYCPWR_MEAS_UUID: u32 = 10851;
+pub const CYCPWR_VECTOR_UUID: u32 = 10852;
+pub const CYCPWR_FEATURE_UUID: u32 = 10853;
+pub const CYCPWR_CTRL_PT_UUID: u32 = 10854;
+pub const LOC_SPEED_UUID: u32 = 10855;
+pub const NAV_UUID: u32 = 10856;
+pub const POS_QUALITY_UUID: u32 = 10857;
+pub const LN_FEATURE_UUID: u32 = 10858;
+pub const LN_CTRL_PT_UUID: u32 = 10859;
+pub const ELE_UUID: u32 = 10860;
+pub const PRESSURE_UUID: u32 = 10861;
+pub const TEMP_UUID: u32 = 10862;
+pub const HUMI_UUID: u32 = 10863;
+pub const TRUE_WIND_SPEED_UUID: u32 = 10864;
+pub const TRUE_WIND_DIRECTION_UUID: u32 = 10865;
+pub const URI_UUID: u32 = 10934;
+pub const MEDIA_STATE_UUID: u32 = 11171;
+pub const MEDIA_CTRL_PT_UUID: u32 = 11172;
+pub const MEDIA_CTRL_PT_OS_UUID: u32 = 11173;
+pub const CALL_STATE_UUID: u32 = 11197;
+pub const CALL_CTRL_PT_UUID: u32 = 11198;
+pub const CALL_CTRL_PT_OO_UUID: u32 = 11199;
+pub const TERM_REASON_UUID: u32 = 11200;
+pub const INCOMING_CALL_UUID: u32 = 11201;
+pub const MUTE_UUID: u32 = 11203;
+pub const GATT_UNITLESS_UUID: u32 = 9984;
+pub const GATT_UNIT_LENGTH_METER_UUID: u32 = 9985;
+pub const GATT_UNIT_MASS_KGRAM_UUID: u32 = 9986;
+pub const GATT_UNIT_TIME_SECOND_UUID: u32 = 9987;
+pub const GATT_UNIT_ELECTRIC_CURRENT_A_UUID: u32 = 9988;
+pub const GATT_UNIT_THERMODYN_TEMP_K_UUID: u32 = 9989;
+pub const GATT_UNIT_AMOUNT_SUBSTANCE_M_UUID: u32 = 9990;
+pub const GATT_UNIT_LUMINOUS_INTENSITY_C_UUID: u32 = 9991;
+pub const GATT_UNIT_AREA_SQ_MTR_UUID: u32 = 10000;
+pub const GATT_UNIT_VOLUME_CUBIC_MTR_UUID: u32 = 10001;
+pub const GATT_UNIT_VELOCITY_MPS_UUID: u32 = 10002;
+pub const GATT_UNIT_ACCELERATION_MPS_SQ_UUID: u32 = 10003;
+pub const GATT_UNIT_WAVENUMBER_RM_UUID: u32 = 10004;
+pub const GATT_UNIT_DENSITY_KGPCM_UUID: u32 = 10005;
+pub const GATT_UNIT_SURFACE_DENSITY_KGPSM_UUID: u32 = 10006;
+pub const GATT_UNIT_SPECIFIC_VOLUME_CMPKG_UUID: u32 = 10007;
+pub const GATT_UNIT_CURRENT_DENSITY_APSM_UUID: u32 = 10008;
+pub const GATT_UNIT_MAG_FIELD_STRENGTH_UUID: u32 = 10009;
+pub const GATT_UNIT_AMOUNT_CONC_MPCM_UUID: u32 = 10010;
+pub const GATT_UNIT_MASS_CONC_KGPCM_UUID: u32 = 10011;
+pub const GATT_UNIT_LUMINANCE_CPSM_UUID: u32 = 10012;
+pub const GATT_UNIT_REFRACTIVE_INDEX_UUID: u32 = 10013;
+pub const GATT_UNIT_RELATIVE_PERMEABLILTY_UUID: u32 = 10014;
+pub const GATT_UNIT_PLANE_ANGLE_RAD_UUID: u32 = 10016;
+pub const GATT_UNIT_SOLID_ANGLE_STERAD_UUID: u32 = 10017;
+pub const GATT_UNIT_FREQUENCY_HTZ_UUID: u32 = 10018;
+pub const GATT_UNIT_FORCE_NEWTON_UUID: u32 = 10019;
+pub const GATT_UNIT_PRESSURE_PASCAL_UUID: u32 = 10020;
+pub const GATT_UNIT_ENERGY_JOULE_UUID: u32 = 10021;
+pub const GATT_UNIT_POWER_WATT_UUID: u32 = 10022;
+pub const GATT_UNIT_E_CHARGE_C_UUID: u32 = 10023;
+pub const GATT_UNIT_E_POTENTIAL_DIF_V_UUID: u32 = 10024;
+pub const GATT_UNIT_CELSIUS_TEMP_DC_UUID: u32 = 10031;
+pub const GATT_UNIT_TIME_MINUTE_UUID: u32 = 10080;
+pub const GATT_UNIT_TIME_HOUR_UUID: u32 = 10081;
+pub const GATT_UNIT_TIME_DAY_UUID: u32 = 10082;
+pub const GATT_UNIT_PLANE_ANGLE_DEGREE_UUID: u32 = 10083;
+pub const GATT_UNIT_PLANE_ANGLE_MINUTE_UUID: u32 = 10084;
+pub const GATT_UNIT_PLANE_ANGLE_SECOND_UUID: u32 = 10085;
+pub const GATT_UNIT_AREA_HECTARE_UUID: u32 = 10086;
+pub const GATT_UNIT_VOLUME_LITRE_UUID: u32 = 10087;
+pub const GATT_UNIT_MASS_TONNE_UUID: u32 = 10088;
+pub const GATT_UINT_LENGTH_YARD_UUID: u32 = 10144;
+pub const GATT_UNIT_LENGTH_PARSEC_UUID: u32 = 10145;
+pub const GATT_UNIT_LENGTH_INCH_UUID: u32 = 10146;
+pub const GATT_UNIT_LENGTH_FOOT_UUID: u32 = 10147;
+pub const GATT_UNIT_LENGTH_MILE_UUID: u32 = 10148;
+pub const GATT_UNIT_PRESSURE_PFPSI_UUID: u32 = 10149;
+pub const GATT_UNIT_VELOCITY_KMPH_UUID: u32 = 10150;
+pub const GATT_UNIT_VELOCITY_MPH_UUID: u32 = 10151;
+pub const GATT_UNIT_ANGULAR_VELOCITY_RPM_UUID: u32 = 10152;
+pub const GATT_UNIT_ENERGY_GCAL_UUID: u32 = 10153;
+pub const GATT_UNIT_ENERGY_KCAL_UUID: u32 = 10154;
+pub const GATT_UNIT_ENERGY_KWH_UUID: u32 = 10155;
+pub const GATT_UNIT_THERMODYN_TEMP_DF_UUID: u32 = 10156;
+pub const GATT_UNIT_PERCENTAGE_UUID: u32 = 10157;
+pub const GATT_UNIT_PER_MILE_UUID: u32 = 10158;
+pub const GATT_UNIT_PERIOD_BPM_UUID: u32 = 10159;
+pub const GATT_UNIT_E_CHARGE_AH_UUID: u32 = 10160;
+pub const GATT_UNIT_MASS_DENSITY_MGPD_UUID: u32 = 10161;
+pub const GATT_UNIT_MASS_DENSITY_MMPL_UUID: u32 = 10162;
+pub const GATT_UNIT_TIME_YEAR_UUID: u32 = 10163;
+pub const GATT_UNIT_TIME_MONTH_UUID: u32 = 10164;
+pub const GATT_MSG_EVENT: u32 = 176;
+pub const GATT_SERV_MSG_EVENT: u32 = 177;
+pub const GAP_MSG_EVENT: u32 = 208;
+pub const ATT_MTU_SIZE: u32 = 23;
+pub const ATT_MAX_MTU_SIZE: u32 = 512;
+pub const ATT_ERROR_RSP: u32 = 1;
+pub const ATT_EXCHANGE_MTU_REQ: u32 = 2;
+pub const ATT_EXCHANGE_MTU_RSP: u32 = 3;
+pub const ATT_FIND_INFO_REQ: u32 = 4;
+pub const ATT_FIND_INFO_RSP: u32 = 5;
+pub const ATT_FIND_BY_TYPE_VALUE_REQ: u32 = 6;
+pub const ATT_FIND_BY_TYPE_VALUE_RSP: u32 = 7;
+pub const ATT_READ_BY_TYPE_REQ: u32 = 8;
+pub const ATT_READ_BY_TYPE_RSP: u32 = 9;
+pub const ATT_READ_REQ: u32 = 10;
+pub const ATT_READ_RSP: u32 = 11;
+pub const ATT_READ_BLOB_REQ: u32 = 12;
+pub const ATT_READ_BLOB_RSP: u32 = 13;
+pub const ATT_READ_MULTI_REQ: u32 = 14;
+pub const ATT_READ_MULTI_RSP: u32 = 15;
+pub const ATT_READ_BY_GRP_TYPE_REQ: u32 = 16;
+pub const ATT_READ_BY_GRP_TYPE_RSP: u32 = 17;
+pub const ATT_WRITE_REQ: u32 = 18;
+pub const ATT_WRITE_RSP: u32 = 19;
+pub const ATT_PREPARE_WRITE_REQ: u32 = 22;
+pub const ATT_PREPARE_WRITE_RSP: u32 = 23;
+pub const ATT_EXECUTE_WRITE_REQ: u32 = 24;
+pub const ATT_EXECUTE_WRITE_RSP: u32 = 25;
+pub const ATT_HANDLE_VALUE_NOTI: u32 = 27;
+pub const ATT_HANDLE_VALUE_IND: u32 = 29;
+pub const ATT_HANDLE_VALUE_CFM: u32 = 30;
+pub const ATT_WRITE_CMD: u32 = 82;
+pub const ATT_SIGNED_WRITE_CMD: u32 = 210;
+pub const ATT_ERR_INVALID_HANDLE: u32 = 1;
+pub const ATT_ERR_READ_NOT_PERMITTED: u32 = 2;
+pub const ATT_ERR_WRITE_NOT_PERMITTED: u32 = 3;
+pub const ATT_ERR_INVALID_PDU: u32 = 4;
+pub const ATT_ERR_INSUFFICIENT_AUTHEN: u32 = 5;
+pub const ATT_ERR_UNSUPPORTED_REQ: u32 = 6;
+pub const ATT_ERR_INVALID_OFFSET: u32 = 7;
+pub const ATT_ERR_INSUFFICIENT_AUTHOR: u32 = 8;
+pub const ATT_ERR_PREPARE_QUEUE_FULL: u32 = 9;
+pub const ATT_ERR_ATTR_NOT_FOUND: u32 = 10;
+pub const ATT_ERR_ATTR_NOT_LONG: u32 = 11;
+pub const ATT_ERR_INSUFFICIENT_KEY_SIZE: u32 = 12;
+pub const ATT_ERR_INVALID_VALUE_SIZE: u32 = 13;
+pub const ATT_ERR_UNLIKELY: u32 = 14;
+pub const ATT_ERR_INSUFFICIENT_ENCRYPT: u32 = 15;
+pub const ATT_ERR_UNSUPPORTED_GRP_TYPE: u32 = 16;
+pub const ATT_ERR_INSUFFICIENT_RESOURCES: u32 = 17;
+pub const ATT_ERR_INVALID_VALUE: u32 = 128;
+pub const ATT_FLOW_CTRL_VIOLATED_EVENT: u32 = 126;
+pub const ATT_MTU_UPDATED_EVENT: u32 = 127;
+pub const ATT_BT_UUID_SIZE: u32 = 2;
+pub const ATT_UUID_SIZE: u32 = 16;
+pub const GATT_PERMIT_READ: u32 = 1;
+pub const GATT_PERMIT_WRITE: u32 = 2;
+pub const GATT_PERMIT_AUTHEN_READ: u32 = 4;
+pub const GATT_PERMIT_AUTHEN_WRITE: u32 = 8;
+pub const GATT_PERMIT_AUTHOR_READ: u32 = 16;
+pub const GATT_PERMIT_AUTHOR_WRITE: u32 = 32;
+pub const GATT_PERMIT_ENCRYPT_READ: u32 = 64;
+pub const GATT_PERMIT_ENCRYPT_WRITE: u32 = 128;
+pub const GATT_PROP_BCAST: u32 = 1;
+pub const GATT_PROP_READ: u32 = 2;
+pub const GATT_PROP_WRITE_NO_RSP: u32 = 4;
+pub const GATT_PROP_WRITE: u32 = 8;
+pub const GATT_PROP_NOTIFY: u32 = 16;
+pub const GATT_PROP_INDICATE: u32 = 32;
+pub const GATT_PROP_AUTHEN: u32 = 64;
+pub const GATT_PROP_EXTENDED: u32 = 128;
+pub const GATT_LOCAL_READ: u32 = 255;
+pub const GATT_LOCAL_WRITE: u32 = 254;
+pub const GATT_MIN_ENCRYPT_KEY_SIZE: u32 = 7;
+pub const GATT_MAX_ENCRYPT_KEY_SIZE: u32 = 16;
+pub const GATT_INVALID_HANDLE: u32 = 0;
+pub const GATT_MIN_HANDLE: u32 = 1;
+pub const GATT_MAX_HANDLE: u32 = 65535;
+pub const GATT_MAX_MTU: u32 = 65535;
+pub const GATT_MAX_NUM_CONN: u32 = 4;
+pub const GATT_CLIENT_CFG_NOTIFY: u32 = 1;
+pub const GATT_CLIENT_CFG_INDICATE: u32 = 2;
+pub const GATT_CFG_NO_OPERATION: u32 = 0;
+pub const GATT_ALL_SERVICES: u32 = 4294967295;
+pub const GAP_DEVICE_INIT_DONE_EVENT: u32 = 0;
+pub const GAP_DEVICE_DISCOVERY_EVENT: u32 = 1;
+pub const GAP_ADV_DATA_UPDATE_DONE_EVENT: u32 = 2;
+pub const GAP_MAKE_DISCOVERABLE_DONE_EVENT: u32 = 3;
+pub const GAP_END_DISCOVERABLE_DONE_EVENT: u32 = 4;
+pub const GAP_LINK_ESTABLISHED_EVENT: u32 = 5;
+pub const GAP_LINK_TERMINATED_EVENT: u32 = 6;
+pub const GAP_LINK_PARAM_UPDATE_EVENT: u32 = 7;
+pub const GAP_RANDOM_ADDR_CHANGED_EVENT: u32 = 8;
+pub const GAP_SIGNATURE_UPDATED_EVENT: u32 = 9;
+pub const GAP_AUTHENTICATION_COMPLETE_EVENT: u32 = 10;
+pub const GAP_PASSKEY_NEEDED_EVENT: u32 = 11;
+pub const GAP_SLAVE_REQUESTED_SECURITY_EVENT: u32 = 12;
+pub const GAP_DEVICE_INFO_EVENT: u32 = 13;
+pub const GAP_BOND_COMPLETE_EVENT: u32 = 14;
+pub const GAP_PAIRING_REQ_EVENT: u32 = 15;
+pub const GAP_DIRECT_DEVICE_INFO_EVENT: u32 = 16;
+pub const GAP_PHY_UPDATE_EVENT: u32 = 17;
+pub const GAP_EXT_ADV_DEVICE_INFO_EVENT: u32 = 18;
+pub const GAP_MAKE_PERIODIC_ADV_DONE_EVENT: u32 = 19;
+pub const GAP_END_PERIODIC_ADV_DONE_EVENT: u32 = 20;
+pub const GAP_SYNC_ESTABLISHED_EVENT: u32 = 21;
+pub const GAP_PERIODIC_ADV_DEVICE_INFO_EVENT: u32 = 22;
+pub const GAP_SYNC_LOST_EVENT: u32 = 23;
+pub const GAP_SCAN_REQUEST_EVENT: u32 = 25;
+pub const GAP_OOB_NEEDED_EVENT: u32 = 26;
+pub const GAP_MAKE_CONNECTIONESS_CTE_DONE_EVENT: u32 = 27;
+pub const GAP_END_CONNECTIONESS_CTE_DONE_EVENT: u32 = 28;
+pub const GAP_PERI_ADV_SYNC_TRAN_RECEIVED_EVENT: u32 = 29;
+pub const GAP_PROFILE_BROADCASTER: u32 = 1;
+pub const GAP_PROFILE_OBSERVER: u32 = 2;
+pub const GAP_PROFILE_PERIPHERAL: u32 = 4;
+pub const GAP_PROFILE_CENTRAL: u32 = 8;
+pub const bleGAPUserCanceled: u32 = 48;
+pub const bleGAPConnNotAcceptable: u32 = 49;
+pub const bleGAPBondRejected: u32 = 50;
+pub const bleGAPExpiredCanceled: u32 = 51;
+pub const GAP_DEVICE_NAME_LEN: u32 = 21;
+pub const GAP_DEVICE_NAME_MAX_LEN: u32 = 248;
+pub const LISTEN_PERIODIC_ADVERTISING_MODE: u32 = 1;
+pub const REPORTING_INITIALLY_DISABLED: u32 = 2;
+pub const DUPLICATE_FILTERING_INITIALLY_ENABLED: u32 = 4;
+pub const GAP_CONNHANDLE_INIT: u32 = 65534;
+pub const GAP_CONNHANDLE_ALL: u32 = 65535;
+pub const GAP_PRIVACY_DISABLED: u32 = 0;
+pub const GAP_PRIVACY_ENABLED: u32 = 1;
+pub const GGS_DEVICE_NAME_ATT: u32 = 0;
+pub const GGS_APPEARANCE_ATT: u32 = 1;
+pub const GGS_PERI_PRIVACY_FLAG_ATT: u32 = 2;
+pub const GGS_RECONNCT_ADDR_ATT: u32 = 3;
+pub const GGS_PERI_CONN_PARAM_ATT: u32 = 4;
+pub const GGS_PERI_PRIVACY_FLAG_PROPS: u32 = 5;
+pub const GGS_W_PERMIT_DEVICE_NAME_ATT: u32 = 6;
+pub const GGS_W_PERMIT_APPEARANCE_ATT: u32 = 7;
+pub const GGS_W_PERMIT_PRIVACY_FLAG_ATT: u32 = 8;
+pub const GGS_CENT_ADDR_RES_ATT: u32 = 9;
+pub const GAP_SERVICE: u32 = 1;
+pub const TGAP_GEN_DISC_ADV_MIN: u32 = 0;
+pub const TGAP_LIM_ADV_TIMEOUT: u32 = 1;
+pub const TGAP_DISC_SCAN: u32 = 2;
+pub const TGAP_DISC_ADV_INT_MIN: u32 = 3;
+pub const TGAP_DISC_ADV_INT_MAX: u32 = 4;
+pub const TGAP_DISC_SCAN_INT: u32 = 5;
+pub const TGAP_DISC_SCAN_WIND: u32 = 6;
+pub const TGAP_CONN_EST_INT_MIN: u32 = 7;
+pub const TGAP_CONN_EST_INT_MAX: u32 = 8;
+pub const TGAP_CONN_EST_SCAN_INT: u32 = 9;
+pub const TGAP_CONN_EST_SCAN_WIND: u32 = 10;
+pub const TGAP_CONN_EST_HIGH_SCAN_INT: u32 = 11;
+pub const TGAP_CONN_EST_HIGH_SCAN_WIND: u32 = 12;
+pub const TGAP_CONN_EST_SUPERV_TIMEOUT: u32 = 13;
+pub const TGAP_CONN_EST_LATENCY: u32 = 14;
+pub const TGAP_CONN_EST_MIN_CE_LEN: u32 = 15;
+pub const TGAP_CONN_EST_MAX_CE_LEN: u32 = 16;
+pub const TGAP_PRIVATE_ADDR_INT: u32 = 17;
+pub const TGAP_SM_TIMEOUT: u32 = 18;
+pub const TGAP_SM_MIN_KEY_LEN: u32 = 19;
+pub const TGAP_SM_MAX_KEY_LEN: u32 = 20;
+pub const TGAP_FILTER_ADV_REPORTS: u32 = 21;
+pub const TGAP_SCAN_RSSI_MIN: u32 = 22;
+pub const TGAP_REJECT_CONN_PARAMS: u32 = 23;
+pub const TGAP_AUTH_TASK_ID: u32 = 24;
+pub const TGAP_ADV_TX_POWER: u32 = 25;
+pub const TGAP_ADV_PRIMARY_PHY: u32 = 26;
+pub const TGAP_ADV_SECONDARY_PHY: u32 = 27;
+pub const TGAP_ADV_SECONDARY_MAX_SKIP: u32 = 28;
+pub const TGAP_ADV_ADVERTISING_SID: u32 = 29;
+pub const TGAP_ADV_SCAN_REQ_NOTIFY: u32 = 30;
+pub const TGAP_ADV_ADVERTISING_DURATION: u32 = 31;
+pub const TGAP_ADV_MAX_EVENTS: u32 = 32;
+pub const TGAP_DISC_SCAN_PHY: u32 = 33;
+pub const TGAP_DISC_SCAN_CODED_INT: u32 = 34;
+pub const TGAP_DISC_SCAN_CODED_WIND: u32 = 35;
+pub const TGAP_DISC_SCAN_DURATION: u32 = 36;
+pub const TGAP_DISC_SCAN_PERIOD: u32 = 37;
+pub const TGAP_CONN_EST_INT_PHY: u32 = 38;
+pub const TGAP_CONN_EST_2M_INT_MIN: u32 = 39;
+pub const TGAP_CONN_EST_2M_INT_MAX: u32 = 40;
+pub const TGAP_CONN_EST_2M_SUPERV_TIMEOUT: u32 = 41;
+pub const TGAP_CONN_EST_2M_LATENCY: u32 = 42;
+pub const TGAP_CONN_EST_2M_MIN_CE_LEN: u32 = 43;
+pub const TGAP_CONN_EST_2M_MAX_CE_LEN: u32 = 44;
+pub const TGAP_CONN_EST_CODED_INT_MIN: u32 = 45;
+pub const TGAP_CONN_EST_CODED_INT_MAX: u32 = 46;
+pub const TGAP_CONN_EST_CODED_SCAN_INT: u32 = 47;
+pub const TGAP_CONN_EST_CODED_SCAN_WIND: u32 = 48;
+pub const TGAP_CONN_EST_CODED_HIGH_SCAN_INT: u32 = 49;
+pub const TGAP_CONN_EST_CODED_HIGH_SCAN_WIND: u32 = 50;
+pub const TGAP_CONN_EST_CODED_SUPERV_TIMEOUT: u32 = 51;
+pub const TGAP_CONN_EST_CODED_LATENCY: u32 = 52;
+pub const TGAP_CONN_EST_CODED_MIN_CE_LEN: u32 = 53;
+pub const TGAP_CONN_EST_CODED_MAX_CE_LEN: u32 = 54;
+pub const TGAP_PERIODIC_ADV_INT_MIN: u32 = 55;
+pub const TGAP_PERIODIC_ADV_INT_MAX: u32 = 56;
+pub const TGAP_PERIODIC_ADV_PROPERTIES: u32 = 57;
+pub const TGAP_SCAN_MAX_LENGTH: u32 = 58;
+pub const TGAP_AFH_CHANNEL_MDOE: u32 = 59;
+pub const TGAP_CTE_TYPE: u32 = 60;
+pub const TGAP_CTE_LENGTH: u32 = 61;
+pub const TGAP_CTE_COUNT: u32 = 62;
+pub const TGAP_LENGTH_OF_SWITCHING_PATTERN: u32 = 63;
+pub const TGAP_ADV_RSP_RSSI_MIN: u32 = 64;
+pub const TGAP_PARAMID_MAX: u32 = 65;
+pub const DEVDISC_MODE_NONDISCOVERABLE: u32 = 0;
+pub const DEVDISC_MODE_GENERAL: u32 = 1;
+pub const DEVDISC_MODE_LIMITED: u32 = 2;
+pub const DEVDISC_MODE_ALL: u32 = 3;
+pub const ADDRTYPE_PUBLIC: u32 = 0;
+pub const ADDRTYPE_STATIC: u32 = 1;
+pub const ADDRTYPE_PRIVATE_NONRESOLVE: u32 = 2;
+pub const ADDRTYPE_PRIVATE_RESOLVE: u32 = 3;
+pub const GAP_ADTYPE_ADV_IND: u32 = 0;
+pub const GAP_ADTYPE_ADV_HDC_DIRECT_IND: u32 = 1;
+pub const GAP_ADTYPE_ADV_SCAN_IND: u32 = 2;
+pub const GAP_ADTYPE_ADV_NONCONN_IND: u32 = 3;
+pub const GAP_ADTYPE_ADV_LDC_DIRECT_IND: u32 = 4;
+pub const GAP_ADTYPE_EXT_CONN_DIRECT: u32 = 5;
+pub const GAP_ADTYPE_EXT_SCAN_UNDIRECT: u32 = 6;
+pub const GAP_ADTYPE_EXT_NONCONN_NONSCAN_UNDIRECT: u32 = 7;
+pub const GAP_ADTYPE_EXT_CONN_UNDIRECT: u32 = 8;
+pub const GAP_ADTYPE_EXT_SCAN_DIRECT: u32 = 9;
+pub const GAP_ADTYPE_EXT_NONCONN_NONSCAN_DIRECT: u32 = 10;
+pub const GAP_PHY_VAL_LE_1M: u32 = 1;
+pub const GAP_PHY_VAL_LE_2M: u32 = 2;
+pub const GAP_PHY_BIT_LE_1M: u32 = 1;
+pub const GAP_PHY_BIT_LE_2M: u32 = 2;
+pub const GAP_PHY_BIT_ALL: u32 = 3;
+pub const GAP_PERI_PROPERTIES_INCLUDE_TXPOWER: u32 = 64;
+pub const GAP_CTE_TYPE_AOA: u32 = 0;
+pub const GAP_CTE_TYPE_AOD_1US: u32 = 1;
+pub const GAP_CTE_TYPE_AOD_2US: u32 = 2;
+pub const GAP_ADRPT_ADV_IND: u32 = 0;
+pub const GAP_ADRPT_ADV_DIRECT_IND: u32 = 1;
+pub const GAP_ADRPT_ADV_SCAN_IND: u32 = 2;
+pub const GAP_ADRPT_ADV_NONCONN_IND: u32 = 3;
+pub const GAP_ADRPT_SCAN_RSP: u32 = 4;
+pub const GAP_ADRPT_EXT_CONN_DIRECT: u32 = 5;
+pub const GAP_ADRPT_EXT_SCAN_UNDIRECT: u32 = 6;
+pub const GAP_ADRPT_EXT_NONCONN_NONSCAN_UNDIRECT: u32 = 7;
+pub const GAP_ADRPT_EXT_CONN_UNDIRECT: u32 = 8;
+pub const GAP_ADRPT_EXT_SCAN_DIRECT: u32 = 9;
+pub const GAP_ADRPT_EXT_NONCONN_NONSCAN_DIRECT: u32 = 10;
+pub const GAP_ADRPT_EXT_SCAN_RESPONSE: u32 = 11;
+pub const GAP_ADRPT_EXT_DATA_MASK: u32 = 96;
+pub const GAP_ADRPT_EXT_DATA_COMPLETE: u32 = 0;
+pub const GAP_ADRPT_EXT_DATA_INCOMPLETE: u32 = 32;
+pub const GAP_ADRPT_EXT_DATA_LAST: u32 = 64;
+pub const GAP_ADRPT_ADV_CONNECTABLE: u32 = 1;
+pub const GAP_ADRPT_ADV_SCANNABLE: u32 = 2;
+pub const GAP_ADRPT_ADV_DITECTED: u32 = 4;
+pub const GAP_ADRPT_SCAN_RESPONSE: u32 = 8;
+pub const GAP_FILTER_POLICY_ALL: u32 = 0;
+pub const GAP_FILTER_POLICY_WHITE_SCAN: u32 = 1;
+pub const GAP_FILTER_POLICY_WHITE_CON: u32 = 2;
+pub const GAP_FILTER_POLICY_WHITE: u32 = 3;
+pub const GAP_PASSCODE_MAX: u32 = 999999;
+pub const GAP_INIT_SIGN_COUNTER: u32 = 4294967295;
+pub const GAP_ADVCHAN_37: u32 = 1;
+pub const GAP_ADVCHAN_38: u32 = 2;
+pub const GAP_ADVCHAN_39: u32 = 4;
+pub const GAP_ADVCHAN_ALL: u32 = 7;
+pub const GAP_ADTYPE_FLAGS: u32 = 1;
+pub const GAP_ADTYPE_16BIT_MORE: u32 = 2;
+pub const GAP_ADTYPE_16BIT_COMPLETE: u32 = 3;
+pub const GAP_ADTYPE_32BIT_MORE: u32 = 4;
+pub const GAP_ADTYPE_32BIT_COMPLETE: u32 = 5;
+pub const GAP_ADTYPE_128BIT_MORE: u32 = 6;
+pub const GAP_ADTYPE_128BIT_COMPLETE: u32 = 7;
+pub const GAP_ADTYPE_LOCAL_NAME_SHORT: u32 = 8;
+pub const GAP_ADTYPE_LOCAL_NAME_COMPLETE: u32 = 9;
+pub const GAP_ADTYPE_POWER_LEVEL: u32 = 10;
+pub const GAP_ADTYPE_OOB_CLASS_OF_DEVICE: u32 = 13;
+pub const GAP_ADTYPE_OOB_SIMPLE_PAIRING_HASHC: u32 = 14;
+pub const GAP_ADTYPE_OOB_SIMPLE_PAIRING_RANDR: u32 = 15;
+pub const GAP_ADTYPE_SM_TK: u32 = 16;
+pub const GAP_ADTYPE_SM_OOB_FLAG: u32 = 17;
+pub const GAP_ADTYPE_SLAVE_CONN_INTERVAL_RANGE: u32 = 18;
+pub const GAP_ADTYPE_SIGNED_DATA: u32 = 19;
+pub const GAP_ADTYPE_SERVICES_LIST_16BIT: u32 = 20;
+pub const GAP_ADTYPE_SERVICES_LIST_128BIT: u32 = 21;
+pub const GAP_ADTYPE_SERVICE_DATA: u32 = 22;
+pub const GAP_ADTYPE_PUBLIC_TARGET_ADDR: u32 = 23;
+pub const GAP_ADTYPE_RANDOM_TARGET_ADDR: u32 = 24;
+pub const GAP_ADTYPE_APPEARANCE: u32 = 25;
+pub const GAP_ADTYPE_ADV_INTERVAL: u32 = 26;
+pub const GAP_ADTYPE_LE_BD_ADDR: u32 = 27;
+pub const GAP_ADTYPE_LE_ROLE: u32 = 28;
+pub const GAP_ADTYPE_SIMPLE_PAIRING_HASHC_256: u32 = 29;
+pub const GAP_ADTYPE_SIMPLE_PAIRING_RANDR_256: u32 = 30;
+pub const GAP_ADTYPE_SERVICE_DATA_32BIT: u32 = 32;
+pub const GAP_ADTYPE_SERVICE_DATA_128BIT: u32 = 33;
+pub const GAP_ADTYPE_LE_SC_CONFIRMATION_VALUE: u32 = 34;
+pub const GAP_ADTYPE_LE_SC_RANDOM_VALUE: u32 = 35;
+pub const GAP_ADTYPE_URI: u32 = 36;
+pub const GAP_ADTYPE_INDOOR_POSITION: u32 = 37;
+pub const GAP_ADTYPE_TRAN_DISCOVERY_DATA: u32 = 38;
+pub const GAP_ADTYPE_SUPPORTED_FEATURES: u32 = 39;
+pub const GAP_ADTYPE_CHANNEL_MAP_UPDATE: u32 = 40;
+pub const GAP_ADTYPE_PB_ADV: u32 = 41;
+pub const GAP_ADTYPE_MESH_MESSAGE: u32 = 42;
+pub const GAP_ADTYPE_MESH_BEACON: u32 = 43;
+pub const GAP_ADTYPE_BIG_INFO: u32 = 44;
+pub const GAP_ADTYPE_BROADCAST_CODE: u32 = 45;
+pub const GAP_ADTYPE_RSL_SET_IDENT: u32 = 46;
+pub const GAP_ADTYPE_ADV_INTERVAL_LONG: u32 = 47;
+pub const GAP_ADTYPE_3D_INFO_DATA: u32 = 61;
+pub const GAP_ADTYPE_MANUFACTURER_SPECIFIC: u32 = 255;
+pub const GAP_ADTYPE_FLAGS_LIMITED: u32 = 1;
+pub const GAP_ADTYPE_FLAGS_GENERAL: u32 = 2;
+pub const GAP_ADTYPE_FLAGS_BREDR_NOT_SUPPORTED: u32 = 4;
+pub const GAP_APPEARE_UNKNOWN: u32 = 0;
+pub const GAP_APPEARE_GENERIC_PHONE: u32 = 64;
+pub const GAP_APPEARE_GENERIC_COMPUTER: u32 = 128;
+pub const GAP_APPEARE_GENERIC_WATCH: u32 = 192;
+pub const GAP_APPEARE_WATCH_SPORTS: u32 = 193;
+pub const GAP_APPEARE_GENERIC_CLOCK: u32 = 256;
+pub const GAP_APPEARE_GENERIC_DISPLAY: u32 = 320;
+pub const GAP_APPEARE_GENERIC_RC: u32 = 384;
+pub const GAP_APPEARE_GENERIC_EYE_GALSSES: u32 = 448;
+pub const GAP_APPEARE_GENERIC_TAG: u32 = 512;
+pub const GAP_APPEARE_GENERIC_KEYRING: u32 = 576;
+pub const GAP_APPEARE_GENERIC_MEDIA_PLAYER: u32 = 640;
+pub const GAP_APPEARE_GENERIC_BARCODE_SCANNER: u32 = 704;
+pub const GAP_APPEARE_GENERIC_THERMOMETER: u32 = 768;
+pub const GAP_APPEARE_GENERIC_THERMO_EAR: u32 = 769;
+pub const GAP_APPEARE_GENERIC_HR_SENSOR: u32 = 832;
+pub const GAP_APPEARE_GENERIC_HRS_BELT: u32 = 833;
+pub const GAP_APPEARE_GENERIC_BLOOD_PRESSURE: u32 = 896;
+pub const GAP_APPEARE_GENERIC_BP_ARM: u32 = 897;
+pub const GAP_APPEARE_GENERIC_BP_WRIST: u32 = 898;
+pub const GAP_APPEARE_GENERIC_HID: u32 = 960;
+pub const GAP_APPEARE_HID_KEYBOARD: u32 = 961;
+pub const GAP_APPEARE_HID_MOUSE: u32 = 962;
+pub const GAP_APPEARE_HID_JOYSTIC: u32 = 963;
+pub const GAP_APPEARE_HID_GAMEPAD: u32 = 964;
+pub const GAP_APPEARE_HID_DIGITIZER_TYABLET: u32 = 965;
+pub const GAP_APPEARE_HID_DIGITAL_CARDREADER: u32 = 966;
+pub const GAP_APPEARE_HID_DIGITAL_PEN: u32 = 967;
+pub const GAP_APPEARE_HID_BARCODE_SCANNER: u32 = 968;
+pub const GAPROLE_PROFILEROLE: u32 = 768;
+pub const GAPROLE_IRK: u32 = 769;
+pub const GAPROLE_SRK: u32 = 770;
+pub const GAPROLE_SIGNCOUNTER: u32 = 771;
+pub const GAPROLE_BD_ADDR: u32 = 772;
+pub const GAPROLE_ADVERT_ENABLED: u32 = 773;
+pub const GAPROLE_ADVERT_DATA: u32 = 774;
+pub const GAPROLE_SCAN_RSP_DATA: u32 = 775;
+pub const GAPROLE_ADV_EVENT_TYPE: u32 = 776;
+pub const GAPROLE_ADV_DIRECT_TYPE: u32 = 777;
+pub const GAPROLE_ADV_DIRECT_ADDR: u32 = 778;
+pub const GAPROLE_ADV_CHANNEL_MAP: u32 = 779;
+pub const GAPROLE_ADV_FILTER_POLICY: u32 = 780;
+pub const GAPROLE_STATE: u32 = 781;
+pub const GAPROLE_MAX_SCAN_RES: u32 = 782;
+pub const GAPROLE_MIN_CONN_INTERVAL: u32 = 785;
+pub const GAPROLE_MAX_CONN_INTERVAL: u32 = 786;
+pub const GAPROLE_PHY_TX_SUPPORTED: u32 = 787;
+pub const GAPROLE_PHY_RX_SUPPORTED: u32 = 788;
+pub const GAPROLE_PERIODIC_ADVERT_DATA: u32 = 789;
+pub const GAPROLE_PERIODIC_ADVERT_ENABLED: u32 = 790;
+pub const GAPROLE_CTE_CONNECTIONLESS_ENABLED: u32 = 791;
+pub const GAPBOND_PERI_PAIRING_MODE: u32 = 1024;
+pub const GAPBOND_PERI_MITM_PROTECTION: u32 = 1025;
+pub const GAPBOND_PERI_IO_CAPABILITIES: u32 = 1026;
+pub const GAPBOND_PERI_OOB_ENABLED: u32 = 1027;
+pub const GAPBOND_PERI_OOB_DATA: u32 = 1028;
+pub const GAPBOND_PERI_BONDING_ENABLED: u32 = 1029;
+pub const GAPBOND_PERI_KEY_DIST_LIST: u32 = 1030;
+pub const GAPBOND_PERI_DEFAULT_PASSCODE: u32 = 1031;
+pub const GAPBOND_CENT_PAIRING_MODE: u32 = 1032;
+pub const GAPBOND_CENT_MITM_PROTECTION: u32 = 1033;
+pub const GAPBOND_CENT_IO_CAPABILITIES: u32 = 1034;
+pub const GAPBOND_CENT_OOB_ENABLED: u32 = 1035;
+pub const GAPBOND_CENT_OOB_DATA: u32 = 1036;
+pub const GAPBOND_CENT_BONDING_ENABLED: u32 = 1037;
+pub const GAPBOND_CENT_KEY_DIST_LIST: u32 = 1038;
+pub const GAPBOND_CENT_DEFAULT_PASSCODE: u32 = 1039;
+pub const GAPBOND_ERASE_ALLBONDS: u32 = 1040;
+pub const GAPBOND_AUTO_FAIL_PAIRING: u32 = 1041;
+pub const GAPBOND_AUTO_FAIL_REASON: u32 = 1042;
+pub const GAPBOND_KEYSIZE: u32 = 1043;
+pub const GAPBOND_AUTO_SYNC_WL: u32 = 1044;
+pub const GAPBOND_BOND_COUNT: u32 = 1045;
+pub const GAPBOND_BOND_FAIL_ACTION: u32 = 1046;
+pub const GAPBOND_ERASE_SINGLEBOND: u32 = 1047;
+pub const GAPBOND_BOND_AUTO: u32 = 1048;
+pub const GAPBOND_BOND_UPDATE: u32 = 1049;
+pub const GAPBOND_DISABLE_SINGLEBOND: u32 = 1050;
+pub const GAPBOND_ENABLE_SINGLEBOND: u32 = 1051;
+pub const GAPBOND_DISABLE_ALLBONDS: u32 = 1052;
+pub const GAPBOND_ENABLE_ALLBONDS: u32 = 1053;
+pub const GAPBOND_ERASE_AUTO: u32 = 1054;
+pub const GAPBOND_AUTO_SYNC_RL: u32 = 1055;
+pub const GAPBOND_SET_ENC_PARAMS: u32 = 1056;
+pub const GAPBOND_PERI_SC_PROTECTION: u32 = 1057;
+pub const GAPBOND_CENT_SC_PROTECTION: u32 = 1058;
+pub const GAPBOND_PAIRING_MODE_NO_PAIRING: u32 = 0;
+pub const GAPBOND_PAIRING_MODE_WAIT_FOR_REQ: u32 = 1;
+pub const GAPBOND_PAIRING_MODE_INITIATE: u32 = 2;
+pub const GAPBOND_IO_CAP_DISPLAY_ONLY: u32 = 0;
+pub const GAPBOND_IO_CAP_DISPLAY_YES_NO: u32 = 1;
+pub const GAPBOND_IO_CAP_KEYBOARD_ONLY: u32 = 2;
+pub const GAPBOND_IO_CAP_NO_INPUT_NO_OUTPUT: u32 = 3;
+pub const GAPBOND_IO_CAP_KEYBOARD_DISPLAY: u32 = 4;
+pub const GAPBOND_KEYDIST_SENCKEY: u32 = 1;
+pub const GAPBOND_KEYDIST_SIDKEY: u32 = 2;
+pub const GAPBOND_KEYDIST_SSIGN: u32 = 4;
+pub const GAPBOND_KEYDIST_SLINK: u32 = 8;
+pub const GAPBOND_KEYDIST_MENCKEY: u32 = 16;
+pub const GAPBOND_KEYDIST_MIDKEY: u32 = 32;
+pub const GAPBOND_KEYDIST_MSIGN: u32 = 64;
+pub const GAPBOND_KEYDIST_MLINK: u32 = 128;
+pub const GAPBOND_PAIRING_STATE_STARTED: u32 = 0;
+pub const GAPBOND_PAIRING_STATE_COMPLETE: u32 = 1;
+pub const GAPBOND_PAIRING_STATE_BONDED: u32 = 2;
+pub const GAPBOND_PAIRING_STATE_BOND_SAVED: u32 = 3;
+pub const SMP_PAIRING_FAILED_PASSKEY_ENTRY_FAILED: u32 = 1;
+pub const SMP_PAIRING_FAILED_OOB_NOT_AVAIL: u32 = 2;
+pub const SMP_PAIRING_FAILED_AUTH_REQ: u32 = 3;
+pub const SMP_PAIRING_FAILED_CONFIRM_VALUE: u32 = 4;
+pub const SMP_PAIRING_FAILED_NOT_SUPPORTED: u32 = 5;
+pub const SMP_PAIRING_FAILED_ENC_KEY_SIZE: u32 = 6;
+pub const SMP_PAIRING_FAILED_CMD_NOT_SUPPORTED: u32 = 7;
+pub const SMP_PAIRING_FAILED_UNSPECIFIED: u32 = 8;
+pub const SMP_PAIRING_FAILED_REPEATED_ATTEMPTS: u32 = 9;
+pub const SMP_PAIRING_FAILED_INVALID_PARAMERERS: u32 = 10;
+pub const SMP_PAIRING_FAILED_DHKEY_CHECK_FAILED: u32 = 11;
+pub const SMP_PAIRING_FAILED_NUMERIC_COMPARISON: u32 = 12;
+pub const SMP_PAIRING_FAILED_KEY_REJECTED: u32 = 15;
+pub const GAPBOND_FAIL_NO_ACTION: u32 = 0;
+pub const GAPBOND_FAIL_INITIATE_PAIRING: u32 = 1;
+pub const GAPBOND_FAIL_TERMINATE_LINK: u32 = 2;
+pub const GAPBOND_FAIL_TERMINATE_ERASE_BONDS: u32 = 3;
+pub const BLE_NVID_IRK: u32 = 2;
+pub const BLE_NVID_CSRK: u32 = 3;
+pub const BLE_NVID_SIGNCOUNTER: u32 = 4;
+pub const BLE_NVID_BOND_RF_START: u32 = 256;
+pub const BLE_NVID_GAP_BOND_START: u32 = 512;
+pub const GAP_BOND_REC_ID_OFFSET: u32 = 0;
+pub const GAP_BOND_LOCAL_LTK_OFFSET: u32 = 1;
+pub const GAP_BOND_DEV_LTK_OFFSET: u32 = 2;
+pub const GAP_BOND_DEV_IRK_OFFSET: u32 = 3;
+pub const GAP_BOND_DEV_CSRK_OFFSET: u32 = 4;
+pub const GAP_BOND_DEV_SIGN_COUNTER_OFFSET: u32 = 5;
+pub const GAP_BOND_REC_IDS: u32 = 6;
+pub const BLE_NVID_GATT_CFG_START: u32 = 28672;
+pub const BLE_NVID_MAX_VAL: u32 = 32767;
 pub const GAPROLE_STATE_ADV_MASK: u32 = 15;
 pub const GAPROLE_STATE_ADV_SHIFT: u32 = 0;
 pub const GAPROLE_INIT: u32 = 0;
@@ -536,34 +5663,2191 @@ pub const GAPROLE_CONNECTIONLESS_CTE_WAIT: u32 = 512;
 pub const GAPROLE_CONNECTIONLESS_CTE_ERROR: u32 = 768;
 pub const GAPROLE_PERIODIC_STATE_VALID: u32 = 16777216;
 pub const GAPROLE_CTE_T_STATE_VALID: u32 = 33554432;
-
-// GAP_DEVDISC_MODE_DEFINES GAP Device Discovery Modes
-/// No discoverable setting.
-pub const DEVDISC_MODE_NONDISCOVERABLE: u8 = 0x00;
-/// General Discoverable devices.
-pub const DEVDISC_MODE_GENERAL: u8 = 0x01;
-/// Limited Discoverable devices.
-pub const DEVDISC_MODE_LIMITED: u8 = 0x02;
-/// Not filtered.
-pub const DEVDISC_MODE_ALL: u8 = 0x03;
-
-pub type pfnEcc_key_t = Option<unsafe extern "C" fn(pub_: *mut u8, priv_: *mut u8) -> ::core::ffi::c_int>;
-pub type pfnEcc_dhkey_t =
-    Option<
-        unsafe extern "C" fn(
-            peer_pub_key_x: *mut u8,
-            peer_pub_key_y: *mut u8,
-            our_priv_key: *mut u8,
-            out_dhkey: *mut u8,
-        ) -> ::core::ffi::c_int,
-    >;
-pub type pfnEcc_alg_f4_t = Option<
+pub const TX_MODE_TX_FINISH: u32 = 1;
+pub const TX_MODE_TX_FAIL: u32 = 17;
+pub const TX_MODE_TX_TIMEOUT: u32 = 17;
+pub const TX_MODE_RX_DATA: u32 = 2;
+pub const TX_MODE_RX_TIMEOUT: u32 = 18;
+pub const TX_MODE_HOP_SHUT: u32 = 34;
+pub const RX_MODE_RX_DATA: u32 = 3;
+pub const RX_MODE_TX_FINISH: u32 = 4;
+pub const RX_MODE_TX_FAIL: u32 = 20;
+pub const RX_MODE_TX_TIMEOUT: u32 = 20;
+pub const RX_MODE_HOP_SHUT: u32 = 36;
+pub const LLE_MODE_BASIC: u32 = 0;
+pub const LLE_MODE_AUTO: u32 = 1;
+pub const LLE_WHITENING_ON: u32 = 0;
+pub const LLE_WHITENING_OFF: u32 = 2;
+pub const LLE_MODE_PHY_MODE_MASK: u32 = 48;
+pub const LLE_MODE_PHY_1M: u32 = 0;
+pub const LLE_MODE_PHY_2M: u32 = 16;
+pub const LLE_MODE_EX_CHANNEL: u32 = 64;
+pub const LLE_MODE_NON_RSSI: u32 = 128;
+pub const LL_TX_POWEER_MINUS_20_DBM: u32 = 1;
+pub const LL_TX_POWEER_MINUS_15_DBM: u32 = 3;
+pub const LL_TX_POWEER_MINUS_10_DBM: u32 = 5;
+pub const LL_TX_POWEER_MINUS_8_DBM: u32 = 7;
+pub const LL_TX_POWEER_MINUS_5_DBM: u32 = 11;
+pub const LL_TX_POWEER_MINUS_3_DBM: u32 = 15;
+pub const LL_TX_POWEER_MINUS_1_DBM: u32 = 19;
+pub const LL_TX_POWEER_0_DBM: u32 = 21;
+pub const LL_TX_POWEER_1_DBM: u32 = 27;
+pub const LL_TX_POWEER_2_DBM: u32 = 35;
+pub const LL_TX_POWEER_3_DBM: u32 = 43;
+pub const LL_TX_POWEER_4_DBM: u32 = 59;
+pub const LL_TX_POWEER_9_DBM: u32 = 191;
+pub type __u_char = ::core::ffi::c_uchar;
+pub type __u_short = ::core::ffi::c_ushort;
+pub type __u_int = ::core::ffi::c_uint;
+pub type __u_long = ::core::ffi::c_ulong;
+pub type __int8_t = ::core::ffi::c_schar;
+pub type __uint8_t = ::core::ffi::c_uchar;
+pub type __int16_t = ::core::ffi::c_short;
+pub type __uint16_t = ::core::ffi::c_ushort;
+pub type __int32_t = ::core::ffi::c_int;
+pub type __uint32_t = ::core::ffi::c_uint;
+pub type __int64_t = ::core::ffi::c_long;
+pub type __uint64_t = ::core::ffi::c_ulong;
+pub type __int_least8_t = __int8_t;
+pub type __uint_least8_t = __uint8_t;
+pub type __int_least16_t = __int16_t;
+pub type __uint_least16_t = __uint16_t;
+pub type __int_least32_t = __int32_t;
+pub type __uint_least32_t = __uint32_t;
+pub type __int_least64_t = __int64_t;
+pub type __uint_least64_t = __uint64_t;
+pub type __quad_t = ::core::ffi::c_long;
+pub type __u_quad_t = ::core::ffi::c_ulong;
+pub type __intmax_t = ::core::ffi::c_long;
+pub type __uintmax_t = ::core::ffi::c_ulong;
+pub type __dev_t = ::core::ffi::c_ulong;
+pub type __uid_t = ::core::ffi::c_uint;
+pub type __gid_t = ::core::ffi::c_uint;
+pub type __ino_t = ::core::ffi::c_ulong;
+pub type __ino64_t = ::core::ffi::c_ulong;
+pub type __mode_t = ::core::ffi::c_uint;
+pub type __nlink_t = ::core::ffi::c_ulong;
+pub type __off_t = ::core::ffi::c_long;
+pub type __off64_t = ::core::ffi::c_long;
+pub type __pid_t = ::core::ffi::c_int;
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct __fsid_t {
+    pub __val: [::core::ffi::c_int; 2usize],
+}
+#[allow(clippy::unnecessary_operation, clippy::identity_op)]
+const _: () = {
+    ["Size of __fsid_t"][::core::mem::size_of::<__fsid_t>() - 8usize];
+    ["Alignment of __fsid_t"][::core::mem::align_of::<__fsid_t>() - 4usize];
+    ["Offset of field: __fsid_t::__val"][::core::mem::offset_of!(__fsid_t, __val) - 0usize];
+};
+pub type __clock_t = ::core::ffi::c_long;
+pub type __rlim_t = ::core::ffi::c_ulong;
+pub type __rlim64_t = ::core::ffi::c_ulong;
+pub type __id_t = ::core::ffi::c_uint;
+pub type __time_t = ::core::ffi::c_long;
+pub type __useconds_t = ::core::ffi::c_uint;
+pub type __suseconds_t = ::core::ffi::c_long;
+pub type __suseconds64_t = ::core::ffi::c_long;
+pub type __daddr_t = ::core::ffi::c_int;
+pub type __key_t = ::core::ffi::c_int;
+pub type __clockid_t = ::core::ffi::c_int;
+pub type __timer_t = *mut ::core::ffi::c_void;
+pub type __blksize_t = ::core::ffi::c_long;
+pub type __blkcnt_t = ::core::ffi::c_long;
+pub type __blkcnt64_t = ::core::ffi::c_long;
+pub type __fsblkcnt_t = ::core::ffi::c_ulong;
+pub type __fsblkcnt64_t = ::core::ffi::c_ulong;
+pub type __fsfilcnt_t = ::core::ffi::c_ulong;
+pub type __fsfilcnt64_t = ::core::ffi::c_ulong;
+pub type __fsword_t = ::core::ffi::c_long;
+pub type __ssize_t = ::core::ffi::c_long;
+pub type __syscall_slong_t = ::core::ffi::c_long;
+pub type __syscall_ulong_t = ::core::ffi::c_ulong;
+pub type __loff_t = __off64_t;
+pub type __caddr_t = *mut ::core::ffi::c_char;
+pub type __intptr_t = ::core::ffi::c_long;
+pub type __socklen_t = ::core::ffi::c_uint;
+pub type __sig_atomic_t = ::core::ffi::c_int;
+pub type int_least8_t = __int_least8_t;
+pub type int_least16_t = __int_least16_t;
+pub type int_least32_t = __int_least32_t;
+pub type int_least64_t = __int_least64_t;
+pub type uint_least8_t = __uint_least8_t;
+pub type uint_least16_t = __uint_least16_t;
+pub type uint_least32_t = __uint_least32_t;
+pub type uint_least64_t = __uint_least64_t;
+pub type int_fast8_t = ::core::ffi::c_schar;
+pub type int_fast16_t = ::core::ffi::c_long;
+pub type int_fast32_t = ::core::ffi::c_long;
+pub type int_fast64_t = ::core::ffi::c_long;
+pub type uint_fast8_t = ::core::ffi::c_uchar;
+pub type uint_fast16_t = ::core::ffi::c_ulong;
+pub type uint_fast32_t = ::core::ffi::c_ulong;
+pub type uint_fast64_t = ::core::ffi::c_ulong;
+pub type intmax_t = __intmax_t;
+pub type uintmax_t = __uintmax_t;
+pub type BOOL = u8;
+pub type bStatus_t = u8;
+pub type tmosTaskID = u8;
+pub type tmosEvents = u16;
+pub type tmosTimer = u32;
+pub type tmosSnvId_t = u16;
+pub type tmosSnvLen_t = u16;
+pub type pfnSrandCB = ::core::option::Option<unsafe extern "C" fn() -> u32>;
+pub type pfnIdleCB = ::core::option::Option<unsafe extern "C" fn(arg1: u32) -> u32>;
+pub type pfnLSICalibrationCB = ::core::option::Option<unsafe extern "C" fn()>;
+pub type pfnTempSampleCB = ::core::option::Option<unsafe extern "C" fn() -> u16>;
+pub type pfnEventCB = ::core::option::Option<unsafe extern "C" fn(timeUs: u32)>;
+pub type pfnLibStatusErrorCB = ::core::option::Option<unsafe extern "C" fn(code: u8, status: u32)>;
+pub type pTaskEventHandlerFn =
+    ::core::option::Option<unsafe extern "C" fn(taskID: tmosTaskID, event: tmosEvents) -> tmosEvents>;
+pub type pfnFlashReadCB = ::core::option::Option<unsafe extern "C" fn(addr: u32, num: u32, pBuf: *mut u32) -> u32>;
+pub type pfnFlashWriteCB = ::core::option::Option<unsafe extern "C" fn(addr: u32, num: u32, pBuf: *mut u32) -> u32>;
+pub type pfnGetSysClock = ::core::option::Option<unsafe extern "C" fn() -> u32>;
+pub type pfnSetSysClockIRQ = ::core::option::Option<unsafe extern "C" fn()>;
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct tag_ble_config {
+    pub MEMAddr: u32,
+    pub MEMLen: u16,
+    pub SNVAddr: u32,
+    pub SNVBlock: u16,
+    pub SNVNum: u8,
+    pub BufNumber: u8,
+    pub BufMaxLen: u16,
+    pub TxNumEvent: u8,
+    pub RxNumEvent: u8,
+    pub TxPower: u8,
+    pub ConnectNumber: u8,
+    pub WindowWidening: u8,
+    pub WaitWindow: u8,
+    pub MacAddr: [u8; 6usize],
+    pub srandCB: pfnSrandCB,
+    pub idleCB: pfnIdleCB,
+    pub tsCB: pfnTempSampleCB,
+    pub rcCB: pfnLSICalibrationCB,
+    pub staCB: pfnLibStatusErrorCB,
+    pub readFlashCB: pfnFlashReadCB,
+    pub writeFlashCB: pfnFlashWriteCB,
+    pub PeripheralNumber: u8,
+    pub CentralNumber: u8,
+}
+#[allow(clippy::unnecessary_operation, clippy::identity_op)]
+// const _: () = {
+//     ["Size of tag_ble_config"][::core::mem::size_of::<tag_ble_config>() - 96usize];
+//     ["Alignment of tag_ble_config"][::core::mem::align_of::<tag_ble_config>() - 8usize];
+//     ["Offset of field: tag_ble_config::MEMAddr"][::core::mem::offset_of!(tag_ble_config, MEMAddr) - 0usize];
+//     ["Offset of field: tag_ble_config::MEMLen"][::core::mem::offset_of!(tag_ble_config, MEMLen) - 4usize];
+//     ["Offset of field: tag_ble_config::SNVAddr"][::core::mem::offset_of!(tag_ble_config, SNVAddr) - 8usize];
+//     ["Offset of field: tag_ble_config::SNVBlock"][::core::mem::offset_of!(tag_ble_config, SNVBlock) - 12usize];
+//     ["Offset of field: tag_ble_config::SNVNum"][::core::mem::offset_of!(tag_ble_config, SNVNum) - 14usize];
+//     ["Offset of field: tag_ble_config::BufNumber"][::core::mem::offset_of!(tag_ble_config, BufNumber) - 15usize];
+//     ["Offset of field: tag_ble_config::BufMaxLen"][::core::mem::offset_of!(tag_ble_config, BufMaxLen) - 16usize];
+//     ["Offset of field: tag_ble_config::TxNumEvent"][::core::mem::offset_of!(tag_ble_config, TxNumEvent) - 18usize];
+//     ["Offset of field: tag_ble_config::RxNumEvent"][::core::mem::offset_of!(tag_ble_config, RxNumEvent) - 19usize];
+//     ["Offset of field: tag_ble_config::TxPower"][::core::mem::offset_of!(tag_ble_config, TxPower) - 20usize];
+//     ["Offset of field: tag_ble_config::ConnectNumber"]
+//         [::core::mem::offset_of!(tag_ble_config, ConnectNumber) - 21usize];
+//     ["Offset of field: tag_ble_config::WindowWidening"]
+//         [::core::mem::offset_of!(tag_ble_config, WindowWidening) - 22usize];
+//     ["Offset of field: tag_ble_config::WaitWindow"][::core::mem::offset_of!(tag_ble_config, WaitWindow) - 23usize];
+//     ["Offset of field: tag_ble_config::MacAddr"][::core::mem::offset_of!(tag_ble_config, MacAddr) - 24usize];
+//     ["Offset of field: tag_ble_config::srandCB"][::core::mem::offset_of!(tag_ble_config, srandCB) - 32usize];
+//     ["Offset of field: tag_ble_config::idleCB"][::core::mem::offset_of!(tag_ble_config, idleCB) - 40usize];
+//     ["Offset of field: tag_ble_config::tsCB"][::core::mem::offset_of!(tag_ble_config, tsCB) - 48usize];
+//     ["Offset of field: tag_ble_config::rcCB"][::core::mem::offset_of!(tag_ble_config, rcCB) - 56usize];
+//     ["Offset of field: tag_ble_config::staCB"][::core::mem::offset_of!(tag_ble_config, staCB) - 64usize];
+//     ["Offset of field: tag_ble_config::readFlashCB"][::core::mem::offset_of!(tag_ble_config, readFlashCB) - 72usize];
+//     ["Offset of field: tag_ble_config::writeFlashCB"][::core::mem::offset_of!(tag_ble_config, writeFlashCB) - 80usize];
+//     ["Offset of field: tag_ble_config::PeripheralNumber"]
+//         [::core::mem::offset_of!(tag_ble_config, PeripheralNumber) - 88usize];
+//     ["Offset of field: tag_ble_config::CentralNumber"]
+//         [::core::mem::offset_of!(tag_ble_config, CentralNumber) - 89usize];
+// };
+pub type bleConfig_t = tag_ble_config;
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct tag_ble_clock_config {
+    pub getClockValue: pfnGetSysClock,
+    pub ClockMaxCount: u32,
+    pub ClockFrequency: u16,
+    pub ClockAccuracy: u16,
+    pub irqEnable: u8,
+    pub SetPendingIRQ: pfnSetSysClockIRQ,
+}
+// #[allow(clippy::unnecessary_operation, clippy::identity_op)]
+// const _: () = {
+//     ["Size of tag_ble_clock_config"][::core::mem::size_of::<tag_ble_clock_config>() - 32usize];
+//     ["Alignment of tag_ble_clock_config"][::core::mem::align_of::<tag_ble_clock_config>() - 8usize];
+//     ["Offset of field: tag_ble_clock_config::getClockValue"]
+//         [::core::mem::offset_of!(tag_ble_clock_config, getClockValue) - 0usize];
+//     ["Offset of field: tag_ble_clock_config::ClockMaxCount"]
+//         [::core::mem::offset_of!(tag_ble_clock_config, ClockMaxCount) - 8usize];
+//     ["Offset of field: tag_ble_clock_config::ClockFrequency"]
+//         [::core::mem::offset_of!(tag_ble_clock_config, ClockFrequency) - 12usize];
+//     ["Offset of field: tag_ble_clock_config::ClockAccuracy"]
+//         [::core::mem::offset_of!(tag_ble_clock_config, ClockAccuracy) - 14usize];
+//     ["Offset of field: tag_ble_clock_config::irqEnable"]
+//         [::core::mem::offset_of!(tag_ble_clock_config, irqEnable) - 16usize];
+//     ["Offset of field: tag_ble_clock_config::SetPendingIRQ"]
+//         [::core::mem::offset_of!(tag_ble_clock_config, SetPendingIRQ) - 24usize];
+// };
+pub type bleClockConfig_t = tag_ble_clock_config;
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct tag_ble_pa_control_config {
+    pub txEnableGPIO: u32,
+    pub txDisableGPIO: u32,
+    pub tx_pin: u32,
+    pub rxEnableGPIO: u32,
+    pub rxDisableGPIO: u32,
+    pub rx_pin: u32,
+}
+#[allow(clippy::unnecessary_operation, clippy::identity_op)]
+const _: () = {
+    ["Size of tag_ble_pa_control_config"][::core::mem::size_of::<tag_ble_pa_control_config>() - 24usize];
+    ["Alignment of tag_ble_pa_control_config"][::core::mem::align_of::<tag_ble_pa_control_config>() - 4usize];
+    ["Offset of field: tag_ble_pa_control_config::txEnableGPIO"]
+        [::core::mem::offset_of!(tag_ble_pa_control_config, txEnableGPIO) - 0usize];
+    ["Offset of field: tag_ble_pa_control_config::txDisableGPIO"]
+        [::core::mem::offset_of!(tag_ble_pa_control_config, txDisableGPIO) - 4usize];
+    ["Offset of field: tag_ble_pa_control_config::tx_pin"]
+        [::core::mem::offset_of!(tag_ble_pa_control_config, tx_pin) - 8usize];
+    ["Offset of field: tag_ble_pa_control_config::rxEnableGPIO"]
+        [::core::mem::offset_of!(tag_ble_pa_control_config, rxEnableGPIO) - 12usize];
+    ["Offset of field: tag_ble_pa_control_config::rxDisableGPIO"]
+        [::core::mem::offset_of!(tag_ble_pa_control_config, rxDisableGPIO) - 16usize];
+    ["Offset of field: tag_ble_pa_control_config::rx_pin"]
+        [::core::mem::offset_of!(tag_ble_pa_control_config, rx_pin) - 20usize];
+};
+pub type blePaControlConfig_t = tag_ble_pa_control_config;
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct tmos_event_hdr_t {
+    pub event: u8,
+    pub status: u8,
+}
+#[allow(clippy::unnecessary_operation, clippy::identity_op)]
+const _: () = {
+    ["Size of tmos_event_hdr_t"][::core::mem::size_of::<tmos_event_hdr_t>() - 2usize];
+    ["Alignment of tmos_event_hdr_t"][::core::mem::align_of::<tmos_event_hdr_t>() - 1usize];
+    ["Offset of field: tmos_event_hdr_t::event"][::core::mem::offset_of!(tmos_event_hdr_t, event) - 0usize];
+    ["Offset of field: tmos_event_hdr_t::status"][::core::mem::offset_of!(tmos_event_hdr_t, status) - 1usize];
+};
+unsafe extern "C" {
+    pub static VER_LIB: [u8; 0usize];
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct gapBondLTK_t {
+    #[doc = "!< Long Term Key (LTK)"]
+    pub LTK: [u8; 16usize],
+    #[doc = "!< LTK eDiv"]
+    pub div: u16,
+    #[doc = "!< LTK random number"]
+    pub rand: [u8; 8usize],
+    #[doc = "!< LTK key size"]
+    pub keySize: u8,
+}
+#[allow(clippy::unnecessary_operation, clippy::identity_op)]
+const _: () = {
+    ["Size of gapBondLTK_t"][::core::mem::size_of::<gapBondLTK_t>() - 28usize];
+    ["Alignment of gapBondLTK_t"][::core::mem::align_of::<gapBondLTK_t>() - 2usize];
+    ["Offset of field: gapBondLTK_t::LTK"][::core::mem::offset_of!(gapBondLTK_t, LTK) - 0usize];
+    ["Offset of field: gapBondLTK_t::div"][::core::mem::offset_of!(gapBondLTK_t, div) - 16usize];
+    ["Offset of field: gapBondLTK_t::rand"][::core::mem::offset_of!(gapBondLTK_t, rand) - 18usize];
+    ["Offset of field: gapBondLTK_t::keySize"][::core::mem::offset_of!(gapBondLTK_t, keySize) - 26usize];
+};
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct gapBondRec_t {
+    #[doc = "!< Central's address"]
+    pub publicAddr: [u8; 6usize],
+    #[doc = "!< Privacy Reconnection Address"]
+    pub reconnectAddr: [u8; 6usize],
+    #[doc = "!< State flags: SM_AUTH_STATE_AUTHENTICATED & SM_AUTH_STATE_BONDING"]
+    pub stateFlags: u16,
+    pub bondsToDelete: u8,
+    #[doc = "!< Central's address type"]
+    pub publicAddrType: u8,
+    pub bondSeq: u32,
+}
+#[allow(clippy::unnecessary_operation, clippy::identity_op)]
+const _: () = {
+    ["Size of gapBondRec_t"][::core::mem::size_of::<gapBondRec_t>() - 20usize];
+    ["Alignment of gapBondRec_t"][::core::mem::align_of::<gapBondRec_t>() - 4usize];
+    ["Offset of field: gapBondRec_t::publicAddr"][::core::mem::offset_of!(gapBondRec_t, publicAddr) - 0usize];
+    ["Offset of field: gapBondRec_t::reconnectAddr"][::core::mem::offset_of!(gapBondRec_t, reconnectAddr) - 6usize];
+    ["Offset of field: gapBondRec_t::stateFlags"][::core::mem::offset_of!(gapBondRec_t, stateFlags) - 12usize];
+    ["Offset of field: gapBondRec_t::bondsToDelete"][::core::mem::offset_of!(gapBondRec_t, bondsToDelete) - 14usize];
+    ["Offset of field: gapBondRec_t::publicAddrType"][::core::mem::offset_of!(gapBondRec_t, publicAddrType) - 15usize];
+    ["Offset of field: gapBondRec_t::bondSeq"][::core::mem::offset_of!(gapBondRec_t, bondSeq) - 16usize];
+};
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct gapBondCharCfg_t {
+    #[doc = "!< attribute handle"]
+    pub attrHandle: u16,
+    #[doc = "!< attribute value for this device"]
+    pub value: u8,
+}
+#[allow(clippy::unnecessary_operation, clippy::identity_op)]
+const _: () = {
+    ["Size of gapBondCharCfg_t"][::core::mem::size_of::<gapBondCharCfg_t>() - 4usize];
+    ["Alignment of gapBondCharCfg_t"][::core::mem::align_of::<gapBondCharCfg_t>() - 2usize];
+    ["Offset of field: gapBondCharCfg_t::attrHandle"][::core::mem::offset_of!(gapBondCharCfg_t, attrHandle) - 0usize];
+    ["Offset of field: gapBondCharCfg_t::value"][::core::mem::offset_of!(gapBondCharCfg_t, value) - 2usize];
+};
+#[doc = " TYPEDEFS"]
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct linkSec_t {
+    #[doc = "!< Signature Resolving Key"]
+    pub srk: [u8; 16usize],
+    #[doc = "!< Sign Counter"]
+    pub signCounter: u32,
+}
+#[allow(clippy::unnecessary_operation, clippy::identity_op)]
+const _: () = {
+    ["Size of linkSec_t"][::core::mem::size_of::<linkSec_t>() - 20usize];
+    ["Alignment of linkSec_t"][::core::mem::align_of::<linkSec_t>() - 4usize];
+    ["Offset of field: linkSec_t::srk"][::core::mem::offset_of!(linkSec_t, srk) - 0usize];
+    ["Offset of field: linkSec_t::signCounter"][::core::mem::offset_of!(linkSec_t, signCounter) - 16usize];
+};
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct encParams_t {
+    #[doc = "!< Long Term Key"]
+    pub ltk: [u8; 16usize],
+    #[doc = "!< Diversifier"]
+    pub div: u16,
+    #[doc = "!< random number"]
+    pub rand: [u8; 8usize],
+    #[doc = "!< LTK Key Size"]
+    pub keySize: u8,
+    pub gapBondInvalid: u8,
+}
+#[allow(clippy::unnecessary_operation, clippy::identity_op)]
+const _: () = {
+    ["Size of encParams_t"][::core::mem::size_of::<encParams_t>() - 28usize];
+    ["Alignment of encParams_t"][::core::mem::align_of::<encParams_t>() - 2usize];
+    ["Offset of field: encParams_t::ltk"][::core::mem::offset_of!(encParams_t, ltk) - 0usize];
+    ["Offset of field: encParams_t::div"][::core::mem::offset_of!(encParams_t, div) - 16usize];
+    ["Offset of field: encParams_t::rand"][::core::mem::offset_of!(encParams_t, rand) - 18usize];
+    ["Offset of field: encParams_t::keySize"][::core::mem::offset_of!(encParams_t, keySize) - 26usize];
+    ["Offset of field: encParams_t::gapBondInvalid"][::core::mem::offset_of!(encParams_t, gapBondInvalid) - 27usize];
+};
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct bondEncParams_t {
+    #[doc = "!< GAP Profile Roles @GAP_PROFILE_ROLE_DEFINES"]
+    pub connRole: u8,
+    #[doc = "!< Address type of connected device"]
+    pub addrType: u8,
+    #[doc = "!< Other Device's address"]
+    pub addr: [u8; 6usize],
+    pub encParams: encParams_t,
+}
+#[allow(clippy::unnecessary_operation, clippy::identity_op)]
+const _: () = {
+    ["Size of bondEncParams_t"][::core::mem::size_of::<bondEncParams_t>() - 36usize];
+    ["Alignment of bondEncParams_t"][::core::mem::align_of::<bondEncParams_t>() - 2usize];
+    ["Offset of field: bondEncParams_t::connRole"][::core::mem::offset_of!(bondEncParams_t, connRole) - 0usize];
+    ["Offset of field: bondEncParams_t::addrType"][::core::mem::offset_of!(bondEncParams_t, addrType) - 1usize];
+    ["Offset of field: bondEncParams_t::addr"][::core::mem::offset_of!(bondEncParams_t, addr) - 2usize];
+    ["Offset of field: bondEncParams_t::encParams"][::core::mem::offset_of!(bondEncParams_t, encParams) - 8usize];
+};
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct linkDBItem_t {
+    #[doc = "!< Application that controls the link"]
+    pub taskID: u8,
+    #[doc = "!< Controller connection handle"]
+    pub connectionHandle: u16,
+    #[doc = "!< LINK_CONNECTED, LINK_AUTHENTICATED..."]
+    pub stateFlags: u8,
+    #[doc = "!< Address type of connected device"]
+    pub addrType: u8,
+    #[doc = "!< Other Device's address"]
+    pub addr: [u8; 6usize],
+    #[doc = "!< Connection formed as central or peripheral"]
+    pub connRole: u8,
+    #[doc = "!< The connection's interval (n * 1.25ms)"]
+    pub connInterval: u16,
+    pub connLatency: u16,
+    pub connTimeout: u16,
+    #[doc = "!< The connection's MTU size"]
+    pub MTU: u16,
+    #[doc = "!< Connection Security related items"]
+    pub sec: linkSec_t,
+    #[doc = "!< pointer to LTK, ediv, rand. if needed."]
+    pub pEncParams: *mut encParams_t,
+    pub smEvtID: u16,
+    pub pPairingParams: *mut ::core::ffi::c_void,
+    pub pAuthLink: *mut ::core::ffi::c_void,
+}
+#[allow(clippy::unnecessary_operation, clippy::identity_op)]
+// const _: () = {
+//     ["Size of linkDBItem_t"][::core::mem::size_of::<linkDBItem_t>() - 80usize];
+//     ["Alignment of linkDBItem_t"][::core::mem::align_of::<linkDBItem_t>() - 8usize];
+//     ["Offset of field: linkDBItem_t::taskID"][::core::mem::offset_of!(linkDBItem_t, taskID) - 0usize];
+//     ["Offset of field: linkDBItem_t::connectionHandle"]
+//         [::core::mem::offset_of!(linkDBItem_t, connectionHandle) - 2usize];
+//     ["Offset of field: linkDBItem_t::stateFlags"][::core::mem::offset_of!(linkDBItem_t, stateFlags) - 4usize];
+//     ["Offset of field: linkDBItem_t::addrType"][::core::mem::offset_of!(linkDBItem_t, addrType) - 5usize];
+//     ["Offset of field: linkDBItem_t::addr"][::core::mem::offset_of!(linkDBItem_t, addr) - 6usize];
+//     ["Offset of field: linkDBItem_t::connRole"][::core::mem::offset_of!(linkDBItem_t, connRole) - 12usize];
+//     ["Offset of field: linkDBItem_t::connInterval"][::core::mem::offset_of!(linkDBItem_t, connInterval) - 14usize];
+//     ["Offset of field: linkDBItem_t::connLatency"][::core::mem::offset_of!(linkDBItem_t, connLatency) - 16usize];
+//     ["Offset of field: linkDBItem_t::connTimeout"][::core::mem::offset_of!(linkDBItem_t, connTimeout) - 18usize];
+//     ["Offset of field: linkDBItem_t::MTU"][::core::mem::offset_of!(linkDBItem_t, MTU) - 20usize];
+//     ["Offset of field: linkDBItem_t::sec"][::core::mem::offset_of!(linkDBItem_t, sec) - 24usize];
+//     ["Offset of field: linkDBItem_t::pEncParams"][::core::mem::offset_of!(linkDBItem_t, pEncParams) - 48usize];
+//     ["Offset of field: linkDBItem_t::smEvtID"][::core::mem::offset_of!(linkDBItem_t, smEvtID) - 56usize];
+//     ["Offset of field: linkDBItem_t::pPairingParams"][::core::mem::offset_of!(linkDBItem_t, pPairingParams) - 64usize];
+//     ["Offset of field: linkDBItem_t::pAuthLink"][::core::mem::offset_of!(linkDBItem_t, pAuthLink) - 72usize];
+// };
+pub type pfnLinkDBCB_t = ::core::option::Option<unsafe extern "C" fn(connectionHandle: u16, changeType: u8)>;
+pub type pfnPerformFuncCB_t = ::core::option::Option<unsafe extern "C" fn(pLinkItem: *mut linkDBItem_t)>;
+#[doc = " Attribute Type format (2 or 16 octet UUID)."]
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct attAttrType_t {
+    #[doc = "!< Length of UUID (2 or 16)"]
+    pub len: u8,
+    #[doc = "!< 16 or 128 bit UUID"]
+    pub uuid: [u8; 16usize],
+}
+#[allow(clippy::unnecessary_operation, clippy::identity_op)]
+const _: () = {
+    ["Size of attAttrType_t"][::core::mem::size_of::<attAttrType_t>() - 17usize];
+    ["Alignment of attAttrType_t"][::core::mem::align_of::<attAttrType_t>() - 1usize];
+    ["Offset of field: attAttrType_t::len"][::core::mem::offset_of!(attAttrType_t, len) - 0usize];
+    ["Offset of field: attAttrType_t::uuid"][::core::mem::offset_of!(attAttrType_t, uuid) - 1usize];
+};
+#[doc = " Attribute Type format (2-octet Bluetooth UUID)."]
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct attAttrBtType_t {
+    #[doc = "!< Length of UUID (2)"]
+    pub len: u8,
+    #[doc = "!< 16 bit UUID"]
+    pub uuid: [u8; 2usize],
+}
+#[allow(clippy::unnecessary_operation, clippy::identity_op)]
+const _: () = {
+    ["Size of attAttrBtType_t"][::core::mem::size_of::<attAttrBtType_t>() - 3usize];
+    ["Alignment of attAttrBtType_t"][::core::mem::align_of::<attAttrBtType_t>() - 1usize];
+    ["Offset of field: attAttrBtType_t::len"][::core::mem::offset_of!(attAttrBtType_t, len) - 0usize];
+    ["Offset of field: attAttrBtType_t::uuid"][::core::mem::offset_of!(attAttrBtType_t, uuid) - 1usize];
+};
+#[doc = " Error Response format."]
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct attErrorRsp_t {
+    #[doc = "!< Request that generated this error response"]
+    pub reqOpcode: u8,
+    #[doc = "!< Attribute handle that generated error response"]
+    pub handle: u16,
+    #[doc = "!< Reason why the request has generated error response"]
+    pub errCode: u8,
+}
+#[allow(clippy::unnecessary_operation, clippy::identity_op)]
+const _: () = {
+    ["Size of attErrorRsp_t"][::core::mem::size_of::<attErrorRsp_t>() - 6usize];
+    ["Alignment of attErrorRsp_t"][::core::mem::align_of::<attErrorRsp_t>() - 2usize];
+    ["Offset of field: attErrorRsp_t::reqOpcode"][::core::mem::offset_of!(attErrorRsp_t, reqOpcode) - 0usize];
+    ["Offset of field: attErrorRsp_t::handle"][::core::mem::offset_of!(attErrorRsp_t, handle) - 2usize];
+    ["Offset of field: attErrorRsp_t::errCode"][::core::mem::offset_of!(attErrorRsp_t, errCode) - 4usize];
+};
+#[doc = " Exchange MTU Request format."]
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct attExchangeMTUReq_t {
+    #[doc = "!< Client receive MTU size"]
+    pub clientRxMTU: u16,
+}
+#[allow(clippy::unnecessary_operation, clippy::identity_op)]
+const _: () = {
+    ["Size of attExchangeMTUReq_t"][::core::mem::size_of::<attExchangeMTUReq_t>() - 2usize];
+    ["Alignment of attExchangeMTUReq_t"][::core::mem::align_of::<attExchangeMTUReq_t>() - 2usize];
+    ["Offset of field: attExchangeMTUReq_t::clientRxMTU"]
+        [::core::mem::offset_of!(attExchangeMTUReq_t, clientRxMTU) - 0usize];
+};
+#[doc = " Exchange MTU Response format."]
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct attExchangeMTURsp_t {
+    #[doc = "!< Server receive MTU size"]
+    pub serverRxMTU: u16,
+}
+#[allow(clippy::unnecessary_operation, clippy::identity_op)]
+const _: () = {
+    ["Size of attExchangeMTURsp_t"][::core::mem::size_of::<attExchangeMTURsp_t>() - 2usize];
+    ["Alignment of attExchangeMTURsp_t"][::core::mem::align_of::<attExchangeMTURsp_t>() - 2usize];
+    ["Offset of field: attExchangeMTURsp_t::serverRxMTU"]
+        [::core::mem::offset_of!(attExchangeMTURsp_t, serverRxMTU) - 0usize];
+};
+#[doc = " Find Information Request format."]
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct attFindInfoReq_t {
+    #[doc = "!< First requested handle number (must be first field)"]
+    pub startHandle: u16,
+    #[doc = "!< Last requested handle number"]
+    pub endHandle: u16,
+}
+#[allow(clippy::unnecessary_operation, clippy::identity_op)]
+const _: () = {
+    ["Size of attFindInfoReq_t"][::core::mem::size_of::<attFindInfoReq_t>() - 4usize];
+    ["Alignment of attFindInfoReq_t"][::core::mem::align_of::<attFindInfoReq_t>() - 2usize];
+    ["Offset of field: attFindInfoReq_t::startHandle"][::core::mem::offset_of!(attFindInfoReq_t, startHandle) - 0usize];
+    ["Offset of field: attFindInfoReq_t::endHandle"][::core::mem::offset_of!(attFindInfoReq_t, endHandle) - 2usize];
+};
+#[doc = " Find Information Response format."]
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct attFindInfoRsp_t {
+    #[doc = "!< Number of attribute handle-UUID pairs found"]
+    pub numInfo: u16,
+    #[doc = "!< Format of information data"]
+    pub format: u8,
+    #[doc = "!< Information data whose format is determined by format field (4 to ATT_MTU_SIZE-2)"]
+    pub pInfo: *mut u8,
+}
+#[allow(clippy::unnecessary_operation, clippy::identity_op)]
+// const _: () = {
+//     ["Size of attFindInfoRsp_t"][::core::mem::size_of::<attFindInfoRsp_t>() - 16usize];
+//     ["Alignment of attFindInfoRsp_t"][::core::mem::align_of::<attFindInfoRsp_t>() - 8usize];
+//     ["Offset of field: attFindInfoRsp_t::numInfo"][::core::mem::offset_of!(attFindInfoRsp_t, numInfo) - 0usize];
+//     ["Offset of field: attFindInfoRsp_t::format"][::core::mem::offset_of!(attFindInfoRsp_t, format) - 2usize];
+//     ["Offset of field: attFindInfoRsp_t::pInfo"][::core::mem::offset_of!(attFindInfoRsp_t, pInfo) - 8usize];
+// };
+#[doc = " Find By Type Value Request format."]
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct attFindByTypeValueReq_t {
+    #[doc = "!< First requested handle number (must be first field)"]
+    pub startHandle: u16,
+    #[doc = "!< Last requested handle number"]
+    pub endHandle: u16,
+    #[doc = "!< 2-octet UUID to find"]
+    pub type_: attAttrBtType_t,
+    #[doc = "!< Length of value"]
+    pub len: u16,
+    #[doc = "!< Attribute value to find (0 to ATT_MTU_SIZE-7)"]
+    pub pValue: *mut u8,
+}
+#[allow(clippy::unnecessary_operation, clippy::identity_op)]
+// const _: () = {
+//     ["Size of attFindByTypeValueReq_t"][::core::mem::size_of::<attFindByTypeValueReq_t>() - 24usize];
+//     ["Alignment of attFindByTypeValueReq_t"][::core::mem::align_of::<attFindByTypeValueReq_t>() - 8usize];
+//     ["Offset of field: attFindByTypeValueReq_t::startHandle"]
+//         [::core::mem::offset_of!(attFindByTypeValueReq_t, startHandle) - 0usize];
+//     ["Offset of field: attFindByTypeValueReq_t::endHandle"]
+//         [::core::mem::offset_of!(attFindByTypeValueReq_t, endHandle) - 2usize];
+//     ["Offset of field: attFindByTypeValueReq_t::type_"]
+//         [::core::mem::offset_of!(attFindByTypeValueReq_t, type_) - 4usize];
+//     ["Offset of field: attFindByTypeValueReq_t::len"][::core::mem::offset_of!(attFindByTypeValueReq_t, len) - 8usize];
+//     ["Offset of field: attFindByTypeValueReq_t::pValue"]
+//         [::core::mem::offset_of!(attFindByTypeValueReq_t, pValue) - 16usize];
+// };
+#[doc = " Find By Type Value Response format."]
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct attFindByTypeValueRsp_t {
+    #[doc = "!< Number of handles information found"]
+    pub numInfo: u16,
+    #[doc = "!< List of 1 or more handles information (4 to ATT_MTU_SIZE-1)"]
+    pub pHandlesInfo: *mut u8,
+}
+#[allow(clippy::unnecessary_operation, clippy::identity_op)]
+// const _: () = {
+//     ["Size of attFindByTypeValueRsp_t"][::core::mem::size_of::<attFindByTypeValueRsp_t>() - 16usize];
+//     ["Alignment of attFindByTypeValueRsp_t"][::core::mem::align_of::<attFindByTypeValueRsp_t>() - 8usize];
+//     ["Offset of field: attFindByTypeValueRsp_t::numInfo"]
+//         [::core::mem::offset_of!(attFindByTypeValueRsp_t, numInfo) - 0usize];
+//     ["Offset of field: attFindByTypeValueRsp_t::pHandlesInfo"]
+//         [::core::mem::offset_of!(attFindByTypeValueRsp_t, pHandlesInfo) - 8usize];
+// };
+#[doc = " Read By Type Request format."]
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct attReadByTypeReq_t {
+    #[doc = "!< First requested handle number (must be first field)"]
+    pub startHandle: u16,
+    #[doc = "!< Last requested handle number"]
+    pub endHandle: u16,
+    #[doc = "!< Requested type (2 or 16 octet UUID)"]
+    pub type_: attAttrType_t,
+}
+#[allow(clippy::unnecessary_operation, clippy::identity_op)]
+const _: () = {
+    ["Size of attReadByTypeReq_t"][::core::mem::size_of::<attReadByTypeReq_t>() - 22usize];
+    ["Alignment of attReadByTypeReq_t"][::core::mem::align_of::<attReadByTypeReq_t>() - 2usize];
+    ["Offset of field: attReadByTypeReq_t::startHandle"]
+        [::core::mem::offset_of!(attReadByTypeReq_t, startHandle) - 0usize];
+    ["Offset of field: attReadByTypeReq_t::endHandle"][::core::mem::offset_of!(attReadByTypeReq_t, endHandle) - 2usize];
+    ["Offset of field: attReadByTypeReq_t::type_"][::core::mem::offset_of!(attReadByTypeReq_t, type_) - 4usize];
+};
+#[doc = " Read By Type Response format."]
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct attReadByTypeRsp_t {
+    #[doc = "!< Number of attribute handle-UUID pairs found"]
+    pub numPairs: u16,
+    #[doc = "!< Size of each attribute handle-value pair"]
+    pub len: u16,
+    #[doc = "!< List of 1 or more attribute handle-value pairs (2 to ATT_MTU_SIZE-2)"]
+    pub pDataList: *mut u8,
+}
+#[allow(clippy::unnecessary_operation, clippy::identity_op)]
+// const _: () = {
+//     ["Size of attReadByTypeRsp_t"][::core::mem::size_of::<attReadByTypeRsp_t>() - 16usize];
+//     ["Alignment of attReadByTypeRsp_t"][::core::mem::align_of::<attReadByTypeRsp_t>() - 8usize];
+//     ["Offset of field: attReadByTypeRsp_t::numPairs"][::core::mem::offset_of!(attReadByTypeRsp_t, numPairs) - 0usize];
+//     ["Offset of field: attReadByTypeRsp_t::len"][::core::mem::offset_of!(attReadByTypeRsp_t, len) - 2usize];
+//     ["Offset of field: attReadByTypeRsp_t::pDataList"][::core::mem::offset_of!(attReadByTypeRsp_t, pDataList) - 8usize];
+// };
+#[doc = " Read Request format."]
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct attReadReq_t {
+    #[doc = "!< Handle of the attribute to be read (must be first field)"]
+    pub handle: u16,
+}
+#[allow(clippy::unnecessary_operation, clippy::identity_op)]
+const _: () = {
+    ["Size of attReadReq_t"][::core::mem::size_of::<attReadReq_t>() - 2usize];
+    ["Alignment of attReadReq_t"][::core::mem::align_of::<attReadReq_t>() - 2usize];
+    ["Offset of field: attReadReq_t::handle"][::core::mem::offset_of!(attReadReq_t, handle) - 0usize];
+};
+#[doc = " Read Response format."]
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct attReadRsp_t {
+    #[doc = "!< Length of value"]
+    pub len: u16,
+    #[doc = "!< Value of the attribute with the handle given (0 to ATT_MTU_SIZE-1)"]
+    pub pValue: *mut u8,
+}
+#[allow(clippy::unnecessary_operation, clippy::identity_op)]
+// const _: () = {
+//     ["Size of attReadRsp_t"][::core::mem::size_of::<attReadRsp_t>() - 16usize];
+//     ["Alignment of attReadRsp_t"][::core::mem::align_of::<attReadRsp_t>() - 8usize];
+//     ["Offset of field: attReadRsp_t::len"][::core::mem::offset_of!(attReadRsp_t, len) - 0usize];
+//     ["Offset of field: attReadRsp_t::pValue"][::core::mem::offset_of!(attReadRsp_t, pValue) - 8usize];
+// };
+#[doc = " Read Blob Req format."]
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct attReadBlobReq_t {
+    #[doc = "!< Handle of the attribute to be read (must be first field)"]
+    pub handle: u16,
+    #[doc = "!< Offset of the first octet to be read"]
+    pub offset: u16,
+}
+#[allow(clippy::unnecessary_operation, clippy::identity_op)]
+const _: () = {
+    ["Size of attReadBlobReq_t"][::core::mem::size_of::<attReadBlobReq_t>() - 4usize];
+    ["Alignment of attReadBlobReq_t"][::core::mem::align_of::<attReadBlobReq_t>() - 2usize];
+    ["Offset of field: attReadBlobReq_t::handle"][::core::mem::offset_of!(attReadBlobReq_t, handle) - 0usize];
+    ["Offset of field: attReadBlobReq_t::offset"][::core::mem::offset_of!(attReadBlobReq_t, offset) - 2usize];
+};
+#[doc = " Read Blob Response format."]
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct attReadBlobRsp_t {
+    #[doc = "!< Length of value"]
+    pub len: u16,
+    #[doc = "!< Part of the value of the attribute with the handle given (0 to ATT_MTU_SIZE-1)"]
+    pub pValue: *mut u8,
+}
+#[allow(clippy::unnecessary_operation, clippy::identity_op)]
+// const _: () = {
+//     ["Size of attReadBlobRsp_t"][::core::mem::size_of::<attReadBlobRsp_t>() - 16usize];
+//     ["Alignment of attReadBlobRsp_t"][::core::mem::align_of::<attReadBlobRsp_t>() - 8usize];
+//     ["Offset of field: attReadBlobRsp_t::len"][::core::mem::offset_of!(attReadBlobRsp_t, len) - 0usize];
+//     ["Offset of field: attReadBlobRsp_t::pValue"][::core::mem::offset_of!(attReadBlobRsp_t, pValue) - 8usize];
+// };
+#[doc = " Read Multiple Request format."]
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct attReadMultiReq_t {
+    #[doc = "!< Set of two or more attribute handles (4 to ATT_MTU_SIZE-1) - must be first field"]
+    pub pHandles: *mut u8,
+    #[doc = "!< Number of attribute handles"]
+    pub numHandles: u16,
+}
+#[allow(clippy::unnecessary_operation, clippy::identity_op)]
+// const _: () = {
+//     ["Size of attReadMultiReq_t"][::core::mem::size_of::<attReadMultiReq_t>() - 16usize];
+//     ["Alignment of attReadMultiReq_t"][::core::mem::align_of::<attReadMultiReq_t>() - 8usize];
+//     ["Offset of field: attReadMultiReq_t::pHandles"][::core::mem::offset_of!(attReadMultiReq_t, pHandles) - 0usize];
+//     ["Offset of field: attReadMultiReq_t::numHandles"][::core::mem::offset_of!(attReadMultiReq_t, numHandles) - 8usize];
+// };
+#[doc = " Read Multiple Response format."]
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct attReadMultiRsp_t {
+    #[doc = "!< Length of values"]
+    pub len: u16,
+    #[doc = "!< Set of two or more values (0 to ATT_MTU_SIZE-1)"]
+    pub pValues: *mut u8,
+}
+#[allow(clippy::unnecessary_operation, clippy::identity_op)]
+// const _: () = {
+//     ["Size of attReadMultiRsp_t"][::core::mem::size_of::<attReadMultiRsp_t>() - 16usize];
+//     ["Alignment of attReadMultiRsp_t"][::core::mem::align_of::<attReadMultiRsp_t>() - 8usize];
+//     ["Offset of field: attReadMultiRsp_t::len"][::core::mem::offset_of!(attReadMultiRsp_t, len) - 0usize];
+//     ["Offset of field: attReadMultiRsp_t::pValues"][::core::mem::offset_of!(attReadMultiRsp_t, pValues) - 8usize];
+// };
+#[doc = " Read By Group Type Request format."]
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct attReadByGrpTypeReq_t {
+    #[doc = "!< First requested handle number (must be first field)"]
+    pub startHandle: u16,
+    #[doc = "!< Last requested handle number"]
+    pub endHandle: u16,
+    #[doc = "!< Requested group type (2 or 16 octet UUID)"]
+    pub type_: attAttrType_t,
+}
+#[allow(clippy::unnecessary_operation, clippy::identity_op)]
+const _: () = {
+    ["Size of attReadByGrpTypeReq_t"][::core::mem::size_of::<attReadByGrpTypeReq_t>() - 22usize];
+    ["Alignment of attReadByGrpTypeReq_t"][::core::mem::align_of::<attReadByGrpTypeReq_t>() - 2usize];
+    ["Offset of field: attReadByGrpTypeReq_t::startHandle"]
+        [::core::mem::offset_of!(attReadByGrpTypeReq_t, startHandle) - 0usize];
+    ["Offset of field: attReadByGrpTypeReq_t::endHandle"]
+        [::core::mem::offset_of!(attReadByGrpTypeReq_t, endHandle) - 2usize];
+    ["Offset of field: attReadByGrpTypeReq_t::type_"][::core::mem::offset_of!(attReadByGrpTypeReq_t, type_) - 4usize];
+};
+#[doc = " Read By Group Type Response format."]
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct attReadByGrpTypeRsp_t {
+    #[doc = "!< Number of attribute handle, end group handle and value sets found"]
+    pub numGrps: u16,
+    #[doc = "!< Length of each attribute handle, end group handle and value set"]
+    pub len: u16,
+    #[doc = "!< List of 1 or more attribute handle, end group handle and value (4 to ATT_MTU_SIZE-2)"]
+    pub pDataList: *mut u8,
+}
+#[allow(clippy::unnecessary_operation, clippy::identity_op)]
+// const _: () = {
+//     ["Size of attReadByGrpTypeRsp_t"][::core::mem::size_of::<attReadByGrpTypeRsp_t>() - 16usize];
+//     ["Alignment of attReadByGrpTypeRsp_t"][::core::mem::align_of::<attReadByGrpTypeRsp_t>() - 8usize];
+//     ["Offset of field: attReadByGrpTypeRsp_t::numGrps"]
+//         [::core::mem::offset_of!(attReadByGrpTypeRsp_t, numGrps) - 0usize];
+//     ["Offset of field: attReadByGrpTypeRsp_t::len"][::core::mem::offset_of!(attReadByGrpTypeRsp_t, len) - 2usize];
+//     ["Offset of field: attReadByGrpTypeRsp_t::pDataList"]
+//         [::core::mem::offset_of!(attReadByGrpTypeRsp_t, pDataList) - 8usize];
+// };
+#[doc = " Write Request format."]
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct attWriteReq_t {
+    #[doc = "!< Handle of the attribute to be written (must be first field)"]
+    pub handle: u16,
+    #[doc = "!< Length of value"]
+    pub len: u16,
+    #[doc = "!< Value of the attribute to be written (0 to ATT_MTU_SIZE-3)"]
+    pub pValue: *mut u8,
+    #[doc = "!< Authentication Signature status (not included (0), valid (1), invalid (2))"]
+    pub sig: u8,
+    #[doc = "!< Command Flag"]
+    pub cmd: u8,
+}
+#[allow(clippy::unnecessary_operation, clippy::identity_op)]
+// const _: () = {
+//     ["Size of attWriteReq_t"][::core::mem::size_of::<attWriteReq_t>() - 24usize];
+//     ["Alignment of attWriteReq_t"][::core::mem::align_of::<attWriteReq_t>() - 8usize];
+//     ["Offset of field: attWriteReq_t::handle"][::core::mem::offset_of!(attWriteReq_t, handle) - 0usize];
+//     ["Offset of field: attWriteReq_t::len"][::core::mem::offset_of!(attWriteReq_t, len) - 2usize];
+//     ["Offset of field: attWriteReq_t::pValue"][::core::mem::offset_of!(attWriteReq_t, pValue) - 8usize];
+//     ["Offset of field: attWriteReq_t::sig"][::core::mem::offset_of!(attWriteReq_t, sig) - 16usize];
+//     ["Offset of field: attWriteReq_t::cmd"][::core::mem::offset_of!(attWriteReq_t, cmd) - 17usize];
+// };
+#[doc = " Prepare Write Request format."]
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct attPrepareWriteReq_t {
+    #[doc = "!< Handle of the attribute to be written (must be first field)"]
+    pub handle: u16,
+    #[doc = "!< Offset of the first octet to be written"]
+    pub offset: u16,
+    #[doc = "!< Length of value"]
+    pub len: u16,
+    #[doc = "!< Part of the value of the attribute to be written (0 to ATT_MTU_SIZE-5) - must be allocated"]
+    pub pValue: *mut u8,
+}
+#[allow(clippy::unnecessary_operation, clippy::identity_op)]
+// const _: () = {
+//     ["Size of attPrepareWriteReq_t"][::core::mem::size_of::<attPrepareWriteReq_t>() - 16usize];
+//     ["Alignment of attPrepareWriteReq_t"][::core::mem::align_of::<attPrepareWriteReq_t>() - 8usize];
+//     ["Offset of field: attPrepareWriteReq_t::handle"][::core::mem::offset_of!(attPrepareWriteReq_t, handle) - 0usize];
+//     ["Offset of field: attPrepareWriteReq_t::offset"][::core::mem::offset_of!(attPrepareWriteReq_t, offset) - 2usize];
+//     ["Offset of field: attPrepareWriteReq_t::len"][::core::mem::offset_of!(attPrepareWriteReq_t, len) - 4usize];
+//     ["Offset of field: attPrepareWriteReq_t::pValue"][::core::mem::offset_of!(attPrepareWriteReq_t, pValue) - 8usize];
+// };
+#[doc = " Prepare Write Response format."]
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct attPrepareWriteRsp_t {
+    #[doc = "!< Handle of the attribute that has been read"]
+    pub handle: u16,
+    #[doc = "!< Offset of the first octet to be written"]
+    pub offset: u16,
+    #[doc = "!< Length of value"]
+    pub len: u16,
+    #[doc = "!< Part of the value of the attribute to be written (0 to ATT_MTU_SIZE-5)"]
+    pub pValue: *mut u8,
+}
+#[allow(clippy::unnecessary_operation, clippy::identity_op)]
+// const _: () = {
+//     ["Size of attPrepareWriteRsp_t"][::core::mem::size_of::<attPrepareWriteRsp_t>() - 16usize];
+//     ["Alignment of attPrepareWriteRsp_t"][::core::mem::align_of::<attPrepareWriteRsp_t>() - 8usize];
+//     ["Offset of field: attPrepareWriteRsp_t::handle"][::core::mem::offset_of!(attPrepareWriteRsp_t, handle) - 0usize];
+//     ["Offset of field: attPrepareWriteRsp_t::offset"][::core::mem::offset_of!(attPrepareWriteRsp_t, offset) - 2usize];
+//     ["Offset of field: attPrepareWriteRsp_t::len"][::core::mem::offset_of!(attPrepareWriteRsp_t, len) - 4usize];
+//     ["Offset of field: attPrepareWriteRsp_t::pValue"][::core::mem::offset_of!(attPrepareWriteRsp_t, pValue) - 8usize];
+// };
+#[doc = " Execute Write Request format."]
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct attExecuteWriteReq_t {
+    #[doc = "!< 0x00 - cancel all prepared writes.\n!< 0x01 - immediately write all pending prepared values."]
+    pub flags: u8,
+}
+#[allow(clippy::unnecessary_operation, clippy::identity_op)]
+const _: () = {
+    ["Size of attExecuteWriteReq_t"][::core::mem::size_of::<attExecuteWriteReq_t>() - 1usize];
+    ["Alignment of attExecuteWriteReq_t"][::core::mem::align_of::<attExecuteWriteReq_t>() - 1usize];
+    ["Offset of field: attExecuteWriteReq_t::flags"][::core::mem::offset_of!(attExecuteWriteReq_t, flags) - 0usize];
+};
+#[doc = " Handle Value Notification format."]
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct attHandleValueNoti_t {
+    #[doc = "!< Handle of the attribute that has been changed (must be first field)"]
+    pub handle: u16,
+    #[doc = "!< Length of value"]
+    pub len: u16,
+    #[doc = "!< Current value of the attribute (0 to ATT_MTU_SIZE-3)"]
+    pub pValue: *mut u8,
+}
+#[allow(clippy::unnecessary_operation, clippy::identity_op)]
+// const _: () = {
+//     ["Size of attHandleValueNoti_t"][::core::mem::size_of::<attHandleValueNoti_t>() - 16usize];
+//     ["Alignment of attHandleValueNoti_t"][::core::mem::align_of::<attHandleValueNoti_t>() - 8usize];
+//     ["Offset of field: attHandleValueNoti_t::handle"][::core::mem::offset_of!(attHandleValueNoti_t, handle) - 0usize];
+//     ["Offset of field: attHandleValueNoti_t::len"][::core::mem::offset_of!(attHandleValueNoti_t, len) - 2usize];
+//     ["Offset of field: attHandleValueNoti_t::pValue"][::core::mem::offset_of!(attHandleValueNoti_t, pValue) - 8usize];
+// };
+#[doc = " Handle Value Indication format."]
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct attHandleValueInd_t {
+    #[doc = "!< Handle of the attribute that has been changed (must be first field)"]
+    pub handle: u16,
+    #[doc = "!< Length of value"]
+    pub len: u16,
+    #[doc = "!< Current value of the attribute (0 to ATT_MTU_SIZE-3)"]
+    pub pValue: *mut u8,
+}
+#[allow(clippy::unnecessary_operation, clippy::identity_op)]
+// const _: () = {
+//     ["Size of attHandleValueInd_t"][::core::mem::size_of::<attHandleValueInd_t>() - 16usize];
+//     ["Alignment of attHandleValueInd_t"][::core::mem::align_of::<attHandleValueInd_t>() - 8usize];
+//     ["Offset of field: attHandleValueInd_t::handle"][::core::mem::offset_of!(attHandleValueInd_t, handle) - 0usize];
+//     ["Offset of field: attHandleValueInd_t::len"][::core::mem::offset_of!(attHandleValueInd_t, len) - 2usize];
+//     ["Offset of field: attHandleValueInd_t::pValue"][::core::mem::offset_of!(attHandleValueInd_t, pValue) - 8usize];
+// };
+#[doc = " ATT Flow Control Violated Event message format.  This message is sent to the\n app by the local ATT Server or Client when a sequential ATT Request-Response\n or Indication-Confirmation protocol flow control is violated for a connection.\n All subsequent ATT Requests and Indications received by the local ATT Server\n and Client respectively will be dropped.\n\n This message is to inform the app (that has registered with GAP by calling\n GAP_RegisterForMsgs()) in case it wants to drop the connection."]
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct attFlowCtrlViolatedEvt_t {
+    #[doc = "!< opcode of message that caused flow control violation"]
+    pub opcode: u8,
+    #[doc = "!< opcode of pending message"]
+    pub pendingOpcode: u8,
+}
+#[allow(clippy::unnecessary_operation, clippy::identity_op)]
+const _: () = {
+    ["Size of attFlowCtrlViolatedEvt_t"][::core::mem::size_of::<attFlowCtrlViolatedEvt_t>() - 2usize];
+    ["Alignment of attFlowCtrlViolatedEvt_t"][::core::mem::align_of::<attFlowCtrlViolatedEvt_t>() - 1usize];
+    ["Offset of field: attFlowCtrlViolatedEvt_t::opcode"]
+        [::core::mem::offset_of!(attFlowCtrlViolatedEvt_t, opcode) - 0usize];
+    ["Offset of field: attFlowCtrlViolatedEvt_t::pendingOpcode"]
+        [::core::mem::offset_of!(attFlowCtrlViolatedEvt_t, pendingOpcode) - 1usize];
+};
+#[doc = " ATT MTU Updated Event message format.  This message is sent to the app\n by the local ATT Server or Client when the ATT MTU size is updated for a\n connection. The default ATT MTU size is 23 octets.\n\n This message is to inform the app (that has registered with GAP by calling\n GAP_RegisterForMsgs()) about the new ATT MTU size negotiated for a connection."]
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct attMtuUpdatedEvt_t {
+    #[doc = "!< new MTU size"]
+    pub MTU: u16,
+}
+#[allow(clippy::unnecessary_operation, clippy::identity_op)]
+const _: () = {
+    ["Size of attMtuUpdatedEvt_t"][::core::mem::size_of::<attMtuUpdatedEvt_t>() - 2usize];
+    ["Alignment of attMtuUpdatedEvt_t"][::core::mem::align_of::<attMtuUpdatedEvt_t>() - 2usize];
+    ["Offset of field: attMtuUpdatedEvt_t::MTU"][::core::mem::offset_of!(attMtuUpdatedEvt_t, MTU) - 0usize];
+};
+#[doc = " ATT Message format. It's a union of all attribute protocol messages and\n locally-generated events used between the attribute protocol and upper\n layer profile/application."]
+#[repr(C)]
+#[derive(Copy, Clone)]
+pub union attMsg_t {
+    #[doc = "!< ATT Exchange MTU Request"]
+    pub exchangeMTUReq: attExchangeMTUReq_t,
+    #[doc = "!< ATT Find Information Request"]
+    pub findInfoReq: attFindInfoReq_t,
+    #[doc = "!< ATT Find By Type Value Request"]
+    pub findByTypeValueReq: attFindByTypeValueReq_t,
+    #[doc = "!< ATT Read By Type Request"]
+    pub readByTypeReq: attReadByTypeReq_t,
+    #[doc = "!< ATT Read Request"]
+    pub readReq: attReadReq_t,
+    #[doc = "!< ATT Read Blob Request"]
+    pub readBlobReq: attReadBlobReq_t,
+    #[doc = "!< ATT Read Multiple Request"]
+    pub readMultiReq: attReadMultiReq_t,
+    #[doc = "!< ATT Read By Group Type Request"]
+    pub readByGrpTypeReq: attReadByGrpTypeReq_t,
+    #[doc = "!< ATT Write Request"]
+    pub writeReq: attWriteReq_t,
+    #[doc = "!< ATT Prepare Write Request"]
+    pub prepareWriteReq: attPrepareWriteReq_t,
+    #[doc = "!< ATT Execute Write Request"]
+    pub executeWriteReq: attExecuteWriteReq_t,
+    #[doc = "!< ATT Error Response"]
+    pub errorRsp: attErrorRsp_t,
+    #[doc = "!< ATT Exchange MTU Response"]
+    pub exchangeMTURsp: attExchangeMTURsp_t,
+    #[doc = "!< ATT Find Information Response"]
+    pub findInfoRsp: attFindInfoRsp_t,
+    #[doc = "!< ATT Find By Type Value Response"]
+    pub findByTypeValueRsp: attFindByTypeValueRsp_t,
+    #[doc = "!< ATT Read By Type Response"]
+    pub readByTypeRsp: attReadByTypeRsp_t,
+    #[doc = "!< ATT Read Response"]
+    pub readRsp: attReadRsp_t,
+    #[doc = "!< ATT Read Blob Response"]
+    pub readBlobRsp: attReadBlobRsp_t,
+    #[doc = "!< ATT Read Multiple Response"]
+    pub readMultiRsp: attReadMultiRsp_t,
+    #[doc = "!< ATT Read By Group Type Response"]
+    pub readByGrpTypeRsp: attReadByGrpTypeRsp_t,
+    #[doc = "!< ATT Prepare Write Response"]
+    pub prepareWriteRsp: attPrepareWriteRsp_t,
+    #[doc = "!< ATT Handle Value Notification"]
+    pub handleValueNoti: attHandleValueNoti_t,
+    #[doc = "!< ATT Handle Value Indication"]
+    pub handleValueInd: attHandleValueInd_t,
+    #[doc = "!< ATT Flow Control Violated Event"]
+    pub flowCtrlEvt: attFlowCtrlViolatedEvt_t,
+    #[doc = "!< ATT MTU Updated Event"]
+    pub mtuEvt: attMtuUpdatedEvt_t,
+}
+#[allow(clippy::unnecessary_operation, clippy::identity_op)]
+// const _: () = {
+//     ["Size of attMsg_t"][::core::mem::size_of::<attMsg_t>() - 24usize];
+//     ["Alignment of attMsg_t"][::core::mem::align_of::<attMsg_t>() - 8usize];
+//     ["Offset of field: attMsg_t::exchangeMTUReq"][::core::mem::offset_of!(attMsg_t, exchangeMTUReq) - 0usize];
+//     ["Offset of field: attMsg_t::findInfoReq"][::core::mem::offset_of!(attMsg_t, findInfoReq) - 0usize];
+//     ["Offset of field: attMsg_t::findByTypeValueReq"][::core::mem::offset_of!(attMsg_t, findByTypeValueReq) - 0usize];
+//     ["Offset of field: attMsg_t::readByTypeReq"][::core::mem::offset_of!(attMsg_t, readByTypeReq) - 0usize];
+//     ["Offset of field: attMsg_t::readReq"][::core::mem::offset_of!(attMsg_t, readReq) - 0usize];
+//     ["Offset of field: attMsg_t::readBlobReq"][::core::mem::offset_of!(attMsg_t, readBlobReq) - 0usize];
+//     ["Offset of field: attMsg_t::readMultiReq"][::core::mem::offset_of!(attMsg_t, readMultiReq) - 0usize];
+//     ["Offset of field: attMsg_t::readByGrpTypeReq"][::core::mem::offset_of!(attMsg_t, readByGrpTypeReq) - 0usize];
+//     ["Offset of field: attMsg_t::writeReq"][::core::mem::offset_of!(attMsg_t, writeReq) - 0usize];
+//     ["Offset of field: attMsg_t::prepareWriteReq"][::core::mem::offset_of!(attMsg_t, prepareWriteReq) - 0usize];
+//     ["Offset of field: attMsg_t::executeWriteReq"][::core::mem::offset_of!(attMsg_t, executeWriteReq) - 0usize];
+//     ["Offset of field: attMsg_t::errorRsp"][::core::mem::offset_of!(attMsg_t, errorRsp) - 0usize];
+//     ["Offset of field: attMsg_t::exchangeMTURsp"][::core::mem::offset_of!(attMsg_t, exchangeMTURsp) - 0usize];
+//     ["Offset of field: attMsg_t::findInfoRsp"][::core::mem::offset_of!(attMsg_t, findInfoRsp) - 0usize];
+//     ["Offset of field: attMsg_t::findByTypeValueRsp"][::core::mem::offset_of!(attMsg_t, findByTypeValueRsp) - 0usize];
+//     ["Offset of field: attMsg_t::readByTypeRsp"][::core::mem::offset_of!(attMsg_t, readByTypeRsp) - 0usize];
+//     ["Offset of field: attMsg_t::readRsp"][::core::mem::offset_of!(attMsg_t, readRsp) - 0usize];
+//     ["Offset of field: attMsg_t::readBlobRsp"][::core::mem::offset_of!(attMsg_t, readBlobRsp) - 0usize];
+//     ["Offset of field: attMsg_t::readMultiRsp"][::core::mem::offset_of!(attMsg_t, readMultiRsp) - 0usize];
+//     ["Offset of field: attMsg_t::readByGrpTypeRsp"][::core::mem::offset_of!(attMsg_t, readByGrpTypeRsp) - 0usize];
+//     ["Offset of field: attMsg_t::prepareWriteRsp"][::core::mem::offset_of!(attMsg_t, prepareWriteRsp) - 0usize];
+//     ["Offset of field: attMsg_t::handleValueNoti"][::core::mem::offset_of!(attMsg_t, handleValueNoti) - 0usize];
+//     ["Offset of field: attMsg_t::handleValueInd"][::core::mem::offset_of!(attMsg_t, handleValueInd) - 0usize];
+//     ["Offset of field: attMsg_t::flowCtrlEvt"][::core::mem::offset_of!(attMsg_t, flowCtrlEvt) - 0usize];
+//     ["Offset of field: attMsg_t::mtuEvt"][::core::mem::offset_of!(attMsg_t, mtuEvt) - 0usize];
+// };
+#[doc = " GATT Find By Type Value Request format."]
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct gattFindByTypeValueReq_t {
+    #[doc = "!< First requested handle number (must be first field)"]
+    pub startHandle: u16,
+    #[doc = "!< Last requested handle number"]
+    pub endHandle: u16,
+    #[doc = "!< Primary service UUID value (2 or 16 octets)"]
+    pub value: attAttrType_t,
+}
+#[allow(clippy::unnecessary_operation, clippy::identity_op)]
+const _: () = {
+    ["Size of gattFindByTypeValueReq_t"][::core::mem::size_of::<gattFindByTypeValueReq_t>() - 22usize];
+    ["Alignment of gattFindByTypeValueReq_t"][::core::mem::align_of::<gattFindByTypeValueReq_t>() - 2usize];
+    ["Offset of field: gattFindByTypeValueReq_t::startHandle"]
+        [::core::mem::offset_of!(gattFindByTypeValueReq_t, startHandle) - 0usize];
+    ["Offset of field: gattFindByTypeValueReq_t::endHandle"]
+        [::core::mem::offset_of!(gattFindByTypeValueReq_t, endHandle) - 2usize];
+    ["Offset of field: gattFindByTypeValueReq_t::value"]
+        [::core::mem::offset_of!(gattFindByTypeValueReq_t, value) - 4usize];
+};
+#[doc = " GATT Read By Type Request format."]
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct gattReadByTypeReq_t {
+    #[doc = "!< Whether this is a GATT Discover Characteristics by UUID sub-procedure"]
+    pub discCharsByUUID: u8,
+    #[doc = "!< Read By Type Request"]
+    pub req: attReadByTypeReq_t,
+}
+#[allow(clippy::unnecessary_operation, clippy::identity_op)]
+const _: () = {
+    ["Size of gattReadByTypeReq_t"][::core::mem::size_of::<gattReadByTypeReq_t>() - 24usize];
+    ["Alignment of gattReadByTypeReq_t"][::core::mem::align_of::<gattReadByTypeReq_t>() - 2usize];
+    ["Offset of field: gattReadByTypeReq_t::discCharsByUUID"]
+        [::core::mem::offset_of!(gattReadByTypeReq_t, discCharsByUUID) - 0usize];
+    ["Offset of field: gattReadByTypeReq_t::req"][::core::mem::offset_of!(gattReadByTypeReq_t, req) - 2usize];
+};
+#[doc = " GATT Write Long Request format. Do not change the order of the members."]
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct gattWriteLongReq_t {
+    #[doc = "!< Whether reliable writes requested (always FALSE for Write Long)"]
+    pub reliable: u8,
+    #[doc = "!< ATT Prepare Write Request"]
+    pub req: attPrepareWriteReq_t,
+    #[doc = "!< Offset of last Prepare Write Request sent"]
+    pub lastOffset: u16,
+}
+#[allow(clippy::unnecessary_operation, clippy::identity_op)]
+// const _: () = {
+//     ["Size of gattWriteLongReq_t"][::core::mem::size_of::<gattWriteLongReq_t>() - 32usize];
+//     ["Alignment of gattWriteLongReq_t"][::core::mem::align_of::<gattWriteLongReq_t>() - 8usize];
+//     ["Offset of field: gattWriteLongReq_t::reliable"][::core::mem::offset_of!(gattWriteLongReq_t, reliable) - 0usize];
+//     ["Offset of field: gattWriteLongReq_t::req"][::core::mem::offset_of!(gattWriteLongReq_t, req) - 8usize];
+//     ["Offset of field: gattWriteLongReq_t::lastOffset"]
+//         [::core::mem::offset_of!(gattWriteLongReq_t, lastOffset) - 24usize];
+// };
+#[doc = " GATT Reliable Writes Request format. Do not change the order of the members."]
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct gattReliableWritesReq_t {
+    #[doc = "!< Whether reliable writes requested (always TRUE for Reliable Writes)"]
+    pub reliable: u8,
+    #[doc = "!< Array of Prepare Write Requests (must be allocated)"]
+    pub pReqs: *mut attPrepareWriteReq_t,
+    #[doc = "!< Number of Prepare Write Requests"]
+    pub numReqs: u8,
+    #[doc = "!< Index of last Prepare Write Request sent"]
+    pub index: u8,
+    #[doc = "!< 0x00 - cancel all prepared writes.\n!< 0x01 - immediately write all pending prepared values."]
+    pub flags: u8,
+}
+#[allow(clippy::unnecessary_operation, clippy::identity_op)]
+// const _: () = {
+//     ["Size of gattReliableWritesReq_t"][::core::mem::size_of::<gattReliableWritesReq_t>() - 24usize];
+//     ["Alignment of gattReliableWritesReq_t"][::core::mem::align_of::<gattReliableWritesReq_t>() - 8usize];
+//     ["Offset of field: gattReliableWritesReq_t::reliable"]
+//         [::core::mem::offset_of!(gattReliableWritesReq_t, reliable) - 0usize];
+//     ["Offset of field: gattReliableWritesReq_t::pReqs"]
+//         [::core::mem::offset_of!(gattReliableWritesReq_t, pReqs) - 8usize];
+//     ["Offset of field: gattReliableWritesReq_t::numReqs"]
+//         [::core::mem::offset_of!(gattReliableWritesReq_t, numReqs) - 16usize];
+//     ["Offset of field: gattReliableWritesReq_t::index"]
+//         [::core::mem::offset_of!(gattReliableWritesReq_t, index) - 17usize];
+//     ["Offset of field: gattReliableWritesReq_t::flags"]
+//         [::core::mem::offset_of!(gattReliableWritesReq_t, flags) - 18usize];
+// };
+#[doc = " GATT Message format. It's a union of all attribute protocol/profile messages\n and locally-generated events used between the attribute protocol/profile and\n upper layer application."]
+#[repr(C)]
+#[derive(Copy, Clone)]
+pub union gattMsg_t {
+    #[doc = "!< ATT Exchange MTU Request"]
+    pub exchangeMTUReq: attExchangeMTUReq_t,
+    #[doc = "!< ATT Find Information Request"]
+    pub findInfoReq: attFindInfoReq_t,
+    #[doc = "!< ATT Find By Type Value Request"]
+    pub findByTypeValueReq: attFindByTypeValueReq_t,
+    #[doc = "!< ATT Read By Type Request"]
+    pub readByTypeReq: attReadByTypeReq_t,
+    #[doc = "!< ATT Read Request"]
+    pub readReq: attReadReq_t,
+    #[doc = "!< ATT Read Blob Request"]
+    pub readBlobReq: attReadBlobReq_t,
+    #[doc = "!< ATT Read Multiple Request"]
+    pub readMultiReq: attReadMultiReq_t,
+    #[doc = "!< ATT Read By Group Type Request"]
+    pub readByGrpTypeReq: attReadByGrpTypeReq_t,
+    #[doc = "!< ATT Write Request"]
+    pub writeReq: attWriteReq_t,
+    #[doc = "!< ATT Prepare Write Request"]
+    pub prepareWriteReq: attPrepareWriteReq_t,
+    #[doc = "!< ATT Execute Write Request"]
+    pub executeWriteReq: attExecuteWriteReq_t,
+    #[doc = "!< GATT Find By Type Value Request"]
+    pub gattFindByTypeValueReq: gattFindByTypeValueReq_t,
+    #[doc = "!< GATT Read By Type Request"]
+    pub gattReadByTypeReq: gattReadByTypeReq_t,
+    #[doc = "!< GATT Long Write Request"]
+    pub gattWriteLongReq: gattWriteLongReq_t,
+    #[doc = "!< GATT Reliable Writes Request"]
+    pub gattReliableWritesReq: gattReliableWritesReq_t,
+    #[doc = "!< ATT Error Response"]
+    pub errorRsp: attErrorRsp_t,
+    #[doc = "!< ATT Exchange MTU Response"]
+    pub exchangeMTURsp: attExchangeMTURsp_t,
+    #[doc = "!< ATT Find Information Response"]
+    pub findInfoRsp: attFindInfoRsp_t,
+    #[doc = "!< ATT Find By Type Value Response"]
+    pub findByTypeValueRsp: attFindByTypeValueRsp_t,
+    #[doc = "!< ATT Read By Type Response"]
+    pub readByTypeRsp: attReadByTypeRsp_t,
+    #[doc = "!< ATT Read Response"]
+    pub readRsp: attReadRsp_t,
+    #[doc = "!< ATT Read Blob Response"]
+    pub readBlobRsp: attReadBlobRsp_t,
+    #[doc = "!< ATT Read Multiple Response"]
+    pub readMultiRsp: attReadMultiRsp_t,
+    #[doc = "!< ATT Read By Group Type Response"]
+    pub readByGrpTypeRsp: attReadByGrpTypeRsp_t,
+    #[doc = "!< ATT Prepare Write Response"]
+    pub prepareWriteRsp: attPrepareWriteRsp_t,
+    #[doc = "!< ATT Handle Value Notification"]
+    pub handleValueNoti: attHandleValueNoti_t,
+    #[doc = "!< ATT Handle Value Indication"]
+    pub handleValueInd: attHandleValueInd_t,
+    #[doc = "!< ATT Flow Control Violated Event"]
+    pub flowCtrlEvt: attFlowCtrlViolatedEvt_t,
+    #[doc = "!< ATT MTU Updated Event"]
+    pub mtuEvt: attMtuUpdatedEvt_t,
+}
+#[allow(clippy::unnecessary_operation, clippy::identity_op)]
+// const _: () = {
+//     ["Size of gattMsg_t"][::core::mem::size_of::<gattMsg_t>() - 32usize];
+//     ["Alignment of gattMsg_t"][::core::mem::align_of::<gattMsg_t>() - 8usize];
+//     ["Offset of field: gattMsg_t::exchangeMTUReq"][::core::mem::offset_of!(gattMsg_t, exchangeMTUReq) - 0usize];
+//     ["Offset of field: gattMsg_t::findInfoReq"][::core::mem::offset_of!(gattMsg_t, findInfoReq) - 0usize];
+//     ["Offset of field: gattMsg_t::findByTypeValueReq"][::core::mem::offset_of!(gattMsg_t, findByTypeValueReq) - 0usize];
+//     ["Offset of field: gattMsg_t::readByTypeReq"][::core::mem::offset_of!(gattMsg_t, readByTypeReq) - 0usize];
+//     ["Offset of field: gattMsg_t::readReq"][::core::mem::offset_of!(gattMsg_t, readReq) - 0usize];
+//     ["Offset of field: gattMsg_t::readBlobReq"][::core::mem::offset_of!(gattMsg_t, readBlobReq) - 0usize];
+//     ["Offset of field: gattMsg_t::readMultiReq"][::core::mem::offset_of!(gattMsg_t, readMultiReq) - 0usize];
+//     ["Offset of field: gattMsg_t::readByGrpTypeReq"][::core::mem::offset_of!(gattMsg_t, readByGrpTypeReq) - 0usize];
+//     ["Offset of field: gattMsg_t::writeReq"][::core::mem::offset_of!(gattMsg_t, writeReq) - 0usize];
+//     ["Offset of field: gattMsg_t::prepareWriteReq"][::core::mem::offset_of!(gattMsg_t, prepareWriteReq) - 0usize];
+//     ["Offset of field: gattMsg_t::executeWriteReq"][::core::mem::offset_of!(gattMsg_t, executeWriteReq) - 0usize];
+//     ["Offset of field: gattMsg_t::gattFindByTypeValueReq"]
+//         [::core::mem::offset_of!(gattMsg_t, gattFindByTypeValueReq) - 0usize];
+//     ["Offset of field: gattMsg_t::gattReadByTypeReq"][::core::mem::offset_of!(gattMsg_t, gattReadByTypeReq) - 0usize];
+//     ["Offset of field: gattMsg_t::gattWriteLongReq"][::core::mem::offset_of!(gattMsg_t, gattWriteLongReq) - 0usize];
+//     ["Offset of field: gattMsg_t::gattReliableWritesReq"]
+//         [::core::mem::offset_of!(gattMsg_t, gattReliableWritesReq) - 0usize];
+//     ["Offset of field: gattMsg_t::errorRsp"][::core::mem::offset_of!(gattMsg_t, errorRsp) - 0usize];
+//     ["Offset of field: gattMsg_t::exchangeMTURsp"][::core::mem::offset_of!(gattMsg_t, exchangeMTURsp) - 0usize];
+//     ["Offset of field: gattMsg_t::findInfoRsp"][::core::mem::offset_of!(gattMsg_t, findInfoRsp) - 0usize];
+//     ["Offset of field: gattMsg_t::findByTypeValueRsp"][::core::mem::offset_of!(gattMsg_t, findByTypeValueRsp) - 0usize];
+//     ["Offset of field: gattMsg_t::readByTypeRsp"][::core::mem::offset_of!(gattMsg_t, readByTypeRsp) - 0usize];
+//     ["Offset of field: gattMsg_t::readRsp"][::core::mem::offset_of!(gattMsg_t, readRsp) - 0usize];
+//     ["Offset of field: gattMsg_t::readBlobRsp"][::core::mem::offset_of!(gattMsg_t, readBlobRsp) - 0usize];
+//     ["Offset of field: gattMsg_t::readMultiRsp"][::core::mem::offset_of!(gattMsg_t, readMultiRsp) - 0usize];
+//     ["Offset of field: gattMsg_t::readByGrpTypeRsp"][::core::mem::offset_of!(gattMsg_t, readByGrpTypeRsp) - 0usize];
+//     ["Offset of field: gattMsg_t::prepareWriteRsp"][::core::mem::offset_of!(gattMsg_t, prepareWriteRsp) - 0usize];
+//     ["Offset of field: gattMsg_t::handleValueNoti"][::core::mem::offset_of!(gattMsg_t, handleValueNoti) - 0usize];
+//     ["Offset of field: gattMsg_t::handleValueInd"][::core::mem::offset_of!(gattMsg_t, handleValueInd) - 0usize];
+//     ["Offset of field: gattMsg_t::flowCtrlEvt"][::core::mem::offset_of!(gattMsg_t, flowCtrlEvt) - 0usize];
+//     ["Offset of field: gattMsg_t::mtuEvt"][::core::mem::offset_of!(gattMsg_t, mtuEvt) - 0usize];
+// };
+#[doc = " GATT tmos GATT_MSG_EVENT message format. This message is used to forward an\n incoming attribute protocol/profile message up to upper layer application."]
+#[repr(C)]
+#[derive(Copy, Clone)]
+pub struct gattMsgEvent_t {
+    #[doc = "!< GATT_MSG_EVENT and status"]
+    pub hdr: tmos_event_hdr_t,
+    #[doc = "!< Connection message was received on"]
+    pub connHandle: u16,
+    #[doc = "!< Type of message"]
+    pub method: u8,
+    #[doc = "!< Attribute protocol/profile message"]
+    pub msg: gattMsg_t,
+}
+#[allow(clippy::unnecessary_operation, clippy::identity_op)]
+// const _: () = {
+//     ["Size of gattMsgEvent_t"][::core::mem::size_of::<gattMsgEvent_t>() - 40usize];
+//     ["Alignment of gattMsgEvent_t"][::core::mem::align_of::<gattMsgEvent_t>() - 8usize];
+//     ["Offset of field: gattMsgEvent_t::hdr"][::core::mem::offset_of!(gattMsgEvent_t, hdr) - 0usize];
+//     ["Offset of field: gattMsgEvent_t::connHandle"][::core::mem::offset_of!(gattMsgEvent_t, connHandle) - 2usize];
+//     ["Offset of field: gattMsgEvent_t::method"][::core::mem::offset_of!(gattMsgEvent_t, method) - 4usize];
+//     ["Offset of field: gattMsgEvent_t::msg"][::core::mem::offset_of!(gattMsgEvent_t, msg) - 8usize];
+// };
+#[doc = " GATT Attribute Type format."]
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct gattAttrType_t {
+    #[doc = "!< Length of UUID (2 or 16)"]
+    pub len: u8,
+    #[doc = "!< Pointer to UUID"]
+    pub uuid: *const u8,
+}
+#[allow(clippy::unnecessary_operation, clippy::identity_op)]
+// const _: () = {
+//     ["Size of gattAttrType_t"][::core::mem::size_of::<gattAttrType_t>() - 16usize];
+//     ["Alignment of gattAttrType_t"][::core::mem::align_of::<gattAttrType_t>() - 8usize];
+//     ["Offset of field: gattAttrType_t::len"][::core::mem::offset_of!(gattAttrType_t, len) - 0usize];
+//     ["Offset of field: gattAttrType_t::uuid"][::core::mem::offset_of!(gattAttrType_t, uuid) - 8usize];
+// };
+#[doc = " GATT Attribute format."]
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct attAttribute_t {
+    #[doc = "!< Attribute type (2 or 16 octet UUIDs)"]
+    pub type_: gattAttrType_t,
+    #[doc = "!< Attribute permissions"]
+    pub permissions: u8,
+    #[doc = "!< Attribute handle - assigned internally by attribute server"]
+    pub handle: u16,
+    #[doc = "!< Attribute value - encoding of the octet array is defined in\n!< the applicable profile. The maximum length of an attribute\n!< value shall be 512 octets."]
+    pub pValue: *mut u8,
+}
+#[allow(clippy::unnecessary_operation, clippy::identity_op)]
+// const _: () = {
+//     ["Size of attAttribute_t"][::core::mem::size_of::<attAttribute_t>() - 32usize];
+//     ["Alignment of attAttribute_t"][::core::mem::align_of::<attAttribute_t>() - 8usize];
+//     ["Offset of field: attAttribute_t::type_"][::core::mem::offset_of!(attAttribute_t, type_) - 0usize];
+//     ["Offset of field: attAttribute_t::permissions"][::core::mem::offset_of!(attAttribute_t, permissions) - 16usize];
+//     ["Offset of field: attAttribute_t::handle"][::core::mem::offset_of!(attAttribute_t, handle) - 18usize];
+//     ["Offset of field: attAttribute_t::pValue"][::core::mem::offset_of!(attAttribute_t, pValue) - 24usize];
+// };
+#[doc = " GATT Attribute format."]
+pub type gattAttribute_t = attAttribute_t;
+#[doc = " GATT Service format."]
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct gattService_t {
+    #[doc = "!< Number of attributes in attrs"]
+    pub numAttrs: u16,
+    #[doc = "!< Minimum encryption key size required by service (7-16 bytes)"]
+    pub encKeySize: u8,
+    #[doc = " Array of attribute records.\n  note: The list must start with a Service attribute followed by\n        all attributes associated with this Service attribute."]
+    pub attrs: *mut gattAttribute_t,
+}
+#[allow(clippy::unnecessary_operation, clippy::identity_op)]
+// const _: () = {
+//     ["Size of gattService_t"][::core::mem::size_of::<gattService_t>() - 16usize];
+//     ["Alignment of gattService_t"][::core::mem::align_of::<gattService_t>() - 8usize];
+//     ["Offset of field: gattService_t::numAttrs"][::core::mem::offset_of!(gattService_t, numAttrs) - 0usize];
+//     ["Offset of field: gattService_t::encKeySize"][::core::mem::offset_of!(gattService_t, encKeySize) - 2usize];
+//     ["Offset of field: gattService_t::attrs"][::core::mem::offset_of!(gattService_t, attrs) - 8usize];
+// };
+#[doc = " @brief   Callback function prototype to read an attribute value.\n\n @note    blePending can be returned ONLY for the following\n          read operations:\n          - Read Request: ATT_READ_REQ\n          - Read Blob Request: ATT_READ_BLOB_REQ\n\n @note    If blePending is returned then it's the responsibility of the application to respond to\n          ATT_READ_REQ and ATT_READ_BLOB_REQ message with ATT_READ_RSP and ATT_READ_BLOB_RSP\n          message respectively.\n\n @note    Payload 'pValue' used with ATT_READ_RSP and ATT_READ_BLOB_RSP must be allocated using GATT_bm_alloc().\n\n @param   connHandle - connection request was received on\n @param   pAttr - pointer to attribute\n @param   pValue - pointer to data to be read (to be returned)\n @param   pLen - length of data (to be returned)\n @param   offset - offset of the first octet to be read\n @param   maxLen - maximum length of data to be read\n @param   method - type of read message\n\n @return  SUCCESS: Read was successfully.<BR>\n          blePending: A response is pending for this client.<BR>\n          Error, otherwise: ref ATT_ERR_CODE_DEFINES.<BR>"]
+pub type pfnGATTReadAttrCB_t = ::core::option::Option<
+    unsafe extern "C" fn(
+        connHandle: u16,
+        pAttr: *mut gattAttribute_t,
+        pValue: *mut u8,
+        pLen: *mut u16,
+        offset: u16,
+        maxLen: u16,
+        method: u8,
+    ) -> u8,
+>;
+#[doc = " @brief   Callback function prototype to write an attribute value.\n\n @note    blePending can be returned ONLY for the following\n          write operations:\n          - Write Request: ATT_WRITE_REQ\n          - Write Command: ATT_WRITE_CMD\n          - Write Long: ATT_EXECUTE_WRITE_REQ\n          - Reliable Writes: Multiple ATT_PREPARE_WRITE_REQ followed by one final ATT_EXECUTE_WRITE_REQ\n\n @note    If blePending is returned then it's the responsibility of the application to 1) respond to\n          ATT_WRITE_REQ and ATT_EXECUTE_WRITE_REQ message with ATT_WRITE_RSP and ATT_EXECUTE_WRITE_RSP\n          message respectively, and 2) free each request payload 'pValue' using BM_free().\n\n @note    Write Command (ATT_WRITE_CMD) does NOT require a response message.\n\n @param   connHandle - connection request was received on\n @param   pAttr - pointer to attribute\n @param   pValue - pointer to data to be written\n @param   pLen - length of data\n @param   offset - offset of the first octet to be written\n @param   method - type of write message\n\n @return  SUCCESS: Write was successfully.<BR>\n          blePending: A response is pending for this client.<BR>\n          Error, otherwise: ref ATT_ERR_CODE_DEFINES.<BR>"]
+pub type pfnGATTWriteAttrCB_t = ::core::option::Option<
+    unsafe extern "C" fn(
+        connHandle: u16,
+        pAttr: *mut gattAttribute_t,
+        pValue: *mut u8,
+        len: u16,
+        offset: u16,
+        method: u8,
+    ) -> u8,
+>;
+#[doc = " @brief   Callback function prototype to authorize a Read or Write operation\n          on a given attribute.\n\n @param   connHandle - connection request was received on\n @param   pAttr - pointer to attribute\n @param   opcode - request opcode (ATT_READ_REQ or ATT_WRITE_REQ)\n\n @return  SUCCESS: Operation authorized.<BR>\n          ATT_ERR_INSUFFICIENT_AUTHOR: Authorization required.<BR>"]
+pub type pfnGATTAuthorizeAttrCB_t =
+    ::core::option::Option<unsafe extern "C" fn(connHandle: u16, pAttr: *mut gattAttribute_t, opcode: u8) -> bStatus_t>;
+#[doc = " GATT Structure for Client Characteristic Configuration."]
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct gattCharCfg_t {
+    #[doc = "!< Client connection handle"]
+    pub connHandle: u16,
+    #[doc = "!< Characteristic configuration value for this client"]
+    pub value: u8,
+}
+#[allow(clippy::unnecessary_operation, clippy::identity_op)]
+const _: () = {
+    ["Size of gattCharCfg_t"][::core::mem::size_of::<gattCharCfg_t>() - 4usize];
+    ["Alignment of gattCharCfg_t"][::core::mem::align_of::<gattCharCfg_t>() - 2usize];
+    ["Offset of field: gattCharCfg_t::connHandle"][::core::mem::offset_of!(gattCharCfg_t, connHandle) - 0usize];
+    ["Offset of field: gattCharCfg_t::value"][::core::mem::offset_of!(gattCharCfg_t, value) - 2usize];
+};
+#[doc = " GATT Structure for service callback functions - must be setup by the application\n and used when GATTServApp_RegisterService() is called."]
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct gattServiceCBs_t {
+    #[doc = "!< Read callback function pointer"]
+    pub pfnReadAttrCB: pfnGATTReadAttrCB_t,
+    #[doc = "!< Write callback function pointer"]
+    pub pfnWriteAttrCB: pfnGATTWriteAttrCB_t,
+    #[doc = "!< Authorization callback function pointer"]
+    pub pfnAuthorizeAttrCB: pfnGATTAuthorizeAttrCB_t,
+}
+#[allow(clippy::unnecessary_operation, clippy::identity_op)]
+// const _: () = {
+//     ["Size of gattServiceCBs_t"][::core::mem::size_of::<gattServiceCBs_t>() - 24usize];
+//     ["Alignment of gattServiceCBs_t"][::core::mem::align_of::<gattServiceCBs_t>() - 8usize];
+//     ["Offset of field: gattServiceCBs_t::pfnReadAttrCB"]
+//         [::core::mem::offset_of!(gattServiceCBs_t, pfnReadAttrCB) - 0usize];
+//     ["Offset of field: gattServiceCBs_t::pfnWriteAttrCB"]
+//         [::core::mem::offset_of!(gattServiceCBs_t, pfnWriteAttrCB) - 8usize];
+//     ["Offset of field: gattServiceCBs_t::pfnAuthorizeAttrCB"]
+//         [::core::mem::offset_of!(gattServiceCBs_t, pfnAuthorizeAttrCB) - 16usize];
+// };
+#[doc = "gap**************************************/\n/**\n Connection parameters for the peripheral device.  These numbers are used\n to compare against connection events and request connection parameter\n updates with the central."]
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct gapPeriConnectParams_t {
+    #[doc = "!< Minimum value for the connection event (interval. 0x0006 - 0x0C80 * 1.25ms)"]
+    pub intervalMin: u16,
+    #[doc = "!< Maximum value for the connection event (interval. 0x0006 - 0x0C80 * 1.25ms)"]
+    pub intervalMax: u16,
+    #[doc = "!< Number of LL latency connection events (0x0000 - 0x03e8)"]
+    pub latency: u16,
+    #[doc = "!< Connection Timeout (0x000A - 0x0C80 * 10ms)"]
+    pub timeout: u16,
+}
+#[allow(clippy::unnecessary_operation, clippy::identity_op)]
+const _: () = {
+    ["Size of gapPeriConnectParams_t"][::core::mem::size_of::<gapPeriConnectParams_t>() - 8usize];
+    ["Alignment of gapPeriConnectParams_t"][::core::mem::align_of::<gapPeriConnectParams_t>() - 2usize];
+    ["Offset of field: gapPeriConnectParams_t::intervalMin"]
+        [::core::mem::offset_of!(gapPeriConnectParams_t, intervalMin) - 0usize];
+    ["Offset of field: gapPeriConnectParams_t::intervalMax"]
+        [::core::mem::offset_of!(gapPeriConnectParams_t, intervalMax) - 2usize];
+    ["Offset of field: gapPeriConnectParams_t::latency"]
+        [::core::mem::offset_of!(gapPeriConnectParams_t, latency) - 4usize];
+    ["Offset of field: gapPeriConnectParams_t::timeout"]
+        [::core::mem::offset_of!(gapPeriConnectParams_t, timeout) - 6usize];
+};
+#[doc = " GAP event header format."]
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct gapEventHdr_t {
+    #[doc = "!< GAP_MSG_EVENT and status"]
+    pub hdr: tmos_event_hdr_t,
+    #[doc = "!< GAP type of command. Ref: @ref GAP_MSG_EVENT_DEFINES"]
+    pub opcode: u8,
+}
+#[allow(clippy::unnecessary_operation, clippy::identity_op)]
+const _: () = {
+    ["Size of gapEventHdr_t"][::core::mem::size_of::<gapEventHdr_t>() - 3usize];
+    ["Alignment of gapEventHdr_t"][::core::mem::align_of::<gapEventHdr_t>() - 1usize];
+    ["Offset of field: gapEventHdr_t::hdr"][::core::mem::offset_of!(gapEventHdr_t, hdr) - 0usize];
+    ["Offset of field: gapEventHdr_t::opcode"][::core::mem::offset_of!(gapEventHdr_t, opcode) - 2usize];
+};
+#[doc = " GAP_DEVICE_INIT_DONE_EVENT message format.  This message is sent to the\n app when the Device Initialization is done [initiated by calling\n GAP_DeviceInit()]."]
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct gapDeviceInitDoneEvent_t {
+    #[doc = "!< GAP_MSG_EVENT and status"]
+    pub hdr: tmos_event_hdr_t,
+    #[doc = "!< GAP_DEVICE_INIT_DONE_EVENT"]
+    pub opcode: u8,
+    #[doc = "!< Device's BD_ADDR"]
+    pub devAddr: [u8; 6usize],
+    #[doc = "!< HC_LE_Data_Packet_Length"]
+    pub dataPktLen: u16,
+    #[doc = "!< HC_Total_Num_LE_Data_Packets"]
+    pub numDataPkts: u8,
+}
+#[allow(clippy::unnecessary_operation, clippy::identity_op)]
+const _: () = {
+    ["Size of gapDeviceInitDoneEvent_t"][::core::mem::size_of::<gapDeviceInitDoneEvent_t>() - 14usize];
+    ["Alignment of gapDeviceInitDoneEvent_t"][::core::mem::align_of::<gapDeviceInitDoneEvent_t>() - 2usize];
+    ["Offset of field: gapDeviceInitDoneEvent_t::hdr"][::core::mem::offset_of!(gapDeviceInitDoneEvent_t, hdr) - 0usize];
+    ["Offset of field: gapDeviceInitDoneEvent_t::opcode"]
+        [::core::mem::offset_of!(gapDeviceInitDoneEvent_t, opcode) - 2usize];
+    ["Offset of field: gapDeviceInitDoneEvent_t::devAddr"]
+        [::core::mem::offset_of!(gapDeviceInitDoneEvent_t, devAddr) - 3usize];
+    ["Offset of field: gapDeviceInitDoneEvent_t::dataPktLen"]
+        [::core::mem::offset_of!(gapDeviceInitDoneEvent_t, dataPktLen) - 10usize];
+    ["Offset of field: gapDeviceInitDoneEvent_t::numDataPkts"]
+        [::core::mem::offset_of!(gapDeviceInitDoneEvent_t, numDataPkts) - 12usize];
+};
+#[doc = " GAP_SIGNATURE_UPDATED_EVENT message format.  This message is sent to the\n app when the signature counter has changed.  This message is to inform the\n application in case it wants to save it to be restored on reboot or reconnect.\n This message is sent to update a connection's signature counter and to update\n this device's signature counter.  If devAddr == BD_ADDR, then this message pertains\n to this device."]
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct gapSignUpdateEvent_t {
+    #[doc = "!< GAP_MSG_EVENT and status"]
+    pub hdr: tmos_event_hdr_t,
+    #[doc = "!< GAP_SIGNATURE_UPDATED_EVENT"]
+    pub opcode: u8,
+    #[doc = "!< Device's address type for devAddr"]
+    pub addrType: u8,
+    #[doc = "!< Device's BD_ADDR, could be own address"]
+    pub devAddr: [u8; 6usize],
+    #[doc = "!< new Signed Counter"]
+    pub signCounter: u32,
+}
+#[allow(clippy::unnecessary_operation, clippy::identity_op)]
+const _: () = {
+    ["Size of gapSignUpdateEvent_t"][::core::mem::size_of::<gapSignUpdateEvent_t>() - 16usize];
+    ["Alignment of gapSignUpdateEvent_t"][::core::mem::align_of::<gapSignUpdateEvent_t>() - 4usize];
+    ["Offset of field: gapSignUpdateEvent_t::hdr"][::core::mem::offset_of!(gapSignUpdateEvent_t, hdr) - 0usize];
+    ["Offset of field: gapSignUpdateEvent_t::opcode"][::core::mem::offset_of!(gapSignUpdateEvent_t, opcode) - 2usize];
+    ["Offset of field: gapSignUpdateEvent_t::addrType"]
+        [::core::mem::offset_of!(gapSignUpdateEvent_t, addrType) - 3usize];
+    ["Offset of field: gapSignUpdateEvent_t::devAddr"][::core::mem::offset_of!(gapSignUpdateEvent_t, devAddr) - 4usize];
+    ["Offset of field: gapSignUpdateEvent_t::signCounter"]
+        [::core::mem::offset_of!(gapSignUpdateEvent_t, signCounter) - 12usize];
+};
+#[doc = " GAP_DEVICE_INFO_EVENT message format.  This message is sent to the\n app during a Device Discovery Request, when a new advertisement or scan\n response is received."]
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct gapDeviceInfoEvent_t {
+    #[doc = "!< GAP_MSG_EVENT and status"]
+    pub hdr: tmos_event_hdr_t,
+    #[doc = "!< GAP_DEVICE_INFO_EVENT"]
+    pub opcode: u8,
+    #[doc = "!< Advertisement Type: @ref GAP_ADVERTISEMENT_REPORT_TYPE_DEFINES"]
+    pub eventType: u8,
+    #[doc = "!< address type: @ref GAP_ADDR_TYPE_DEFINES"]
+    pub addrType: u8,
+    #[doc = "!< Address of the advertisement or SCAN_RSP"]
+    pub addr: [u8; 6usize],
+    #[doc = "!< Advertisement or SCAN_RSP RSSI"]
+    pub rssi: i8,
+    #[doc = "!< Length (in bytes) of the data field (evtData)"]
+    pub dataLen: u8,
+    #[doc = "!< Data field of advertisement or SCAN_RSP"]
+    pub pEvtData: *mut u8,
+}
+#[allow(clippy::unnecessary_operation, clippy::identity_op)]
+// const _: () = {
+//     ["Size of gapDeviceInfoEvent_t"][::core::mem::size_of::<gapDeviceInfoEvent_t>() - 24usize];
+//     ["Alignment of gapDeviceInfoEvent_t"][::core::mem::align_of::<gapDeviceInfoEvent_t>() - 8usize];
+//     ["Offset of field: gapDeviceInfoEvent_t::hdr"][::core::mem::offset_of!(gapDeviceInfoEvent_t, hdr) - 0usize];
+//     ["Offset of field: gapDeviceInfoEvent_t::opcode"][::core::mem::offset_of!(gapDeviceInfoEvent_t, opcode) - 2usize];
+//     ["Offset of field: gapDeviceInfoEvent_t::eventType"]
+//         [::core::mem::offset_of!(gapDeviceInfoEvent_t, eventType) - 3usize];
+//     ["Offset of field: gapDeviceInfoEvent_t::addrType"]
+//         [::core::mem::offset_of!(gapDeviceInfoEvent_t, addrType) - 4usize];
+//     ["Offset of field: gapDeviceInfoEvent_t::addr"][::core::mem::offset_of!(gapDeviceInfoEvent_t, addr) - 5usize];
+//     ["Offset of field: gapDeviceInfoEvent_t::rssi"][::core::mem::offset_of!(gapDeviceInfoEvent_t, rssi) - 11usize];
+//     ["Offset of field: gapDeviceInfoEvent_t::dataLen"]
+//         [::core::mem::offset_of!(gapDeviceInfoEvent_t, dataLen) - 12usize];
+//     ["Offset of field: gapDeviceInfoEvent_t::pEvtData"]
+//         [::core::mem::offset_of!(gapDeviceInfoEvent_t, pEvtData) - 16usize];
+// };
+#[doc = " GAP_DIRECT_DEVICE_INFO_EVENT message format.  This message is sent to the\n app during a Device Discovery Request, when a new advertisement or scan\n response is received."]
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct gapDirectDeviceInfoEvent_t {
+    #[doc = "!< GAP_MSG_EVENT and status"]
+    pub hdr: tmos_event_hdr_t,
+    #[doc = "!< GAP_DIRECT_DEVICE_INFO_EVENT"]
+    pub opcode: u8,
+    #[doc = "!< Advertisement Type: @ref GAP_ADVERTISEMENT_REPORT_TYPE_DEFINES"]
+    pub eventType: u8,
+    #[doc = "!< address type: @ref GAP_ADDR_TYPE_DEFINES"]
+    pub addrType: u8,
+    #[doc = "!< Address of the advertisement or SCAN_RSP"]
+    pub addr: [u8; 6usize],
+    #[doc = "!< public or random address type"]
+    pub directAddrType: u8,
+    #[doc = "!< device address"]
+    pub directAddr: [u8; 6usize],
+    #[doc = "!< Advertisement or SCAN_RSP RSSI"]
+    pub rssi: i8,
+}
+#[allow(clippy::unnecessary_operation, clippy::identity_op)]
+const _: () = {
+    ["Size of gapDirectDeviceInfoEvent_t"][::core::mem::size_of::<gapDirectDeviceInfoEvent_t>() - 19usize];
+    ["Alignment of gapDirectDeviceInfoEvent_t"][::core::mem::align_of::<gapDirectDeviceInfoEvent_t>() - 1usize];
+    ["Offset of field: gapDirectDeviceInfoEvent_t::hdr"]
+        [::core::mem::offset_of!(gapDirectDeviceInfoEvent_t, hdr) - 0usize];
+    ["Offset of field: gapDirectDeviceInfoEvent_t::opcode"]
+        [::core::mem::offset_of!(gapDirectDeviceInfoEvent_t, opcode) - 2usize];
+    ["Offset of field: gapDirectDeviceInfoEvent_t::eventType"]
+        [::core::mem::offset_of!(gapDirectDeviceInfoEvent_t, eventType) - 3usize];
+    ["Offset of field: gapDirectDeviceInfoEvent_t::addrType"]
+        [::core::mem::offset_of!(gapDirectDeviceInfoEvent_t, addrType) - 4usize];
+    ["Offset of field: gapDirectDeviceInfoEvent_t::addr"]
+        [::core::mem::offset_of!(gapDirectDeviceInfoEvent_t, addr) - 5usize];
+    ["Offset of field: gapDirectDeviceInfoEvent_t::directAddrType"]
+        [::core::mem::offset_of!(gapDirectDeviceInfoEvent_t, directAddrType) - 11usize];
+    ["Offset of field: gapDirectDeviceInfoEvent_t::directAddr"]
+        [::core::mem::offset_of!(gapDirectDeviceInfoEvent_t, directAddr) - 12usize];
+    ["Offset of field: gapDirectDeviceInfoEvent_t::rssi"]
+        [::core::mem::offset_of!(gapDirectDeviceInfoEvent_t, rssi) - 18usize];
+};
+#[doc = " GAP_EXT_ADV_DEVICE_INFO_EVENT message format.  This message is sent to the\n app during a Device Discovery Request, when a new advertisement or scan\n response is received."]
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct gapExtAdvDeviceInfoEvent_t {
+    #[doc = "!< GAP_MSG_EVENT and status"]
+    pub hdr: tmos_event_hdr_t,
+    #[doc = "!< GAP_EXT_ADV_DEVICE_INFO_EVENT"]
+    pub opcode: u8,
+    #[doc = "!< Advertisement Type: @ref GAP_ADVERTISEMENT_REPORT_TYPE_DEFINES"]
+    pub eventType: u8,
+    #[doc = "!< address type: @ref GAP_ADDR_TYPE_DEFINES"]
+    pub addrType: u8,
+    #[doc = "!< Address of the advertisement or SCAN_RSP"]
+    pub addr: [u8; 6usize],
+    #[doc = "!< Advertiser PHY on the primary advertising channel"]
+    pub primaryPHY: u8,
+    #[doc = "!< Advertiser PHY on the secondary advertising channel"]
+    pub secondaryPHY: u8,
+    #[doc = "!< Value of the Advertising SID subfield in the ADI field of the PDU"]
+    pub advertisingSID: u8,
+    #[doc = "!< Advertisement or SCAN_RSP power"]
+    pub txPower: i8,
+    #[doc = "!< Advertisement or SCAN_RSP RSSI"]
+    pub rssi: i8,
+    #[doc = "!< the interval of periodic advertising"]
+    pub periodicAdvInterval: u16,
+    #[doc = "!< public or random address type"]
+    pub directAddressType: u8,
+    #[doc = "!< device address"]
+    pub directAddress: [u8; 6usize],
+    #[doc = "!< Length (in bytes) of the data field (evtData)"]
+    pub dataLen: u8,
+    #[doc = "!< Data field of advertisement or SCAN_RSP"]
+    pub pEvtData: *mut u8,
+}
+#[allow(clippy::unnecessary_operation, clippy::identity_op)]
+// const _: () = {
+//     ["Size of gapExtAdvDeviceInfoEvent_t"][::core::mem::size_of::<gapExtAdvDeviceInfoEvent_t>() - 40usize];
+//     ["Alignment of gapExtAdvDeviceInfoEvent_t"][::core::mem::align_of::<gapExtAdvDeviceInfoEvent_t>() - 8usize];
+//     ["Offset of field: gapExtAdvDeviceInfoEvent_t::hdr"]
+//         [::core::mem::offset_of!(gapExtAdvDeviceInfoEvent_t, hdr) - 0usize];
+//     ["Offset of field: gapExtAdvDeviceInfoEvent_t::opcode"]
+//         [::core::mem::offset_of!(gapExtAdvDeviceInfoEvent_t, opcode) - 2usize];
+//     ["Offset of field: gapExtAdvDeviceInfoEvent_t::eventType"]
+//         [::core::mem::offset_of!(gapExtAdvDeviceInfoEvent_t, eventType) - 3usize];
+//     ["Offset of field: gapExtAdvDeviceInfoEvent_t::addrType"]
+//         [::core::mem::offset_of!(gapExtAdvDeviceInfoEvent_t, addrType) - 4usize];
+//     ["Offset of field: gapExtAdvDeviceInfoEvent_t::addr"]
+//         [::core::mem::offset_of!(gapExtAdvDeviceInfoEvent_t, addr) - 5usize];
+//     ["Offset of field: gapExtAdvDeviceInfoEvent_t::primaryPHY"]
+//         [::core::mem::offset_of!(gapExtAdvDeviceInfoEvent_t, primaryPHY) - 11usize];
+//     ["Offset of field: gapExtAdvDeviceInfoEvent_t::secondaryPHY"]
+//         [::core::mem::offset_of!(gapExtAdvDeviceInfoEvent_t, secondaryPHY) - 12usize];
+//     ["Offset of field: gapExtAdvDeviceInfoEvent_t::advertisingSID"]
+//         [::core::mem::offset_of!(gapExtAdvDeviceInfoEvent_t, advertisingSID) - 13usize];
+//     ["Offset of field: gapExtAdvDeviceInfoEvent_t::txPower"]
+//         [::core::mem::offset_of!(gapExtAdvDeviceInfoEvent_t, txPower) - 14usize];
+//     ["Offset of field: gapExtAdvDeviceInfoEvent_t::rssi"]
+//         [::core::mem::offset_of!(gapExtAdvDeviceInfoEvent_t, rssi) - 15usize];
+//     ["Offset of field: gapExtAdvDeviceInfoEvent_t::periodicAdvInterval"]
+//         [::core::mem::offset_of!(gapExtAdvDeviceInfoEvent_t, periodicAdvInterval) - 16usize];
+//     ["Offset of field: gapExtAdvDeviceInfoEvent_t::directAddressType"]
+//         [::core::mem::offset_of!(gapExtAdvDeviceInfoEvent_t, directAddressType) - 18usize];
+//     ["Offset of field: gapExtAdvDeviceInfoEvent_t::directAddress"]
+//         [::core::mem::offset_of!(gapExtAdvDeviceInfoEvent_t, directAddress) - 19usize];
+//     ["Offset of field: gapExtAdvDeviceInfoEvent_t::dataLen"]
+//         [::core::mem::offset_of!(gapExtAdvDeviceInfoEvent_t, dataLen) - 25usize];
+//     ["Offset of field: gapExtAdvDeviceInfoEvent_t::pEvtData"]
+//         [::core::mem::offset_of!(gapExtAdvDeviceInfoEvent_t, pEvtData) - 32usize];
+// };
+#[doc = " Type of device discovery (Scan) to perform."]
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct gapDevDiscReq_t {
+    #[doc = "!< Requesting App's Task ID, used to return results"]
+    pub taskID: u8,
+    #[doc = "!< Discovery Mode: @ref GAP_DEVDISC_MODE_DEFINES"]
+    pub mode: u8,
+    #[doc = "!< TRUE for active scanning"]
+    pub activeScan: u8,
+    #[doc = "!< TRUE to only allow advertisements from devices in the white list."]
+    pub whiteList: u8,
+}
+#[allow(clippy::unnecessary_operation, clippy::identity_op)]
+const _: () = {
+    ["Size of gapDevDiscReq_t"][::core::mem::size_of::<gapDevDiscReq_t>() - 4usize];
+    ["Alignment of gapDevDiscReq_t"][::core::mem::align_of::<gapDevDiscReq_t>() - 1usize];
+    ["Offset of field: gapDevDiscReq_t::taskID"][::core::mem::offset_of!(gapDevDiscReq_t, taskID) - 0usize];
+    ["Offset of field: gapDevDiscReq_t::mode"][::core::mem::offset_of!(gapDevDiscReq_t, mode) - 1usize];
+    ["Offset of field: gapDevDiscReq_t::activeScan"][::core::mem::offset_of!(gapDevDiscReq_t, activeScan) - 2usize];
+    ["Offset of field: gapDevDiscReq_t::whiteList"][::core::mem::offset_of!(gapDevDiscReq_t, whiteList) - 3usize];
+};
+#[doc = " Type of device."]
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct gapDevRec_t {
+    #[doc = "!< Indicates advertising event type used by the advertiser: @ref GAP_ADVERTISEMENT_REPORT_TYPE_DEFINES"]
+    pub eventType: u8,
+    #[doc = "!< Address Type: @ref GAP_ADDR_TYPE_DEFINES"]
+    pub addrType: u8,
+    #[doc = "!< Device's Address"]
+    pub addr: [u8; 6usize],
+}
+#[allow(clippy::unnecessary_operation, clippy::identity_op)]
+const _: () = {
+    ["Size of gapDevRec_t"][::core::mem::size_of::<gapDevRec_t>() - 8usize];
+    ["Alignment of gapDevRec_t"][::core::mem::align_of::<gapDevRec_t>() - 1usize];
+    ["Offset of field: gapDevRec_t::eventType"][::core::mem::offset_of!(gapDevRec_t, eventType) - 0usize];
+    ["Offset of field: gapDevRec_t::addrType"][::core::mem::offset_of!(gapDevRec_t, addrType) - 1usize];
+    ["Offset of field: gapDevRec_t::addr"][::core::mem::offset_of!(gapDevRec_t, addr) - 2usize];
+};
+#[doc = " GAP_DEVICE_DISCOVERY_EVENT message format. This message is sent to the\n Application after a scan is performed."]
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct gapDevDiscEvent_t {
+    #[doc = "!< GAP_MSG_EVENT and status"]
+    pub hdr: tmos_event_hdr_t,
+    #[doc = "!< GAP_DEVICE_DISCOVERY_EVENT"]
+    pub opcode: u8,
+    #[doc = "!< Number of devices found during scan"]
+    pub numDevs: u8,
+    #[doc = "!< array of device records"]
+    pub pDevList: *mut gapDevRec_t,
+}
+#[allow(clippy::unnecessary_operation, clippy::identity_op)]
+// const _: () = {
+//     ["Size of gapDevDiscEvent_t"][::core::mem::size_of::<gapDevDiscEvent_t>() - 16usize];
+//     ["Alignment of gapDevDiscEvent_t"][::core::mem::align_of::<gapDevDiscEvent_t>() - 8usize];
+//     ["Offset of field: gapDevDiscEvent_t::hdr"][::core::mem::offset_of!(gapDevDiscEvent_t, hdr) - 0usize];
+//     ["Offset of field: gapDevDiscEvent_t::opcode"][::core::mem::offset_of!(gapDevDiscEvent_t, opcode) - 2usize];
+//     ["Offset of field: gapDevDiscEvent_t::numDevs"][::core::mem::offset_of!(gapDevDiscEvent_t, numDevs) - 3usize];
+//     ["Offset of field: gapDevDiscEvent_t::pDevList"][::core::mem::offset_of!(gapDevDiscEvent_t, pDevList) - 8usize];
+// };
+#[doc = " GAP_MAKE_DISCOVERABLE_DONE_EVENT message format.  This message is sent to the\n app when the Advertise config is complete."]
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct gapMakeDiscoverableRspEvent_t {
+    #[doc = "!< GAP_MSG_EVENT and status"]
+    pub hdr: tmos_event_hdr_t,
+    #[doc = "!< GAP_MAKE_DISCOVERABLE_DONE_EVENT"]
+    pub opcode: u8,
+}
+#[allow(clippy::unnecessary_operation, clippy::identity_op)]
+const _: () = {
+    ["Size of gapMakeDiscoverableRspEvent_t"][::core::mem::size_of::<gapMakeDiscoverableRspEvent_t>() - 3usize];
+    ["Alignment of gapMakeDiscoverableRspEvent_t"][::core::mem::align_of::<gapMakeDiscoverableRspEvent_t>() - 1usize];
+    ["Offset of field: gapMakeDiscoverableRspEvent_t::hdr"]
+        [::core::mem::offset_of!(gapMakeDiscoverableRspEvent_t, hdr) - 0usize];
+    ["Offset of field: gapMakeDiscoverableRspEvent_t::opcode"]
+        [::core::mem::offset_of!(gapMakeDiscoverableRspEvent_t, opcode) - 2usize];
+};
+#[doc = " GAP_END_DISCOVERABLE_DONE_EVENT message format.  This message is sent to the\n app when the Advertising has stopped."]
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct gapEndDiscoverableRspEvent_t {
+    #[doc = "!< GAP_MSG_EVENT and status"]
+    pub hdr: tmos_event_hdr_t,
+    #[doc = "!< GAP_END_DISCOVERABLE_DONE_EVENT"]
+    pub opcode: u8,
+}
+#[allow(clippy::unnecessary_operation, clippy::identity_op)]
+const _: () = {
+    ["Size of gapEndDiscoverableRspEvent_t"][::core::mem::size_of::<gapEndDiscoverableRspEvent_t>() - 3usize];
+    ["Alignment of gapEndDiscoverableRspEvent_t"][::core::mem::align_of::<gapEndDiscoverableRspEvent_t>() - 1usize];
+    ["Offset of field: gapEndDiscoverableRspEvent_t::hdr"]
+        [::core::mem::offset_of!(gapEndDiscoverableRspEvent_t, hdr) - 0usize];
+    ["Offset of field: gapEndDiscoverableRspEvent_t::opcode"]
+        [::core::mem::offset_of!(gapEndDiscoverableRspEvent_t, opcode) - 2usize];
+};
+#[doc = " GAP_PERIODIC_ADVERTISING_DONE_EVENT message format.  This message is sent to the\n app when the Periodic Advertising config is complete."]
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct gapMakePeriodicRspEvent_t {
+    #[doc = "!< GAP_MSG_EVENT and status"]
+    pub hdr: tmos_event_hdr_t,
+    #[doc = "!< GAP_PERIODIC_ADVERTISING_DONE_EVENT"]
+    pub opcode: u8,
+}
+#[allow(clippy::unnecessary_operation, clippy::identity_op)]
+const _: () = {
+    ["Size of gapMakePeriodicRspEvent_t"][::core::mem::size_of::<gapMakePeriodicRspEvent_t>() - 3usize];
+    ["Alignment of gapMakePeriodicRspEvent_t"][::core::mem::align_of::<gapMakePeriodicRspEvent_t>() - 1usize];
+    ["Offset of field: gapMakePeriodicRspEvent_t::hdr"]
+        [::core::mem::offset_of!(gapMakePeriodicRspEvent_t, hdr) - 0usize];
+    ["Offset of field: gapMakePeriodicRspEvent_t::opcode"]
+        [::core::mem::offset_of!(gapMakePeriodicRspEvent_t, opcode) - 2usize];
+};
+#[doc = " GAP_END_PERIODIC_ADV_DONE_EVENT message format.  This message is sent to the\n app when the Periodic Advertising disable is complete."]
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct gapEndPeriodicRspEvent_t {
+    #[doc = "!< GAP_MSG_EVENT and status"]
+    pub hdr: tmos_event_hdr_t,
+    #[doc = "!< GAP_END_PERIODIC_ADV_DONE_EVENT"]
+    pub opcode: u8,
+}
+#[allow(clippy::unnecessary_operation, clippy::identity_op)]
+const _: () = {
+    ["Size of gapEndPeriodicRspEvent_t"][::core::mem::size_of::<gapEndPeriodicRspEvent_t>() - 3usize];
+    ["Alignment of gapEndPeriodicRspEvent_t"][::core::mem::align_of::<gapEndPeriodicRspEvent_t>() - 1usize];
+    ["Offset of field: gapEndPeriodicRspEvent_t::hdr"][::core::mem::offset_of!(gapEndPeriodicRspEvent_t, hdr) - 0usize];
+    ["Offset of field: gapEndPeriodicRspEvent_t::opcode"]
+        [::core::mem::offset_of!(gapEndPeriodicRspEvent_t, opcode) - 2usize];
+};
+#[doc = " GAP_SYNC_ESTABLISHED_EVENT message format.  This message is sent to the\n app when the Periodic Advertising Sync Establish is complete."]
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct gapSyncEstablishedEvent_t {
+    #[doc = "!< GAP_MSG_EVENT and status"]
+    pub hdr: tmos_event_hdr_t,
+    #[doc = "!< GAP_SYNC_ESTABLISHED_EVENT"]
+    pub opcode: u8,
+    #[doc = "!< Periodic advertising sync status"]
+    pub status: u8,
+    #[doc = "!< Identifying the periodic advertising train"]
+    pub syncHandle: u16,
+    #[doc = "!< Value of the Advertising SID subfield in the ADI field of the PDU"]
+    pub advertisingSID: u8,
+    #[doc = "!< Device address type: @ref GAP_ADDR_TYPE_DEFINES"]
+    pub devAddrType: u8,
+    #[doc = "!< Device address of sync"]
+    pub devAddr: [u8; 6usize],
+    #[doc = "!< Advertiser PHY"]
+    pub advertisingPHY: u8,
+    #[doc = "!< Periodic advertising interval"]
+    pub periodicInterval: u16,
+    #[doc = "!< Clock Accuracy"]
+    pub clockAccuracy: u8,
+}
+#[allow(clippy::unnecessary_operation, clippy::identity_op)]
+const _: () = {
+    ["Size of gapSyncEstablishedEvent_t"][::core::mem::size_of::<gapSyncEstablishedEvent_t>() - 20usize];
+    ["Alignment of gapSyncEstablishedEvent_t"][::core::mem::align_of::<gapSyncEstablishedEvent_t>() - 2usize];
+    ["Offset of field: gapSyncEstablishedEvent_t::hdr"]
+        [::core::mem::offset_of!(gapSyncEstablishedEvent_t, hdr) - 0usize];
+    ["Offset of field: gapSyncEstablishedEvent_t::opcode"]
+        [::core::mem::offset_of!(gapSyncEstablishedEvent_t, opcode) - 2usize];
+    ["Offset of field: gapSyncEstablishedEvent_t::status"]
+        [::core::mem::offset_of!(gapSyncEstablishedEvent_t, status) - 3usize];
+    ["Offset of field: gapSyncEstablishedEvent_t::syncHandle"]
+        [::core::mem::offset_of!(gapSyncEstablishedEvent_t, syncHandle) - 4usize];
+    ["Offset of field: gapSyncEstablishedEvent_t::advertisingSID"]
+        [::core::mem::offset_of!(gapSyncEstablishedEvent_t, advertisingSID) - 6usize];
+    ["Offset of field: gapSyncEstablishedEvent_t::devAddrType"]
+        [::core::mem::offset_of!(gapSyncEstablishedEvent_t, devAddrType) - 7usize];
+    ["Offset of field: gapSyncEstablishedEvent_t::devAddr"]
+        [::core::mem::offset_of!(gapSyncEstablishedEvent_t, devAddr) - 8usize];
+    ["Offset of field: gapSyncEstablishedEvent_t::advertisingPHY"]
+        [::core::mem::offset_of!(gapSyncEstablishedEvent_t, advertisingPHY) - 14usize];
+    ["Offset of field: gapSyncEstablishedEvent_t::periodicInterval"]
+        [::core::mem::offset_of!(gapSyncEstablishedEvent_t, periodicInterval) - 16usize];
+    ["Offset of field: gapSyncEstablishedEvent_t::clockAccuracy"]
+        [::core::mem::offset_of!(gapSyncEstablishedEvent_t, clockAccuracy) - 18usize];
+};
+#[doc = " GAP_PERIODIC_ADV_DEVICE_INFO_EVENT message format.  This message is sent to the\n app during Periodic Advertising Sync, when received a Periodic Advertising packet"]
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct gapPeriodicAdvDeviceInfoEvent_t {
+    #[doc = "!< GAP_MSG_EVENT and status"]
+    pub hdr: tmos_event_hdr_t,
+    #[doc = "!< GAP_PERIODIC_ADV_DEVICE_INFO_EVENT"]
+    pub opcode: u8,
+    #[doc = "!< Identifying the periodic advertising train"]
+    pub syncHandle: u16,
+    #[doc = "!< Periodic advertising tx power,Units: dBm"]
+    pub txPower: i8,
+    #[doc = "!< Periodic advertising rssi,Units: dBm"]
+    pub rssi: i8,
+    pub unUsed: u8,
+    #[doc = "!< Data complete"]
+    pub dataStatus: u8,
+    #[doc = "!< Length (in bytes) of the data field (evtData)"]
+    pub dataLength: u8,
+    #[doc = "!< Data field of periodic advertising data"]
+    pub pEvtData: *mut u8,
+}
+#[allow(clippy::unnecessary_operation, clippy::identity_op)]
+// const _: () = {
+//     ["Size of gapPeriodicAdvDeviceInfoEvent_t"][::core::mem::size_of::<gapPeriodicAdvDeviceInfoEvent_t>() - 24usize];
+//     ["Alignment of gapPeriodicAdvDeviceInfoEvent_t"]
+//         [::core::mem::align_of::<gapPeriodicAdvDeviceInfoEvent_t>() - 8usize];
+//     ["Offset of field: gapPeriodicAdvDeviceInfoEvent_t::hdr"]
+//         [::core::mem::offset_of!(gapPeriodicAdvDeviceInfoEvent_t, hdr) - 0usize];
+//     ["Offset of field: gapPeriodicAdvDeviceInfoEvent_t::opcode"]
+//         [::core::mem::offset_of!(gapPeriodicAdvDeviceInfoEvent_t, opcode) - 2usize];
+//     ["Offset of field: gapPeriodicAdvDeviceInfoEvent_t::syncHandle"]
+//         [::core::mem::offset_of!(gapPeriodicAdvDeviceInfoEvent_t, syncHandle) - 4usize];
+//     ["Offset of field: gapPeriodicAdvDeviceInfoEvent_t::txPower"]
+//         [::core::mem::offset_of!(gapPeriodicAdvDeviceInfoEvent_t, txPower) - 6usize];
+//     ["Offset of field: gapPeriodicAdvDeviceInfoEvent_t::rssi"]
+//         [::core::mem::offset_of!(gapPeriodicAdvDeviceInfoEvent_t, rssi) - 7usize];
+//     ["Offset of field: gapPeriodicAdvDeviceInfoEvent_t::unUsed"]
+//         [::core::mem::offset_of!(gapPeriodicAdvDeviceInfoEvent_t, unUsed) - 8usize];
+//     ["Offset of field: gapPeriodicAdvDeviceInfoEvent_t::dataStatus"]
+//         [::core::mem::offset_of!(gapPeriodicAdvDeviceInfoEvent_t, dataStatus) - 9usize];
+//     ["Offset of field: gapPeriodicAdvDeviceInfoEvent_t::dataLength"]
+//         [::core::mem::offset_of!(gapPeriodicAdvDeviceInfoEvent_t, dataLength) - 10usize];
+//     ["Offset of field: gapPeriodicAdvDeviceInfoEvent_t::pEvtData"]
+//         [::core::mem::offset_of!(gapPeriodicAdvDeviceInfoEvent_t, pEvtData) - 16usize];
+// };
+#[doc = " GAP_SYNC_LOST_EVENT message format.  This message is sent to the\n app when the Periodic Advertising Sync timeout period."]
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct gapSyncLostEvent_t {
+    #[doc = "!< GAP_MSG_EVENT and status"]
+    pub hdr: tmos_event_hdr_t,
+    #[doc = "!< GAP_SYNC_LOST_EVENT"]
+    pub opcode: u8,
+    #[doc = "!< Identifying the periodic advertising train"]
+    pub syncHandle: u16,
+}
+#[allow(clippy::unnecessary_operation, clippy::identity_op)]
+const _: () = {
+    ["Size of gapSyncLostEvent_t"][::core::mem::size_of::<gapSyncLostEvent_t>() - 6usize];
+    ["Alignment of gapSyncLostEvent_t"][::core::mem::align_of::<gapSyncLostEvent_t>() - 2usize];
+    ["Offset of field: gapSyncLostEvent_t::hdr"][::core::mem::offset_of!(gapSyncLostEvent_t, hdr) - 0usize];
+    ["Offset of field: gapSyncLostEvent_t::opcode"][::core::mem::offset_of!(gapSyncLostEvent_t, opcode) - 2usize];
+    ["Offset of field: gapSyncLostEvent_t::syncHandle"]
+        [::core::mem::offset_of!(gapSyncLostEvent_t, syncHandle) - 4usize];
+};
+#[doc = " GAP_SCAN_REQUEST_EVENT message format.  This message is sent to the\n app when the advertiser receives a SCAN_REQ PDU or an AUX_SCAN_REQ PDU"]
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct gapScanReqReseiveEvent_t {
+    #[doc = "!< GAP_MSG_EVENT and status"]
+    pub hdr: tmos_event_hdr_t,
+    #[doc = "!< GAP_SCAN_REQUEST_EVENT"]
+    pub opcode: u8,
+    #[doc = "!< identifying the periodic advertising train"]
+    pub advHandle: u8,
+    #[doc = "!< the type of the address"]
+    pub scannerAddrType: u8,
+    #[doc = "!< the address of scanner device"]
+    pub scannerAddr: [u8; 6usize],
+}
+#[allow(clippy::unnecessary_operation, clippy::identity_op)]
+const _: () = {
+    ["Size of gapScanReqReseiveEvent_t"][::core::mem::size_of::<gapScanReqReseiveEvent_t>() - 11usize];
+    ["Alignment of gapScanReqReseiveEvent_t"][::core::mem::align_of::<gapScanReqReseiveEvent_t>() - 1usize];
+    ["Offset of field: gapScanReqReseiveEvent_t::hdr"][::core::mem::offset_of!(gapScanReqReseiveEvent_t, hdr) - 0usize];
+    ["Offset of field: gapScanReqReseiveEvent_t::opcode"]
+        [::core::mem::offset_of!(gapScanReqReseiveEvent_t, opcode) - 2usize];
+    ["Offset of field: gapScanReqReseiveEvent_t::advHandle"]
+        [::core::mem::offset_of!(gapScanReqReseiveEvent_t, advHandle) - 3usize];
+    ["Offset of field: gapScanReqReseiveEvent_t::scannerAddrType"]
+        [::core::mem::offset_of!(gapScanReqReseiveEvent_t, scannerAddrType) - 4usize];
+    ["Offset of field: gapScanReqReseiveEvent_t::scannerAddr"]
+        [::core::mem::offset_of!(gapScanReqReseiveEvent_t, scannerAddr) - 5usize];
+};
+#[doc = " GAP_CONNECTIONESS_CTE_DONE_EVENT message format.  This message is sent to the\n app when the Connectionless CTE Transmit config is complete."]
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct gapMakeConnectionlessCTERspEvent_t {
+    #[doc = "!< GAP_MSG_EVENT and status"]
+    pub hdr: tmos_event_hdr_t,
+    #[doc = "!< GAP_CONNECTIONESS_CTE_DONE_EVENT"]
+    pub opcode: u8,
+}
+#[allow(clippy::unnecessary_operation, clippy::identity_op)]
+const _: () = {
+    ["Size of gapMakeConnectionlessCTERspEvent_t"]
+        [::core::mem::size_of::<gapMakeConnectionlessCTERspEvent_t>() - 3usize];
+    ["Alignment of gapMakeConnectionlessCTERspEvent_t"]
+        [::core::mem::align_of::<gapMakeConnectionlessCTERspEvent_t>() - 1usize];
+    ["Offset of field: gapMakeConnectionlessCTERspEvent_t::hdr"]
+        [::core::mem::offset_of!(gapMakeConnectionlessCTERspEvent_t, hdr) - 0usize];
+    ["Offset of field: gapMakeConnectionlessCTERspEvent_t::opcode"]
+        [::core::mem::offset_of!(gapMakeConnectionlessCTERspEvent_t, opcode) - 2usize];
+};
+#[doc = " GAP_END_PERIODIC_ADV_DONE_EVENT message format.  This message is sent to the\n app when the Periodic Advertising disable is complete."]
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct gapEndConnectionlessCTERspEvent_t {
+    #[doc = "!< GAP_MSG_EVENT and status"]
+    pub hdr: tmos_event_hdr_t,
+    #[doc = "!< GAP_END_CONNECTIONESS_CTE_DONE_EVENT"]
+    pub opcode: u8,
+}
+#[allow(clippy::unnecessary_operation, clippy::identity_op)]
+const _: () = {
+    ["Size of gapEndConnectionlessCTERspEvent_t"][::core::mem::size_of::<gapEndConnectionlessCTERspEvent_t>() - 3usize];
+    ["Alignment of gapEndConnectionlessCTERspEvent_t"]
+        [::core::mem::align_of::<gapEndConnectionlessCTERspEvent_t>() - 1usize];
+    ["Offset of field: gapEndConnectionlessCTERspEvent_t::hdr"]
+        [::core::mem::offset_of!(gapEndConnectionlessCTERspEvent_t, hdr) - 0usize];
+    ["Offset of field: gapEndConnectionlessCTERspEvent_t::opcode"]
+        [::core::mem::offset_of!(gapEndConnectionlessCTERspEvent_t, opcode) - 2usize];
+};
+#[doc = " GAP_ADV_DATA_UPDATE_DONE_EVENT message format.  This message is sent to the\n app when Advertising Data Update is complete."]
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct gapAdvDataUpdateEvent_t {
+    #[doc = "!< GAP_MSG_EVENT and status"]
+    pub hdr: tmos_event_hdr_t,
+    #[doc = "!< GAP_ADV_DATA_UPDATE_DONE_EVENT"]
+    pub opcode: u8,
+    #[doc = "!< TRUE if advertising data, FALSE if SCAN_RSP"]
+    pub adType: u8,
+}
+#[allow(clippy::unnecessary_operation, clippy::identity_op)]
+const _: () = {
+    ["Size of gapAdvDataUpdateEvent_t"][::core::mem::size_of::<gapAdvDataUpdateEvent_t>() - 4usize];
+    ["Alignment of gapAdvDataUpdateEvent_t"][::core::mem::align_of::<gapAdvDataUpdateEvent_t>() - 1usize];
+    ["Offset of field: gapAdvDataUpdateEvent_t::hdr"][::core::mem::offset_of!(gapAdvDataUpdateEvent_t, hdr) - 0usize];
+    ["Offset of field: gapAdvDataUpdateEvent_t::opcode"]
+        [::core::mem::offset_of!(gapAdvDataUpdateEvent_t, opcode) - 2usize];
+    ["Offset of field: gapAdvDataUpdateEvent_t::adType"]
+        [::core::mem::offset_of!(gapAdvDataUpdateEvent_t, adType) - 3usize];
+};
+#[doc = " GAP_LINK_ESTABLISHED_EVENT message format.  This message is sent to the app\n when the link request is complete.<BR>\n <BR>\n For an Observer, this message is sent to complete the Establish Link Request.<BR>\n For a Peripheral, this message is sent to indicate that a link has been created."]
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct gapEstLinkReqEvent_t {
+    #[doc = "!< GAP_MSG_EVENT and status"]
+    pub hdr: tmos_event_hdr_t,
+    #[doc = "!< GAP_LINK_ESTABLISHED_EVENT"]
+    pub opcode: u8,
+    #[doc = "!< Device address type: @ref GAP_ADDR_TYPE_DEFINES"]
+    pub devAddrType: u8,
+    #[doc = "!< Device address of link"]
+    pub devAddr: [u8; 6usize],
+    #[doc = "!< Connection Handle from controller used to ref the device"]
+    pub connectionHandle: u16,
+    #[doc = "!< Connection formed as Central or Peripheral"]
+    pub connRole: u8,
+    #[doc = "!< Connection Interval"]
+    pub connInterval: u16,
+    #[doc = "!< Connection Latency"]
+    pub connLatency: u16,
+    #[doc = "!< Connection Timeout"]
+    pub connTimeout: u16,
+    #[doc = "!< Clock Accuracy"]
+    pub clockAccuracy: u8,
+}
+#[allow(clippy::unnecessary_operation, clippy::identity_op)]
+const _: () = {
+    ["Size of gapEstLinkReqEvent_t"][::core::mem::size_of::<gapEstLinkReqEvent_t>() - 22usize];
+    ["Alignment of gapEstLinkReqEvent_t"][::core::mem::align_of::<gapEstLinkReqEvent_t>() - 2usize];
+    ["Offset of field: gapEstLinkReqEvent_t::hdr"][::core::mem::offset_of!(gapEstLinkReqEvent_t, hdr) - 0usize];
+    ["Offset of field: gapEstLinkReqEvent_t::opcode"][::core::mem::offset_of!(gapEstLinkReqEvent_t, opcode) - 2usize];
+    ["Offset of field: gapEstLinkReqEvent_t::devAddrType"]
+        [::core::mem::offset_of!(gapEstLinkReqEvent_t, devAddrType) - 3usize];
+    ["Offset of field: gapEstLinkReqEvent_t::devAddr"][::core::mem::offset_of!(gapEstLinkReqEvent_t, devAddr) - 4usize];
+    ["Offset of field: gapEstLinkReqEvent_t::connectionHandle"]
+        [::core::mem::offset_of!(gapEstLinkReqEvent_t, connectionHandle) - 10usize];
+    ["Offset of field: gapEstLinkReqEvent_t::connRole"]
+        [::core::mem::offset_of!(gapEstLinkReqEvent_t, connRole) - 12usize];
+    ["Offset of field: gapEstLinkReqEvent_t::connInterval"]
+        [::core::mem::offset_of!(gapEstLinkReqEvent_t, connInterval) - 14usize];
+    ["Offset of field: gapEstLinkReqEvent_t::connLatency"]
+        [::core::mem::offset_of!(gapEstLinkReqEvent_t, connLatency) - 16usize];
+    ["Offset of field: gapEstLinkReqEvent_t::connTimeout"]
+        [::core::mem::offset_of!(gapEstLinkReqEvent_t, connTimeout) - 18usize];
+    ["Offset of field: gapEstLinkReqEvent_t::clockAccuracy"]
+        [::core::mem::offset_of!(gapEstLinkReqEvent_t, clockAccuracy) - 20usize];
+};
+#[doc = " GAP_LINK_PARAM_UPDATE_EVENT message format.  This message is sent to the app\n when the connection parameters update request is complete."]
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct gapLinkUpdateEvent_t {
+    #[doc = "!< GAP_MSG_EVENT and status"]
+    pub hdr: tmos_event_hdr_t,
+    #[doc = "!< GAP_LINK_PARAM_UPDATE_EVENT"]
+    pub opcode: u8,
+    #[doc = "!< bStatus_t"]
+    pub status: u8,
+    #[doc = "!< Connection handle of the update"]
+    pub connectionHandle: u16,
+    #[doc = "!< Requested connection interval"]
+    pub connInterval: u16,
+    #[doc = "!< Requested connection latency"]
+    pub connLatency: u16,
+    #[doc = "!< Requested connection timeout"]
+    pub connTimeout: u16,
+}
+#[allow(clippy::unnecessary_operation, clippy::identity_op)]
+const _: () = {
+    ["Size of gapLinkUpdateEvent_t"][::core::mem::size_of::<gapLinkUpdateEvent_t>() - 12usize];
+    ["Alignment of gapLinkUpdateEvent_t"][::core::mem::align_of::<gapLinkUpdateEvent_t>() - 2usize];
+    ["Offset of field: gapLinkUpdateEvent_t::hdr"][::core::mem::offset_of!(gapLinkUpdateEvent_t, hdr) - 0usize];
+    ["Offset of field: gapLinkUpdateEvent_t::opcode"][::core::mem::offset_of!(gapLinkUpdateEvent_t, opcode) - 2usize];
+    ["Offset of field: gapLinkUpdateEvent_t::status"][::core::mem::offset_of!(gapLinkUpdateEvent_t, status) - 3usize];
+    ["Offset of field: gapLinkUpdateEvent_t::connectionHandle"]
+        [::core::mem::offset_of!(gapLinkUpdateEvent_t, connectionHandle) - 4usize];
+    ["Offset of field: gapLinkUpdateEvent_t::connInterval"]
+        [::core::mem::offset_of!(gapLinkUpdateEvent_t, connInterval) - 6usize];
+    ["Offset of field: gapLinkUpdateEvent_t::connLatency"]
+        [::core::mem::offset_of!(gapLinkUpdateEvent_t, connLatency) - 8usize];
+    ["Offset of field: gapLinkUpdateEvent_t::connTimeout"]
+        [::core::mem::offset_of!(gapLinkUpdateEvent_t, connTimeout) - 10usize];
+};
+#[doc = " GAP_LINK_TERMINATED_EVENT message format.  This message is sent to the\n app when a link to a device is terminated."]
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct gapTerminateLinkEvent_t {
+    #[doc = "!< GAP_MSG_EVENT and status"]
+    pub hdr: tmos_event_hdr_t,
+    #[doc = "!< GAP_LINK_TERMINATED_EVENT"]
+    pub opcode: u8,
+    #[doc = "!< connection Handle"]
+    pub connectionHandle: u16,
+    #[doc = "!< termination reason from LL"]
+    pub reason: u8,
+    pub connRole: u8,
+}
+#[allow(clippy::unnecessary_operation, clippy::identity_op)]
+const _: () = {
+    ["Size of gapTerminateLinkEvent_t"][::core::mem::size_of::<gapTerminateLinkEvent_t>() - 8usize];
+    ["Alignment of gapTerminateLinkEvent_t"][::core::mem::align_of::<gapTerminateLinkEvent_t>() - 2usize];
+    ["Offset of field: gapTerminateLinkEvent_t::hdr"][::core::mem::offset_of!(gapTerminateLinkEvent_t, hdr) - 0usize];
+    ["Offset of field: gapTerminateLinkEvent_t::opcode"]
+        [::core::mem::offset_of!(gapTerminateLinkEvent_t, opcode) - 2usize];
+    ["Offset of field: gapTerminateLinkEvent_t::connectionHandle"]
+        [::core::mem::offset_of!(gapTerminateLinkEvent_t, connectionHandle) - 4usize];
+    ["Offset of field: gapTerminateLinkEvent_t::reason"]
+        [::core::mem::offset_of!(gapTerminateLinkEvent_t, reason) - 6usize];
+    ["Offset of field: gapTerminateLinkEvent_t::connRole"]
+        [::core::mem::offset_of!(gapTerminateLinkEvent_t, connRole) - 7usize];
+};
+#[doc = " GAP_PHY_UPDATE_EVENT message format.  This message is sent to the app(GAP_MSG_EVENT)\n when the PHY update request is complete."]
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct gapPhyUpdateEvent_t {
+    #[doc = "!< GAP_MSG_EVENT and status"]
+    pub hdr: tmos_event_hdr_t,
+    #[doc = "!< GAP_PHY_UPDATE_EVENT"]
+    pub opcode: u8,
+    #[doc = "!< bStatus_t"]
+    pub status: u8,
+    #[doc = "!< Connection handle of the update"]
+    pub connectionHandle: u16,
+    #[doc = "!< tx phy(GAP_PHY_VAL_TYPE)"]
+    pub connTxPHYS: u8,
+    #[doc = "!< rx phy(GAP_PHY_VAL_TYPE)"]
+    pub connRxPHYS: u8,
+}
+#[allow(clippy::unnecessary_operation, clippy::identity_op)]
+const _: () = {
+    ["Size of gapPhyUpdateEvent_t"][::core::mem::size_of::<gapPhyUpdateEvent_t>() - 8usize];
+    ["Alignment of gapPhyUpdateEvent_t"][::core::mem::align_of::<gapPhyUpdateEvent_t>() - 2usize];
+    ["Offset of field: gapPhyUpdateEvent_t::hdr"][::core::mem::offset_of!(gapPhyUpdateEvent_t, hdr) - 0usize];
+    ["Offset of field: gapPhyUpdateEvent_t::opcode"][::core::mem::offset_of!(gapPhyUpdateEvent_t, opcode) - 2usize];
+    ["Offset of field: gapPhyUpdateEvent_t::status"][::core::mem::offset_of!(gapPhyUpdateEvent_t, status) - 3usize];
+    ["Offset of field: gapPhyUpdateEvent_t::connectionHandle"]
+        [::core::mem::offset_of!(gapPhyUpdateEvent_t, connectionHandle) - 4usize];
+    ["Offset of field: gapPhyUpdateEvent_t::connTxPHYS"]
+        [::core::mem::offset_of!(gapPhyUpdateEvent_t, connTxPHYS) - 6usize];
+    ["Offset of field: gapPhyUpdateEvent_t::connRxPHYS"]
+        [::core::mem::offset_of!(gapPhyUpdateEvent_t, connRxPHYS) - 7usize];
+};
+#[doc = " GAP_PASSKEY_NEEDED_EVENT message format.  This message is sent to the\n app when a Passkey is needed from the app's user interface."]
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct gapPasskeyNeededEvent_t {
+    #[doc = "!< GAP_MSG_EVENT and status"]
+    pub hdr: tmos_event_hdr_t,
+    #[doc = "!< GAP_PASSKEY_NEEDED_EVENT"]
+    pub opcode: u8,
+    #[doc = "!< address of device to pair with, and could be either public or random."]
+    pub deviceAddr: [u8; 6usize],
+    #[doc = "!< Connection handle"]
+    pub connectionHandle: u16,
+    #[doc = "!< Pairing User Interface Inputs - Ask user to input passcode"]
+    pub uiInputs: u8,
+    #[doc = "!< Pairing User Interface Outputs - Display passcode"]
+    pub uiOutputs: u8,
+}
+#[allow(clippy::unnecessary_operation, clippy::identity_op)]
+const _: () = {
+    ["Size of gapPasskeyNeededEvent_t"][::core::mem::size_of::<gapPasskeyNeededEvent_t>() - 14usize];
+    ["Alignment of gapPasskeyNeededEvent_t"][::core::mem::align_of::<gapPasskeyNeededEvent_t>() - 2usize];
+    ["Offset of field: gapPasskeyNeededEvent_t::hdr"][::core::mem::offset_of!(gapPasskeyNeededEvent_t, hdr) - 0usize];
+    ["Offset of field: gapPasskeyNeededEvent_t::opcode"]
+        [::core::mem::offset_of!(gapPasskeyNeededEvent_t, opcode) - 2usize];
+    ["Offset of field: gapPasskeyNeededEvent_t::deviceAddr"]
+        [::core::mem::offset_of!(gapPasskeyNeededEvent_t, deviceAddr) - 3usize];
+    ["Offset of field: gapPasskeyNeededEvent_t::connectionHandle"]
+        [::core::mem::offset_of!(gapPasskeyNeededEvent_t, connectionHandle) - 10usize];
+    ["Offset of field: gapPasskeyNeededEvent_t::uiInputs"]
+        [::core::mem::offset_of!(gapPasskeyNeededEvent_t, uiInputs) - 12usize];
+    ["Offset of field: gapPasskeyNeededEvent_t::uiOutputs"]
+        [::core::mem::offset_of!(gapPasskeyNeededEvent_t, uiOutputs) - 13usize];
+};
+#[doc = " Passcode Callback Function"]
+pub type pfnPasscodeCB_t = ::core::option::Option<
+    unsafe extern "C" fn(deviceAddr: *mut u8, connectionHandle: u16, uiInputs: u8, uiOutputs: u8),
+>;
+#[doc = " Pairing State Callback Function"]
+pub type pfnPairStateCB_t = ::core::option::Option<unsafe extern "C" fn(connectionHandle: u16, state: u8, status: u8)>;
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct gapOobNeededEvent_t {
+    #[doc = "!< GAP_MSG_EVENT and status"]
+    pub hdr: tmos_event_hdr_t,
+    #[doc = "!< GAP_O0B_NEEDED_EVENT"]
+    pub opcode: u8,
+    #[doc = "!< address of device to pair with, and could be either public or random."]
+    pub deviceAddr: [u8; 6usize],
+    #[doc = "!< Connection handle"]
+    pub connectionHandle: u16,
+    pub r_local: [u8; 16usize],
+    pub c_local: [u8; 16usize],
+}
+#[allow(clippy::unnecessary_operation, clippy::identity_op)]
+const _: () = {
+    ["Size of gapOobNeededEvent_t"][::core::mem::size_of::<gapOobNeededEvent_t>() - 44usize];
+    ["Alignment of gapOobNeededEvent_t"][::core::mem::align_of::<gapOobNeededEvent_t>() - 2usize];
+    ["Offset of field: gapOobNeededEvent_t::hdr"][::core::mem::offset_of!(gapOobNeededEvent_t, hdr) - 0usize];
+    ["Offset of field: gapOobNeededEvent_t::opcode"][::core::mem::offset_of!(gapOobNeededEvent_t, opcode) - 2usize];
+    ["Offset of field: gapOobNeededEvent_t::deviceAddr"]
+        [::core::mem::offset_of!(gapOobNeededEvent_t, deviceAddr) - 3usize];
+    ["Offset of field: gapOobNeededEvent_t::connectionHandle"]
+        [::core::mem::offset_of!(gapOobNeededEvent_t, connectionHandle) - 10usize];
+    ["Offset of field: gapOobNeededEvent_t::r_local"][::core::mem::offset_of!(gapOobNeededEvent_t, r_local) - 12usize];
+    ["Offset of field: gapOobNeededEvent_t::c_local"][::core::mem::offset_of!(gapOobNeededEvent_t, c_local) - 28usize];
+};
+#[doc = " OOB Callback Function"]
+pub type pfnOobCB_t = ::core::option::Option<
+    unsafe extern "C" fn(deviceAddr: *mut u8, connectionHandle: u16, r_local: *mut u8, c_local: *mut u8),
+>;
+#[doc = " Callback Registration Structure"]
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct gapBondCBs_t {
+    #[doc = "!< Passcode callback"]
+    pub passcodeCB: pfnPasscodeCB_t,
+    #[doc = "!< Pairing state callback"]
+    pub pairStateCB: pfnPairStateCB_t,
+    #[doc = "!< oob callback"]
+    pub oobCB: pfnOobCB_t,
+}
+#[allow(clippy::unnecessary_operation, clippy::identity_op)]
+// const _: () = {
+//     ["Size of gapBondCBs_t"][::core::mem::size_of::<gapBondCBs_t>() - 24usize];
+//     ["Alignment of gapBondCBs_t"][::core::mem::align_of::<gapBondCBs_t>() - 8usize];
+//     ["Offset of field: gapBondCBs_t::passcodeCB"][::core::mem::offset_of!(gapBondCBs_t, passcodeCB) - 0usize];
+//     ["Offset of field: gapBondCBs_t::pairStateCB"][::core::mem::offset_of!(gapBondCBs_t, pairStateCB) - 8usize];
+//     ["Offset of field: gapBondCBs_t::oobCB"][::core::mem::offset_of!(gapBondCBs_t, oobCB) - 16usize];
+// };
+pub type pfnEcc_key_t =
+    ::core::option::Option<unsafe extern "C" fn(pub_: *mut u8, priv_: *mut u8) -> ::core::ffi::c_int>;
+pub type pfnEcc_dhkey_t = ::core::option::Option<
+    unsafe extern "C" fn(
+        peer_pub_key_x: *mut u8,
+        peer_pub_key_y: *mut u8,
+        our_priv_key: *mut u8,
+        out_dhkey: *mut u8,
+    ) -> ::core::ffi::c_int,
+>;
+pub type pfnEcc_alg_f4_t = ::core::option::Option<
     unsafe extern "C" fn(u: *mut u8, v: *mut u8, x: *mut u8, z: u8, out_enc_data: *mut u8) -> ::core::ffi::c_int,
 >;
-pub type pfnEcc_alg_g2_t = Option<
+pub type pfnEcc_alg_g2_t = ::core::option::Option<
     unsafe extern "C" fn(u: *mut u8, v: *mut u8, x: *mut u8, y: *mut u8, passkey: *mut u32) -> ::core::ffi::c_int,
 >;
-pub type pfnEcc_alg_f5_t = Option<
+pub type pfnEcc_alg_f5_t = ::core::option::Option<
     unsafe extern "C" fn(
         w: *mut u8,
         n1: *mut u8,
@@ -576,7 +7860,7 @@ pub type pfnEcc_alg_f5_t = Option<
         ltk: *mut u8,
     ) -> ::core::ffi::c_int,
 >;
-pub type pfnEcc_alg_f6_t = Option<
+pub type pfnEcc_alg_f6_t = ::core::option::Option<
     unsafe extern "C" fn(
         w: *mut u8,
         n1: *mut u8,
@@ -605,123 +7889,1022 @@ pub struct gapEccCBs_t {
     #[doc = "!< LE Secure  Connections check value generation function  f6"]
     pub alg_f6: pfnEcc_alg_f6_t,
 }
-
-pub const GAPBOND_PERI_PAIRING_MODE: u16 = 1024;
-pub const GAPBOND_PERI_MITM_PROTECTION: u16 = 1025;
-pub const GAPBOND_PERI_IO_CAPABILITIES: u16 = 1026;
-pub const GAPBOND_PERI_OOB_ENABLED: u16 = 1027;
-pub const GAPBOND_PERI_OOB_DATA: u16 = 1028;
-pub const GAPBOND_PERI_BONDING_ENABLED: u16 = 1029;
-pub const GAPBOND_PERI_KEY_DIST_LIST: u16 = 1030;
-pub const GAPBOND_PERI_DEFAULT_PASSCODE: u16 = 1031;
-pub const GAPBOND_CENT_PAIRING_MODE: u16 = 1032;
-pub const GAPBOND_CENT_MITM_PROTECTION: u16 = 1033;
-pub const GAPBOND_CENT_IO_CAPABILITIES: u16 = 1034;
-pub const GAPBOND_CENT_OOB_ENABLED: u16 = 1035;
-pub const GAPBOND_CENT_OOB_DATA: u16 = 1036;
-pub const GAPBOND_CENT_BONDING_ENABLED: u16 = 1037;
-pub const GAPBOND_CENT_KEY_DIST_LIST: u16 = 1038;
-pub const GAPBOND_CENT_DEFAULT_PASSCODE: u16 = 1039;
-pub const GAPBOND_ERASE_ALLBONDS: u16 = 1040;
-pub const GAPBOND_AUTO_FAIL_PAIRING: u16 = 1041;
-pub const GAPBOND_AUTO_FAIL_REASON: u16 = 1042;
-pub const GAPBOND_KEYSIZE: u16 = 1043;
-pub const GAPBOND_AUTO_SYNC_WL: u16 = 1044;
-pub const GAPBOND_BOND_COUNT: u16 = 1045;
-pub const GAPBOND_BOND_FAIL_ACTION: u16 = 1046;
-pub const GAPBOND_ERASE_SINGLEBOND: u16 = 1047;
-pub const GAPBOND_BOND_AUTO: u16 = 1048;
-pub const GAPBOND_BOND_UPDATE: u16 = 1049;
-pub const GAPBOND_DISABLE_SINGLEBOND: u16 = 1050;
-pub const GAPBOND_ENABLE_SINGLEBOND: u16 = 1051;
-pub const GAPBOND_DISABLE_ALLBONDS: u16 = 1052;
-pub const GAPBOND_ENABLE_ALLBONDS: u16 = 1053;
-pub const GAPBOND_ERASE_AUTO: u16 = 1054;
-pub const GAPBOND_AUTO_SYNC_RL: u16 = 1055;
-pub const GAPBOND_SET_ENC_PARAMS: u16 = 1056;
-pub const GAPBOND_PERI_SC_PROTECTION: u16 = 1057;
-pub const GAPBOND_CENT_SC_PROTECTION: u16 = 1058;
-
-pub const GAPBOND_PAIRING_MODE_NO_PAIRING: u8 = 0;
-pub const GAPBOND_PAIRING_MODE_WAIT_FOR_REQ: u8 = 1;
-pub const GAPBOND_PAIRING_MODE_INITIATE: u8 = 2;
-
-// GAPBOND_IO_CAP_DEFINES GAP Bond Manager I/O Capabilities
-pub const GAPBOND_IO_CAP_DISPLAY_ONLY: u8 = 0;
-pub const GAPBOND_IO_CAP_DISPLAY_YES_NO: u8 = 1;
-pub const GAPBOND_IO_CAP_KEYBOARD_ONLY: u8 = 2;
-pub const GAPBOND_IO_CAP_NO_INPUT_NO_OUTPUT: u8 = 3;
-pub const GAPBOND_IO_CAP_KEYBOARD_DISPLAY: u8 = 4;
-
-pub const GAPBOND_KEYDIST_SENCKEY: u16 = 1;
-pub const GAPBOND_KEYDIST_SIDKEY: u16 = 2;
-pub const GAPBOND_KEYDIST_SSIGN: u16 = 4;
-pub const GAPBOND_KEYDIST_SLINK: u16 = 8;
-pub const GAPBOND_KEYDIST_MENCKEY: u16 = 16;
-pub const GAPBOND_KEYDIST_MIDKEY: u16 = 32;
-pub const GAPBOND_KEYDIST_MSIGN: u16 = 64;
-pub const GAPBOND_KEYDIST_MLINK: u16 = 128;
-pub const GAPBOND_PAIRING_STATE_STARTED: u16 = 0;
-pub const GAPBOND_PAIRING_STATE_COMPLETE: u16 = 1;
-pub const GAPBOND_PAIRING_STATE_BONDED: u16 = 2;
-pub const GAPBOND_PAIRING_STATE_BOND_SAVED: u16 = 3;
-
-extern "C" {
-    #[doc = " @brief       Set a GAP Bond Manager parameter.\n\n @note    You can call this function with a GAP Parameter ID and it will set the GAP Parameter.\n\n @param   param - Profile parameter ID: @ref GAPBOND_PROFILE_PARAMETERS\n @param   len - length of data to write\n @param   pValue - pointer to data to write.  This is dependent on\n          the parameter ID and WILL be cast to the appropriate\n          data type (example: data type of uint16_t will be cast to\n          uint16_t pointer).\n\n @return      SUCCESS or INVALIDPARAMETER (invalid paramID)"]
-    pub fn GAPBondMgr_SetParameter(param: u16, len: u8, pValue: *const ::core::ffi::c_void) -> bStatus_t;
-
-    #[doc = " @brief   Get a GAP Bond Manager parameter.\n\n @note    You can call this function with a GAP Parameter ID and it will get a GAP Parameter.\n\n @param   param - Profile parameter ID: @ref GAPBOND_PROFILE_PARAMETERS\n @param   pValue - pointer to location to get the value.  This is dependent on\n          the parameter ID and WILL be cast to the appropriate data type.\n          (example: data type of uint16_t will be cast to uint16_t pointer)\n\n @return      SUCCESS or INVALIDPARAMETER (invalid paramID)"]
-    pub fn GAPBondMgr_GetParameter(param: u16, pValue: *mut ::core::ffi::c_void) -> bStatus_t;
-
-    #[doc = " @brief   Respond to a passcode request.\n\n @param   connectionHandle - connection handle of the connected device or 0xFFFF if all devices in database.\n @param   status - SUCCESS if passcode is available, otherwise see @ref SMP_PAIRING_FAILED_DEFINES.\n @param   passcode - integer value containing the passcode.\n\n @return  SUCCESS - bond record found and changed\n          bleIncorrectMode - Link not found."]
-    pub fn GAPBondMgr_PasscodeRsp(connectionHandle: u16, status: u8, passcode: u32) -> bStatus_t;
-
-    #[doc = " @brief   Respond to a passcode request.\n\n @param   connHandle - connection handle of the connected device or 0xFFFF if all devices in database.\n @param   status - SUCCESS if oob data is available, otherwise see @ref SMP_PAIRING_FAILED_DEFINES.\n @param   oob - containing the oob data.\n @param   c_peer - containing the peer confirm.\n\n @return  SUCCESS - bond record found and changed\n          bleIncorrectMode - Link not found."]
-    pub fn GAPBondMgr_OobRsp(connHandle: u16, status: u8, oob: *mut u8, c_peer: *mut u8) -> bStatus_t;
-
-    #[doc = " @brief   Initialization function for the ecc-function callback.\n\n @param   pEcc - callback registration Structure @ref gapEccCBs_t.\n\n @return  null."]
-    pub fn GAPBondMgr_EccInit(pEcc: *mut gapEccCBs_t);
-
-    #[doc = " @brief   Send a security request\n\n @param   connHandle - connection handle\n\n @return  SUCCESS: will send\n          bleNotConnected: Link not found\n          bleIncorrectMode: wrong GAP role, must be a Peripheral Role"]
-    pub fn GAPBondMgr_PeriSecurityReq(connHandle: u16) -> bStatus_t;
+#[allow(clippy::unnecessary_operation, clippy::identity_op)]
+// const _: () = {
+//     ["Size of gapEccCBs_t"][::core::mem::size_of::<gapEccCBs_t>() - 48usize];
+//     ["Alignment of gapEccCBs_t"][::core::mem::align_of::<gapEccCBs_t>() - 8usize];
+//     ["Offset of field: gapEccCBs_t::gen_key_pair"][::core::mem::offset_of!(gapEccCBs_t, gen_key_pair) - 0usize];
+//     ["Offset of field: gapEccCBs_t::gen_dhkey"][::core::mem::offset_of!(gapEccCBs_t, gen_dhkey) - 8usize];
+//     ["Offset of field: gapEccCBs_t::alg_f4"][::core::mem::offset_of!(gapEccCBs_t, alg_f4) - 16usize];
+//     ["Offset of field: gapEccCBs_t::alg_g2"][::core::mem::offset_of!(gapEccCBs_t, alg_g2) - 24usize];
+//     ["Offset of field: gapEccCBs_t::alg_f5"][::core::mem::offset_of!(gapEccCBs_t, alg_f5) - 32usize];
+//     ["Offset of field: gapEccCBs_t::alg_f6"][::core::mem::offset_of!(gapEccCBs_t, alg_f6) - 40usize];
+// };
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct powerList_t {
+    #[doc = "!< Number of lists"]
+    pub powerVal: [u8; 40usize],
 }
-
-// LL
-extern "C" {
+#[allow(clippy::unnecessary_operation, clippy::identity_op)]
+const _: () = {
+    ["Size of powerList_t"][::core::mem::size_of::<powerList_t>() - 40usize];
+    ["Alignment of powerList_t"][::core::mem::align_of::<powerList_t>() - 1usize];
+    ["Offset of field: powerList_t::powerVal"][::core::mem::offset_of!(powerList_t, powerVal) - 0usize];
+};
+#[doc = " gapRole_States_t defined"]
+pub type gapRole_States_t = ::core::ffi::c_ulong;
+#[doc = " gapRole Event Structure"]
+#[repr(C)]
+#[derive(Copy, Clone)]
+pub union gapRoleEvent_t {
+    #[doc = "!< GAP_MSG_EVENT and status."]
+    pub gap: gapEventHdr_t,
+    #[doc = "!< GAP initialization done."]
+    pub initDone: gapDeviceInitDoneEvent_t,
+    #[doc = "!< Discovery device information event structure."]
+    pub deviceInfo: gapDeviceInfoEvent_t,
+    #[doc = "!< Discovery direct device information event structure."]
+    pub deviceDirectInfo: gapDirectDeviceInfoEvent_t,
+    #[doc = "!< Advertising Data Update is complete."]
+    pub dataUpdate: gapAdvDataUpdateEvent_t,
+    #[doc = "!< Discovery periodic device information event structure."]
+    pub devicePeriodicInfo: gapPeriodicAdvDeviceInfoEvent_t,
+    #[doc = "!< Discovery extend advertising device information event structure."]
+    pub deviceExtAdvInfo: gapExtAdvDeviceInfoEvent_t,
+    #[doc = "!< Discovery complete event structure."]
+    pub discCmpl: gapDevDiscEvent_t,
+    #[doc = "!< sync established event structure."]
+    pub syncEstEvt: gapSyncEstablishedEvent_t,
+    #[doc = "!< sync lost event structure."]
+    pub syncLostEvt: gapSyncLostEvent_t,
+    #[doc = "!< Scan_Request_Received event structure."]
+    pub scanReqEvt: gapScanReqReseiveEvent_t,
+    #[doc = "!< Link complete event structure."]
+    pub linkCmpl: gapEstLinkReqEvent_t,
+    #[doc = "!< Link update event structure."]
+    pub linkUpdate: gapLinkUpdateEvent_t,
+    #[doc = "!< Link terminated event structure."]
+    pub linkTerminate: gapTerminateLinkEvent_t,
+    #[doc = "!< Link phy update event structure."]
+    pub linkPhyUpdate: gapPhyUpdateEvent_t,
+}
+#[allow(clippy::unnecessary_operation, clippy::identity_op)]
+// const _: () = {
+//     ["Size of gapRoleEvent_t"][::core::mem::size_of::<gapRoleEvent_t>() - 40usize];
+//     ["Alignment of gapRoleEvent_t"][::core::mem::align_of::<gapRoleEvent_t>() - 8usize];
+//     ["Offset of field: gapRoleEvent_t::gap"][::core::mem::offset_of!(gapRoleEvent_t, gap) - 0usize];
+//     ["Offset of field: gapRoleEvent_t::initDone"][::core::mem::offset_of!(gapRoleEvent_t, initDone) - 0usize];
+//     ["Offset of field: gapRoleEvent_t::deviceInfo"][::core::mem::offset_of!(gapRoleEvent_t, deviceInfo) - 0usize];
+//     ["Offset of field: gapRoleEvent_t::deviceDirectInfo"]
+//         [::core::mem::offset_of!(gapRoleEvent_t, deviceDirectInfo) - 0usize];
+//     ["Offset of field: gapRoleEvent_t::dataUpdate"][::core::mem::offset_of!(gapRoleEvent_t, dataUpdate) - 0usize];
+//     ["Offset of field: gapRoleEvent_t::devicePeriodicInfo"]
+//         [::core::mem::offset_of!(gapRoleEvent_t, devicePeriodicInfo) - 0usize];
+//     ["Offset of field: gapRoleEvent_t::deviceExtAdvInfo"]
+//         [::core::mem::offset_of!(gapRoleEvent_t, deviceExtAdvInfo) - 0usize];
+//     ["Offset of field: gapRoleEvent_t::discCmpl"][::core::mem::offset_of!(gapRoleEvent_t, discCmpl) - 0usize];
+//     ["Offset of field: gapRoleEvent_t::syncEstEvt"][::core::mem::offset_of!(gapRoleEvent_t, syncEstEvt) - 0usize];
+//     ["Offset of field: gapRoleEvent_t::syncLostEvt"][::core::mem::offset_of!(gapRoleEvent_t, syncLostEvt) - 0usize];
+//     ["Offset of field: gapRoleEvent_t::scanReqEvt"][::core::mem::offset_of!(gapRoleEvent_t, scanReqEvt) - 0usize];
+//     ["Offset of field: gapRoleEvent_t::linkCmpl"][::core::mem::offset_of!(gapRoleEvent_t, linkCmpl) - 0usize];
+//     ["Offset of field: gapRoleEvent_t::linkUpdate"][::core::mem::offset_of!(gapRoleEvent_t, linkUpdate) - 0usize];
+//     ["Offset of field: gapRoleEvent_t::linkTerminate"][::core::mem::offset_of!(gapRoleEvent_t, linkTerminate) - 0usize];
+//     ["Offset of field: gapRoleEvent_t::linkPhyUpdate"][::core::mem::offset_of!(gapRoleEvent_t, linkPhyUpdate) - 0usize];
+// };
+#[doc = " Type of device."]
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct gapScanRec_t {
+    #[doc = "!< Indicates advertising event type used by the advertiser: @ref GAP_ADVERTISEMENT_REPORT_TYPE_DEFINES"]
+    pub eventType: u8,
+    #[doc = "!< Scan Address Type:0x00-Public Device Address or Public Identity Address 0x01-Random Device Address or Random (static) Identity Address"]
+    pub addrType: u8,
+    #[doc = "!< Device's Address"]
+    pub addr: [u8; 6usize],
+    pub rssi: i8,
+}
+#[allow(clippy::unnecessary_operation, clippy::identity_op)]
+const _: () = {
+    ["Size of gapScanRec_t"][::core::mem::size_of::<gapScanRec_t>() - 9usize];
+    ["Alignment of gapScanRec_t"][::core::mem::align_of::<gapScanRec_t>() - 1usize];
+    ["Offset of field: gapScanRec_t::eventType"][::core::mem::offset_of!(gapScanRec_t, eventType) - 0usize];
+    ["Offset of field: gapScanRec_t::addrType"][::core::mem::offset_of!(gapScanRec_t, addrType) - 1usize];
+    ["Offset of field: gapScanRec_t::addr"][::core::mem::offset_of!(gapScanRec_t, addr) - 2usize];
+    ["Offset of field: gapScanRec_t::rssi"][::core::mem::offset_of!(gapScanRec_t, rssi) - 8usize];
+};
+#[doc = " Type of GAPRole_CreateSync command parameters."]
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct gapCreateSync_t {
+    pub options: u8,
+    #[doc = "!< if used, specifies the value that must match the Advertising SID"]
+    pub advertising_SID: u8,
+    #[doc = "!< Scan Address Type: @ref GAP_ADDR_TYPE_DEFINES"]
+    pub addrType: u8,
+    #[doc = "!< Device's Address"]
+    pub addr: [u8; 6usize],
+    #[doc = "!< the maximum number of consecutive periodic advertising events that the receiver may skip after\n!< successfully receiving a periodic advertising packet.Range: 0x0000 to 0x01F3"]
+    pub skip: u16,
+    #[doc = "!< the maximum permitted time between successful receives. If this time is exceeded, synchronization is lost.\n!< Time = N*10 ms.Range: 0x000A to 0x4000"]
+    pub syncTimeout: u16,
+    #[doc = "!< specifies whether to only synchronize to periodic advertising with certain types of Constant Tone Extension\n!< (a value of 0 indicates that the presence or absence of a Constant Tone Extension is irrelevant)."]
+    pub syncCTEType: u8,
+}
+#[allow(clippy::unnecessary_operation, clippy::identity_op)]
+const _: () = {
+    ["Size of gapCreateSync_t"][::core::mem::size_of::<gapCreateSync_t>() - 16usize];
+    ["Alignment of gapCreateSync_t"][::core::mem::align_of::<gapCreateSync_t>() - 2usize];
+    ["Offset of field: gapCreateSync_t::options"][::core::mem::offset_of!(gapCreateSync_t, options) - 0usize];
+    ["Offset of field: gapCreateSync_t::advertising_SID"]
+        [::core::mem::offset_of!(gapCreateSync_t, advertising_SID) - 1usize];
+    ["Offset of field: gapCreateSync_t::addrType"][::core::mem::offset_of!(gapCreateSync_t, addrType) - 2usize];
+    ["Offset of field: gapCreateSync_t::addr"][::core::mem::offset_of!(gapCreateSync_t, addr) - 3usize];
+    ["Offset of field: gapCreateSync_t::skip"][::core::mem::offset_of!(gapCreateSync_t, skip) - 10usize];
+    ["Offset of field: gapCreateSync_t::syncTimeout"][::core::mem::offset_of!(gapCreateSync_t, syncTimeout) - 12usize];
+    ["Offset of field: gapCreateSync_t::syncCTEType"][::core::mem::offset_of!(gapCreateSync_t, syncCTEType) - 14usize];
+};
+#[doc = " Type of GAPRole_SetPathLossReporting command parameters."]
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct gapRoleSetPathLossReporting_t {
+    #[doc = "!< Used to identify the Connection handle"]
+    pub connHandle: u16,
+    #[doc = "!< High threshold for the path loss.Units: dB"]
+    pub highThreshold: i8,
+    #[doc = "!< Hysteresis value for the high threshold.Units: dB"]
+    pub highHysteresis: i8,
+    #[doc = "!< High threshold for the path loss.Units: dB"]
+    pub lowThreshold: i8,
+    #[doc = "!< Hysteresis value for the high threshold.Units: dB"]
+    pub lowHysteresis: i8,
+    #[doc = "!< Minimum time in number of connection events to be observed\n!< once the path crosses the threshold before an event is generated."]
+    pub minTimeSpent: u16,
+    #[doc = "!< 0x00:Reporting disabled 0x01:Reporting enabled"]
+    pub enable: u8,
+}
+#[allow(clippy::unnecessary_operation, clippy::identity_op)]
+const _: () = {
+    ["Size of gapRoleSetPathLossReporting_t"][::core::mem::size_of::<gapRoleSetPathLossReporting_t>() - 10usize];
+    ["Alignment of gapRoleSetPathLossReporting_t"][::core::mem::align_of::<gapRoleSetPathLossReporting_t>() - 2usize];
+    ["Offset of field: gapRoleSetPathLossReporting_t::connHandle"]
+        [::core::mem::offset_of!(gapRoleSetPathLossReporting_t, connHandle) - 0usize];
+    ["Offset of field: gapRoleSetPathLossReporting_t::highThreshold"]
+        [::core::mem::offset_of!(gapRoleSetPathLossReporting_t, highThreshold) - 2usize];
+    ["Offset of field: gapRoleSetPathLossReporting_t::highHysteresis"]
+        [::core::mem::offset_of!(gapRoleSetPathLossReporting_t, highHysteresis) - 3usize];
+    ["Offset of field: gapRoleSetPathLossReporting_t::lowThreshold"]
+        [::core::mem::offset_of!(gapRoleSetPathLossReporting_t, lowThreshold) - 4usize];
+    ["Offset of field: gapRoleSetPathLossReporting_t::lowHysteresis"]
+        [::core::mem::offset_of!(gapRoleSetPathLossReporting_t, lowHysteresis) - 5usize];
+    ["Offset of field: gapRoleSetPathLossReporting_t::minTimeSpent"]
+        [::core::mem::offset_of!(gapRoleSetPathLossReporting_t, minTimeSpent) - 6usize];
+    ["Offset of field: gapRoleSetPathLossReporting_t::enable"]
+        [::core::mem::offset_of!(gapRoleSetPathLossReporting_t, enable) - 8usize];
+};
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct gapRolePowerlevelManagement_t {
+    #[doc = "!< Used to identify the Connection handle"]
+    pub connHandle: u16,
+    #[doc = "!< High threshold for the peer power levels.Units: dB"]
+    pub lowRxThreshold: i8,
+    #[doc = "!< High threshold for the peer power levels.Units: dB"]
+    pub highRxThreshold: i8,
+    #[doc = "!< Minimum transmit power level.Units: dB"]
+    pub minTxPower: i8,
+    #[doc = "!< Maximum transmit power level.Units: dB"]
+    pub maxTxPower: i8,
+}
+#[allow(clippy::unnecessary_operation, clippy::identity_op)]
+const _: () = {
+    ["Size of gapRolePowerlevelManagement_t"][::core::mem::size_of::<gapRolePowerlevelManagement_t>() - 6usize];
+    ["Alignment of gapRolePowerlevelManagement_t"][::core::mem::align_of::<gapRolePowerlevelManagement_t>() - 2usize];
+    ["Offset of field: gapRolePowerlevelManagement_t::connHandle"]
+        [::core::mem::offset_of!(gapRolePowerlevelManagement_t, connHandle) - 0usize];
+    ["Offset of field: gapRolePowerlevelManagement_t::lowRxThreshold"]
+        [::core::mem::offset_of!(gapRolePowerlevelManagement_t, lowRxThreshold) - 2usize];
+    ["Offset of field: gapRolePowerlevelManagement_t::highRxThreshold"]
+        [::core::mem::offset_of!(gapRolePowerlevelManagement_t, highRxThreshold) - 3usize];
+    ["Offset of field: gapRolePowerlevelManagement_t::minTxPower"]
+        [::core::mem::offset_of!(gapRolePowerlevelManagement_t, minTxPower) - 4usize];
+    ["Offset of field: gapRolePowerlevelManagement_t::maxTxPower"]
+        [::core::mem::offset_of!(gapRolePowerlevelManagement_t, maxTxPower) - 5usize];
+};
+#[doc = " Callback when the device has been started.  Callback event to\n the Notify of a state change."]
+pub type gapRolesBroadcasterStateNotify_t = ::core::option::Option<unsafe extern "C" fn(newState: gapRole_States_t)>;
+pub type gapRolesScanReqRecv_t = ::core::option::Option<unsafe extern "C" fn(pEvent: *mut gapScanRec_t)>;
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct gapRolesBroadcasterCBs_t {
+    #[doc = "!< Whenever the device changes state"]
+    pub pfnStateChange: gapRolesBroadcasterStateNotify_t,
+    pub pfnScanRecv: gapRolesScanReqRecv_t,
+}
+#[allow(clippy::unnecessary_operation, clippy::identity_op)]
+// const _: () = {
+//     ["Size of gapRolesBroadcasterCBs_t"][::core::mem::size_of::<gapRolesBroadcasterCBs_t>() - 16usize];
+//     ["Alignment of gapRolesBroadcasterCBs_t"][::core::mem::align_of::<gapRolesBroadcasterCBs_t>() - 8usize];
+//     ["Offset of field: gapRolesBroadcasterCBs_t::pfnStateChange"]
+//         [::core::mem::offset_of!(gapRolesBroadcasterCBs_t, pfnStateChange) - 0usize];
+//     ["Offset of field: gapRolesBroadcasterCBs_t::pfnScanRecv"]
+//         [::core::mem::offset_of!(gapRolesBroadcasterCBs_t, pfnScanRecv) - 8usize];
+// };
+#[doc = " Observer Event Callback Function"]
+pub type pfnGapObserverRoleEventCB_t = ::core::option::Option<unsafe extern "C" fn(pEvent: *mut gapRoleEvent_t)>;
+#[doc = " Observer Callback Structure"]
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct gapRoleObserverCB_t {
+    #[doc = "!< Event callback."]
+    pub eventCB: pfnGapObserverRoleEventCB_t,
+}
+#[allow(clippy::unnecessary_operation, clippy::identity_op)]
+// const _: () = {
+//     ["Size of gapRoleObserverCB_t"][::core::mem::size_of::<gapRoleObserverCB_t>() - 8usize];
+//     ["Alignment of gapRoleObserverCB_t"][::core::mem::align_of::<gapRoleObserverCB_t>() - 8usize];
+//     ["Offset of field: gapRoleObserverCB_t::eventCB"][::core::mem::offset_of!(gapRoleObserverCB_t, eventCB) - 0usize];
+// };
+#[doc = " Callback when the device has read an new RSSI value during a connection."]
+pub type gapRolesRssiRead_t = ::core::option::Option<unsafe extern "C" fn(connHandle: u16, newRSSI: i8)>;
+#[doc = " Callback when the device has been started.  Callback event to\n the Notify of a state change."]
+pub type gapRolesStateNotify_t =
+    ::core::option::Option<unsafe extern "C" fn(newState: gapRole_States_t, pEvent: *mut gapRoleEvent_t)>;
+#[doc = " Callback when the connection parameteres are updated."]
+pub type gapRolesParamUpdateCB_t = ::core::option::Option<
+    unsafe extern "C" fn(connHandle: u16, connInterval: u16, connSlaveLatency: u16, connTimeout: u16),
+>;
+#[doc = " Callback structure - must be setup by the application and used when gapRoles_StartDevice() is called."]
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct gapRolesCBs_t {
+    #[doc = "!< Whenever the device changes state"]
+    pub pfnStateChange: gapRolesStateNotify_t,
+    #[doc = "!< When a valid RSSI is read from controller"]
+    pub pfnRssiRead: gapRolesRssiRead_t,
+    #[doc = "!< When the connection parameteres are updated"]
+    pub pfnParamUpdate: gapRolesParamUpdateCB_t,
+}
+#[allow(clippy::unnecessary_operation, clippy::identity_op)]
+// const _: () = {
+//     ["Size of gapRolesCBs_t"][::core::mem::size_of::<gapRolesCBs_t>() - 24usize];
+//     ["Alignment of gapRolesCBs_t"][::core::mem::align_of::<gapRolesCBs_t>() - 8usize];
+//     ["Offset of field: gapRolesCBs_t::pfnStateChange"][::core::mem::offset_of!(gapRolesCBs_t, pfnStateChange) - 0usize];
+//     ["Offset of field: gapRolesCBs_t::pfnRssiRead"][::core::mem::offset_of!(gapRolesCBs_t, pfnRssiRead) - 8usize];
+//     ["Offset of field: gapRolesCBs_t::pfnParamUpdate"]
+//         [::core::mem::offset_of!(gapRolesCBs_t, pfnParamUpdate) - 16usize];
+// };
+#[doc = " Central Event Callback Function"]
+pub type pfnGapCentralRoleEventCB_t = ::core::option::Option<unsafe extern "C" fn(pEvent: *mut gapRoleEvent_t)>;
+#[doc = " HCI Data Length Change Event Callback Function"]
+pub type pfnHciDataLenChangeEvCB_t =
+    ::core::option::Option<unsafe extern "C" fn(connHandle: u16, maxTxOctets: u16, maxRxOctets: u16)>;
+#[doc = " Central Callback Structure"]
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct gapCentralRoleCB_t {
+    #[doc = "!< RSSI callback."]
+    pub rssiCB: gapRolesRssiRead_t,
+    #[doc = "!< Event callback."]
+    pub eventCB: pfnGapCentralRoleEventCB_t,
+    #[doc = "!< Length Change Event Callback ."]
+    pub ChangCB: pfnHciDataLenChangeEvCB_t,
+}
+#[allow(clippy::unnecessary_operation, clippy::identity_op)]
+// const _: () = {
+//     ["Size of gapCentralRoleCB_t"][::core::mem::size_of::<gapCentralRoleCB_t>() - 24usize];
+//     ["Alignment of gapCentralRoleCB_t"][::core::mem::align_of::<gapCentralRoleCB_t>() - 8usize];
+//     ["Offset of field: gapCentralRoleCB_t::rssiCB"][::core::mem::offset_of!(gapCentralRoleCB_t, rssiCB) - 0usize];
+//     ["Offset of field: gapCentralRoleCB_t::eventCB"][::core::mem::offset_of!(gapCentralRoleCB_t, eventCB) - 8usize];
+//     ["Offset of field: gapCentralRoleCB_t::ChangCB"][::core::mem::offset_of!(gapCentralRoleCB_t, ChangCB) - 16usize];
+// };
+#[doc = " RFRole Event Callback Function"]
+pub type pfnRFStatusCB_t = ::core::option::Option<unsafe extern "C" fn(sta: u8, rsr: u8, rxBuf: *mut u8)>;
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct tag_rf_config {
+    #[doc = "!< BIT0   0=basic, 1=auto def@LLE_MODE_TYPE\n!< BIT1   0=whitening on, 1=whitening off def@LLE_WHITENING_TYPE\n!< BIT4-5 00-1M  01-2M  10/11-resv def@LLE_PHY_TYPE\n!< BIT6   0=data channel(0-39)\n!<        1=rf frequency (2400000kHz-2483500kHz)\n!< BIT7   0=the first byte of the receive buffer is rssi\n!<        1=the first byte of the receive buffer is package type"]
+    pub LLEMode: u8,
+    #[doc = "!< rf channel(0-39)"]
+    pub Channel: u8,
+    #[doc = "!< rf frequency (2400000kHz-2483500kHz)"]
+    pub Frequency: u32,
+    #[doc = "!< access address,32bit PHY address"]
+    pub accessAddress: u32,
+    #[doc = "!< crc initial value"]
+    pub CRCInit: u32,
+    #[doc = "!< status call back"]
+    pub rfStatusCB: pfnRFStatusCB_t,
+    #[doc = "!< indicating  Used and Unused data channels.Every channel is represented with a\n!< bit positioned as per the data channel index,The LSB represents data channel index 0"]
+    pub ChannelMap: u32,
+    pub Resv: u8,
+    #[doc = "!< The heart package interval shall be an integer multiple of 100ms"]
+    pub HeartPeriod: u8,
+    #[doc = "!< hop period( T=32n*RTC clock ),default is 8"]
+    pub HopPeriod: u8,
+    #[doc = "!< indicate the hopIncrement used in the data channel selection algorithm,default is 17"]
+    pub HopIndex: u8,
+    #[doc = "!< Maximum data length received in rf-mode(default 251)"]
+    pub RxMaxlen: u8,
+    #[doc = "!< Maximum data length transmit in rf-mode(default 251)"]
+    pub TxMaxlen: u8,
+}
+#[allow(clippy::unnecessary_operation, clippy::identity_op)]
+// const _: () = {
+//     ["Size of tag_rf_config"][::core::mem::size_of::<tag_rf_config>() - 40usize];
+//     ["Alignment of tag_rf_config"][::core::mem::align_of::<tag_rf_config>() - 8usize];
+//     ["Offset of field: tag_rf_config::LLEMode"][::core::mem::offset_of!(tag_rf_config, LLEMode) - 0usize];
+//     ["Offset of field: tag_rf_config::Channel"][::core::mem::offset_of!(tag_rf_config, Channel) - 1usize];
+//     ["Offset of field: tag_rf_config::Frequency"][::core::mem::offset_of!(tag_rf_config, Frequency) - 4usize];
+//     ["Offset of field: tag_rf_config::accessAddress"][::core::mem::offset_of!(tag_rf_config, accessAddress) - 8usize];
+//     ["Offset of field: tag_rf_config::CRCInit"][::core::mem::offset_of!(tag_rf_config, CRCInit) - 12usize];
+//     ["Offset of field: tag_rf_config::rfStatusCB"][::core::mem::offset_of!(tag_rf_config, rfStatusCB) - 16usize];
+//     ["Offset of field: tag_rf_config::ChannelMap"][::core::mem::offset_of!(tag_rf_config, ChannelMap) - 24usize];
+//     ["Offset of field: tag_rf_config::Resv"][::core::mem::offset_of!(tag_rf_config, Resv) - 28usize];
+//     ["Offset of field: tag_rf_config::HeartPeriod"][::core::mem::offset_of!(tag_rf_config, HeartPeriod) - 29usize];
+//     ["Offset of field: tag_rf_config::HopPeriod"][::core::mem::offset_of!(tag_rf_config, HopPeriod) - 30usize];
+//     ["Offset of field: tag_rf_config::HopIndex"][::core::mem::offset_of!(tag_rf_config, HopIndex) - 31usize];
+//     ["Offset of field: tag_rf_config::RxMaxlen"][::core::mem::offset_of!(tag_rf_config, RxMaxlen) - 32usize];
+//     ["Offset of field: tag_rf_config::TxMaxlen"][::core::mem::offset_of!(tag_rf_config, TxMaxlen) - 33usize];
+// };
+pub type rfConfig_t = tag_rf_config;
+unsafe extern "C" {
+    #[doc = " UUID defined\n/\n/**\n GATT Services"]
+    pub static gapServiceUUID: [u8; 0usize];
+}
+unsafe extern "C" {
+    pub static gattServiceUUID: [u8; 0usize];
+}
+unsafe extern "C" {
+    #[doc = " GATT Attribute Types"]
+    pub static primaryServiceUUID: [u8; 0usize];
+}
+unsafe extern "C" {
+    pub static secondaryServiceUUID: [u8; 0usize];
+}
+unsafe extern "C" {
+    pub static includeUUID: [u8; 0usize];
+}
+unsafe extern "C" {
+    pub static characterUUID: [u8; 0usize];
+}
+unsafe extern "C" {
+    #[doc = " GATT Characteristic Descriptors"]
+    pub static charExtPropsUUID: [u8; 0usize];
+}
+unsafe extern "C" {
+    pub static charUserDescUUID: [u8; 0usize];
+}
+unsafe extern "C" {
+    pub static clientCharCfgUUID: [u8; 0usize];
+}
+unsafe extern "C" {
+    pub static servCharCfgUUID: [u8; 0usize];
+}
+unsafe extern "C" {
+    pub static charFormatUUID: [u8; 0usize];
+}
+unsafe extern "C" {
+    pub static charAggFormatUUID: [u8; 0usize];
+}
+unsafe extern "C" {
+    pub static validRangeUUID: [u8; 0usize];
+}
+unsafe extern "C" {
+    pub static extReportRefUUID: [u8; 0usize];
+}
+unsafe extern "C" {
+    pub static reportRefUUID: [u8; 0usize];
+}
+unsafe extern "C" {
+    #[doc = " GATT Characteristic Types"]
+    pub static deviceNameUUID: [u8; 0usize];
+}
+unsafe extern "C" {
+    pub static appearanceUUID: [u8; 0usize];
+}
+unsafe extern "C" {
+    pub static periPrivacyFlagUUID: [u8; 0usize];
+}
+unsafe extern "C" {
+    pub static reconnectAddrUUID: [u8; 0usize];
+}
+unsafe extern "C" {
+    pub static periConnParamUUID: [u8; 0usize];
+}
+unsafe extern "C" {
+    pub static serviceChangedUUID: [u8; 0usize];
+}
+unsafe extern "C" {
+    pub static centAddrResUUID: [u8; 0usize];
+}
+unsafe extern "C" {
+    #[doc = " PUBLIC FUNCTIONS"]
+    pub fn tmos_rand() -> u32;
+}
+unsafe extern "C" {
+    pub fn tmos_memcmp(src1: *const ::core::ffi::c_void, src2: *const ::core::ffi::c_void, len: u32) -> BOOL;
+}
+unsafe extern "C" {
+    pub fn tmos_isbufset(buf: *mut u8, val: u8, len: u32) -> BOOL;
+}
+unsafe extern "C" {
+    pub fn tmos_strlen(pString: *mut ::core::ffi::c_char) -> u32;
+}
+unsafe extern "C" {
+    pub fn tmos_memset(pDst: *mut ::core::ffi::c_void, Value: u8, len: u32);
+}
+unsafe extern "C" {
+    pub fn tmos_memcpy(dst: *mut ::core::ffi::c_void, src: *const ::core::ffi::c_void, len: u32);
+}
+unsafe extern "C" {
+    #[doc = " @brief   start a event immediately\n\n @param   taskID - task ID of event\n @param   event - event value\n\n @return  0 - SUCCESS."]
+    pub fn tmos_set_event(taskID: tmosTaskID, event: tmosEvents) -> bStatus_t;
+}
+unsafe extern "C" {
+    #[doc = " @brief   clear a event already timeout, cannot be used in it own event function.\n\n @param   taskID - task ID of event\n @param   event - event value\n\n @return  0 - SUCCESS."]
+    pub fn tmos_clear_event(taskID: tmosTaskID, event: tmosEvents) -> bStatus_t;
+}
+unsafe extern "C" {
+    #[doc = " @brief   start a event after period of time\n\n @param   taskID - task ID to set event for\n @param   event - event to be notified with\n @param   time - timeout value\n\n @return  TRUE,FALSE."]
+    pub fn tmos_start_task(taskID: tmosTaskID, event: tmosEvents, time: tmosTimer) -> BOOL;
+}
+unsafe extern "C" {
+    #[doc = " @brief   This function is called to start a timer to expire in n system clock time.\n          When the timer expires, the calling task will get the specified event\n          and the timer will be reloaded with the timeout value.\n\n @param   taskID - task ID to set timer for\n @param   event - event to be notified with\n @param   time - timeout value\n\n @return  SUCCESS, or NO_TIMER_AVAIL."]
+    pub fn tmos_start_reload_task(taskID: tmosTaskID, event: tmosEvents, time: tmosTimer) -> bStatus_t;
+}
+unsafe extern "C" {
+    #[doc = " @brief   stop a event\n\n @param   taskID - task ID of event\n @param   event - event value\n\n @param   None.\n\n @return  SUCCESS."]
+    pub fn tmos_stop_task(taskID: tmosTaskID, event: tmosEvents) -> bStatus_t;
+}
+unsafe extern "C" {
+    #[doc = " @brief   get last period of time for this event\n\n @param   taskID - task ID of event\n @param   event - event value\n\n @return  the timer's tick count if found, zero otherwise."]
+    pub fn tmos_get_task_timer(taskID: tmosTaskID, event: tmosEvents) -> tmosTimer;
+}
+unsafe extern "C" {
+    #[doc = " @brief   send msg to a task,callback events&SYS_EVENT_MSG\n\n @param   taskID - task ID of task need to send msg\n @param  *msg_ptr - point of msg\n\n @return  SUCCESS, INVALID_TASK, INVALID_MSG_POINTER"]
+    pub fn tmos_msg_send(taskID: tmosTaskID, msg_ptr: *mut u8) -> bStatus_t;
+}
+unsafe extern "C" {
+    #[doc = " @brief   delete a msg\n\n @param  *msg_ptr - point of msg\n\n @return  SUCCESS."]
+    pub fn tmos_msg_deallocate(msg_ptr: *mut u8) -> bStatus_t;
+}
+unsafe extern "C" {
+    #[doc = " @brief   receive a msg\n\n @param   taskID  - task ID of task need to receive msg\n\n @return *uint8_t - message information or NULL if no message"]
+    pub fn tmos_msg_receive(taskID: tmosTaskID) -> *mut u8;
+}
+unsafe extern "C" {
+    #[doc = " @brief   allocate buffer for msg when need to send msg\n\n @param   len  - length of msg\n\n @return  pointer to allocated buffer or NULL if allocation failed."]
+    pub fn tmos_msg_allocate(len: u16) -> *mut u8;
+}
+unsafe extern "C" {
+    #[doc = " @brief   read a data item to NV.\n\n @param   id   - Valid NV item Id.\n @param   len  - Length of data to read.\n @param  *pBuf - Data to read.\n\n @return  SUCCESS if successful, NV_OPER_FAILED if failed."]
+    pub fn tmos_snv_read(id: tmosSnvId_t, len: tmosSnvLen_t, pBuf: *mut ::core::ffi::c_void) -> bStatus_t;
+}
+unsafe extern "C" {
+    #[doc = " @brief   tmos system timer initialization\n\n @note    must initialization before call tmos task\n\n @param   fnGetClock - system clock select extend input,if NULL select HSE as the clock source\n\n @return  SUCCESS if successful, FAILURE if failed."]
+    pub fn TMOS_TimerInit(pClockConfig: *mut bleClockConfig_t) -> bStatus_t;
+}
+unsafe extern "C" {
+    #[doc = " @brief   interrupt handler.\n\n @param   None\n\n @return  None"]
+    pub fn TMOS_TimerIRQHandler(time: *mut u32) -> bStatus_t;
+}
+unsafe extern "C" {
+    #[doc = " @brief   Process system\n\n @param   None.\n\n @return  None."]
+    pub fn TMOS_SystemProcess();
+}
+unsafe extern "C" {
+    #[doc = " @brief   Get current system clock\n\n @param   None.\n\n @return  current system clock (in 0.625ms)"]
+    pub fn TMOS_GetSystemClock() -> u32;
+}
+unsafe extern "C" {
+    #[doc = " @brief   register process event callback function\n\n @param   eventCb-events callback function\n\n @return  0xFF - error,others-task id"]
+    pub fn TMOS_ProcessEventRegister(eventCb: pTaskEventHandlerFn) -> tmosTaskID;
+}
+unsafe extern "C" {
+    #[doc = " @brief   Add a device address into white list ( support SNVNum MAX )\n\n @param   addrType - Type of device address\n @param   devAddr  - first address of device address\n\n @return  Command Status."]
+    pub fn LL_AddWhiteListDevice(addrType: u8, devAddr: *mut u8) -> bStatus_t;
+}
+unsafe extern "C" {
+    #[doc = " @brief   Remove a device address from white list\n\n @param   addrType - Type of device address\n @param   devAddr  - first address of device address\n\n @return  Command Status."]
+    pub fn LL_RemoveWhiteListDevice(addrType: u8, devAddr: *mut u8) -> bStatus_t;
+}
+unsafe extern "C" {
+    #[doc = " @brief   Clear white list\n\n @param   None\n\n @return  Command Status."]
+    pub fn LL_ClearWhiteList() -> bStatus_t;
+}
+unsafe extern "C" {
+    #[doc = " @brief   Encrypt data\n\n @param   key - key\n @param   plaintextData - original data\n @param   encryptData - encrypted data\n\n @return  Command Status."]
+    pub fn LL_Encrypt(key: *mut u8, plaintextData: *mut u8, encryptData: *mut u8) -> bStatus_t;
+}
+unsafe extern "C" {
+    #[doc = " @brief   Decrypt data\n\n @param   key - key\n @param   plaintextData - original data\n @param   decryptData - decrypted data\n\n @return  Command Status."]
+    pub fn LL_Decrypt(key: *mut u8, plaintextData: *mut u8, decryptData: *mut u8) -> bStatus_t;
+}
+unsafe extern "C" {
+    #[doc = " @brief   get number of unAck packet in current connect buffer\n\n @param   handle - connect handle\n\n @return  0xFFFFFFFF-handle error,number of packets not receiving ack"]
+    pub fn LL_GetNumberOfUnAckPacket(handle: u16) -> u32;
+}
+unsafe extern "C" {
+    #[doc = " @brief   Register a callback function will be called after each connect event.\n          Only effect in single connection\n\n @param   connEventCB - callback function\n\n @return  None."]
+    pub fn LL_ConnectEventRegister(connEventCB: pfnEventCB);
+}
+unsafe extern "C" {
+    #[doc = " @brief   Register a callback function will be called after each advertise event.\n\n @param   advEventCB - callback function\n\n @return  None."]
+    pub fn LL_AdvertiseEventRegister(advEventCB: pfnEventCB);
+}
+unsafe extern "C" {
     #[doc = " @brief   set tx power level\n\n @param   power - tx power level\n\n @return  Command Status."]
     pub fn LL_SetTxPowerLevel(power: u8) -> bStatus_t;
-
 }
-
-// GAP GATT Server Parameters used with GGS Get/Set Parameter and Application's Callback functions
-// uint8_t[GAP_DEVICE_NAME_LEN]
-pub const GGS_DEVICE_NAME_ATT: u8 = 0;
-pub const GGS_APPEARANCE_ATT: u8 = 1;
-pub const GGS_PERI_PRIVACY_FLAG_ATT: u8 = 2;
-pub const GGS_RECONNCT_ADDR_ATT: u8 = 3;
-pub const GGS_PERI_CONN_PARAM_ATT: u8 = 4;
-pub const GGS_PERI_PRIVACY_FLAG_PROPS: u8 = 5;
-pub const GGS_W_PERMIT_DEVICE_NAME_ATT: u8 = 6;
-pub const GGS_W_PERMIT_APPEARANCE_ATT: u8 = 7;
-pub const GGS_W_PERMIT_PRIVACY_FLAG_ATT: u8 = 8;
-pub const GGS_CENT_ADDR_RES_ATT: u8 = 9;
-pub const GGS_ENC_DATA_KEY_MATERIAL: u8 = 11;
-pub const GGS_LE_GATT_SEC_LEVELS: u8 = 12;
-
-// GAP GATT Service
-extern "C" {
+unsafe extern "C" {
+    #[doc = " @brief   set tx power level\n\n @param   pList - tx power list(global variable)\n\n @return  Command Status."]
+    pub fn LL_SetTxPowerList(pList: *mut powerList_t) -> bStatus_t;
+}
+unsafe extern "C" {
+    #[doc = " @brief   read rssi\n\n @param   None.\n\n @return  the value of rssi."]
+    pub fn BLE_ReadRssi() -> i8;
+}
+unsafe extern "C" {
+    #[doc = " @brief   read cfo\n\n @param   None.\n\n @return  the value of cfo."]
+    pub fn BLE_ReadCfo() -> i16;
+}
+unsafe extern "C" {
+    #[doc = " @brief   pa control init\n\n @note    Can't be called until  role Init\n\n @param   paControl - pa control parameters(global variable)\n\n @return  Command Status."]
+    pub fn BLE_PAControlInit(paControl: *mut blePaControlConfig_t);
+}
+unsafe extern "C" {
+    #[doc = " @brief   ble register reset and rf calibration\n\n @param   None\n\n @return  None"]
+    pub fn BLE_RegInit();
+}
+unsafe extern "C" {
+    #[doc = " @brief   Init BLE lib. RTC will be occupied at the same time.\n\n @param   pCfg - config of BLE lib\n\n @return  0-success. error defined @ ERR_LIB_INIT"]
+    pub fn BLE_LibInit(pCfg: *mut bleConfig_t) -> bStatus_t;
+}
+unsafe extern "C" {
+    #[doc = " @brief   interrupt handler.\n\n @param   None\n\n @return  None"]
+    pub fn BB_IRQLibHandler();
+}
+unsafe extern "C" {
+    #[doc = " @brief   interrupt handler.\n\n @param   None\n\n @return  None"]
+    pub fn LLE_IRQLibHandler();
+}
+unsafe extern "C" {
+    #[doc = " @brief   generate a valid access address\n\n @param   None.\n\n @return  access address\n the Access Address meets the following requirements:\n It shall have no more than six consecutive zeros or ones.\n It shall not be t he advertising channel packets�� Access Address.\n It shall not be a sequence that differ s from the advertising channel packets' Access Address by only one bit.\n It shall not have all four octets equal.\n It shall have no more  than 24 transitions.\n It shall have a minimum of two transitions in the most significant six bits."]
+    pub fn BLE_AccessAddressGenerate() -> u32;
+}
+unsafe extern "C" {
+    pub fn linkDB_Register(pFunc: pfnLinkDBCB_t) -> u8;
+}
+unsafe extern "C" {
+    pub fn linkDB_State(connectionHandle: u16, state: u8) -> u8;
+}
+unsafe extern "C" {
+    pub fn linkDB_PerformFunc(cb: pfnPerformFuncCB_t);
+}
+unsafe extern "C" {
+    #[doc = " @brief   This function is used to get the MTU size of a connection.\n\n @param   connHandle - connection handle.\n\n @return  connection MTU size.<BR>"]
+    pub fn ATT_GetMTU(connHandle: u16) -> u16;
+}
+unsafe extern "C" {
+    #[doc = " @brief   Send Handle Value Confirmation.\n\n @param   connHandle - connection to use\n\n @return  SUCCESS: Confirmation was sent successfully.<BR>\n          INVALIDPARAMETER: Invalid confirmation field.<BR>\n          MSG_BUFFER_NOT_AVAIL: No HCI buffer is available.<BR>\n          bleNotConnected: Connection is down.<BR>\n          bleMemAllocError: Memory allocation error occurred.<BR>"]
+    pub fn ATT_HandleValueCfm(connHandle: u16) -> bStatus_t;
+}
+unsafe extern "C" {
+    pub fn ATT_CompareUUID(pUUID1: *const u8, len1: u16, pUUID2: *const u8, len2: u16) -> u8;
+}
+unsafe extern "C" {
+    #[doc = " @brief   Initialize the Generic Attribute Profile Client.\n\n @return  SUCCESS: Client initialized successfully.<BR>\n          bleMemAllocError: Memory allocation error occurred.<BR>"]
+    pub fn GATT_InitClient() -> bStatus_t;
+}
+unsafe extern "C" {
+    #[doc = " @brief   Register to receive incoming ATT Indications or Notifications\n          of attribute values.\n\n @param   taskId ?task to forward indications or notifications to\n\n @return  void"]
+    pub fn GATT_RegisterForInd(taskId: u8);
+}
+unsafe extern "C" {
+    #[doc = " @brief   Find the attribute record for a given handle\n\n @param   handle - handle to look for\n @param   pHandle - handle of owner of attribute (to be returned)\n\n @return  Pointer to attribute record. NULL, otherwise."]
+    pub fn GATT_FindHandle(handle: u16, pHandle: *mut u16) -> *mut gattAttribute_t;
+}
+unsafe extern "C" {
+    #[doc = " @brief   This sub-procedure is used when a server is configured to\n          indicate a characteristic value to a client and expects an\n          attribute protocol layer acknowledgement that the indication\n          was successfully received.\n\n          The ATT Handle Value Indication is used in this sub-procedure.\n\n          If the return status from this function is SUCCESS, the calling\n          application task will receive an tmos GATT_MSG_EVENT message.\n          The type of the message will be ATT_HANDLE_VALUE_CFM.\n\n @note    This sub-procedure is complete when ATT_HANDLE_VALUE_CFM\n          (with SUCCESS or bleTimeoutstatus) is received by the calling application task.\n\n @param   connHandle - connection to use\n @param   pInd - pointer to indication to be sent\n @param   authenticated - whether an authenticated link is required\n @param   taskId - task to be notified of response\n\n @return  SUCCESS: Indication was sent successfully.<BR>\n          INVALIDPARAMETER: Invalid connection handle or request field.<BR>\n          MSG_BUFFER_NOT_AVAIL: No HCI buffer is available.<BR>\n          bleNotConnected: Connection is down.<BR>\n          blePending: A confirmation is pending with this client.<BR>\n          bleMemAllocError: Memory allocation error occurred.<BR>\n          bleTimeout: Previous transaction timed out.<BR>"]
+    pub fn GATT_Indication(connHandle: u16, pInd: *mut attHandleValueInd_t, authenticated: u8, taskId: u8)
+        -> bStatus_t;
+}
+unsafe extern "C" {
+    #[doc = " @brief   This sub-procedure is used when a server is configured to\n          notify a characteristic value to a client without expecting\n          any attribute protocol layer acknowledgement that the\n          notification was successfully received.\n\n          The ATT Handle Value Notification is used in this sub-procedure.\n\n @note    A notification may be sent at any time and does not invoke a confirmation.\n          No confirmation will be sent to the calling application task for\n          this sub-procedure.\n\n @param   connHandle - connection to use\n @param   pNoti - pointer to notification to be sent\n @param   authenticated - whether an authenticated link is required\n\n @return  SUCCESS: Notification was sent successfully.<BR>\n          INVALIDPARAMETER: Invalid connection handle or request field.<BR>\n          MSG_BUFFER_NOT_AVAIL: No HCI buffer is available.<BR>\n          bleNotConnected: Connection is down.<BR>\n          bleMemAllocError: Memory allocation error occurred.<BR>\n          bleTimeout: Previous transaction timed out.<BR>"]
+    pub fn GATT_Notification(connHandle: u16, pNoti: *mut attHandleValueNoti_t, authenticated: u8) -> bStatus_t;
+}
+unsafe extern "C" {
+    #[doc = " @brief   This sub-procedure is used by the client to set the ATT_MTU\n          to the maximum possible value that can be supported by both\n          devices when the client supports a value greater than the\n          default ATT_MTU for the Attribute Protocol. This sub-procedure\n          shall only be initiated once during a connection.\n\n          The ATT Exchange MTU Request is used by this sub-procedure.\n\n          If the return status from this function is SUCCESS, the calling\n          application task will receive an tmos GATT_MSG_EVENT message.\n          The type of the message will be either ATT_EXCHANGE_MTU_RSP or\n          ATT_ERROR_RSP (if an error occurred on the server).\n\n @note    This sub-procedure is complete when either ATT_EXCHANGE_MTU_RSP\n          (with SUCCESS or bleTimeout status) or ATT_ERROR_RSP\n          (with SUCCESS status) is received by the calling application task.\n\n @param   connHandle - connection to use\n @param   pReq - pointer to request to be sent\n @param   taskId - task to be notified of response\n\n @return  SUCCESS: Request was sent successfully.<BR>\n          INVALIDPARAMETER: Invalid connection handle or request field.<BR>\n          MSG_BUFFER_NOT_AVAIL: No HCI buffer is available.<BR>\n          bleNotConnected: Connection is down.<BR>\n          blePending: A response is pending with this server.<BR>\n          bleMemAllocError: Memory allocation error occurred.<BR>\n          bleTimeout: Previous transaction timed out.<BR>"]
+    pub fn GATT_ExchangeMTU(connHandle: u16, pReq: *mut attExchangeMTUReq_t, taskId: u8) -> bStatus_t;
+}
+unsafe extern "C" {
+    #[doc = " @brief   This sub-procedure is used by a client to discover all\n          the primary services on a server.\n\n          The ATT Read By Group Type Request is used with the Attribute\n          Type parameter set to the UUID for \"Primary Service\". The\n          Starting Handle is set to 0x0001 and the Ending Handle is\n          set to 0xFFFF.\n\n          If the return status from this function is SUCCESS, the calling\n          application task will receive multiple tmos GATT_MSG_EVENT messages.\n          The type of the messages will be either ATT_READ_BY_GRP_TYPE_RSP\n          or ATT_ERROR_RSP (if an error occurred on the server).\n\n @note    This sub-procedure is complete when either ATT_READ_BY_GRP_TYPE_RSP\n          (with bleProcedureComplete or bleTimeout status) or ATT_ERROR_RSP\n          (with SUCCESS status) is received by the calling application task.\n\n @param   connHandle - connection to use\n @param   taskId - task to be notified of response\n\n @return  SUCCESS: Request was sent successfully.<BR>\n          INVALIDPARAMETER: Invalid connection handle or request field.<BR>\n          MSG_BUFFER_NOT_AVAIL: No HCI buffer is available.<BR>\n          bleNotConnected: Connection is down.<BR>\n          blePending: A response is pending with this server.<BR>\n          bleMemAllocError: Memory allocation error occurred.<BR>\n          bleTimeout: Previous transaction timed out.<BR>"]
+    pub fn GATT_DiscAllPrimaryServices(connHandle: u16, taskId: u8) -> bStatus_t;
+}
+unsafe extern "C" {
+    #[doc = " @brief   This sub-procedure is used by a client to discover a specific\n          primary service on a server when only the Service UUID is\n          known. The primary specific service may exist multiple times\n          on a server. The primary service being discovered is identified\n          by the service UUID.\n\n          The ATT Find By Type Value Request is used with the Attribute\n          Type parameter set to the UUID for \"Primary Service\" and the\n          Attribute Value set to the 16-bit Bluetooth UUID or 128-bit\n          UUID for the specific primary service. The Starting Handle shall\n          be set to 0x0001 and the Ending Handle shall be set to 0xFFFF.\n\n          If the return status from this function is SUCCESS, the calling\n          application task will receive multiple tmos GATT_MSG_EVENT messages.\n          The type of the messages will be either ATT_FIND_BY_TYPE_VALUE_RSP\n          or ATT_ERROR_RSP (if an error occurred on the server).\n\n @note    This sub-procedure is complete when either ATT_FIND_BY_TYPE_VALUE_RSP\n          (with bleProcedureComplete or bleTimeout status) or ATT_ERROR_RSP\n          (with SUCCESS status) is received by the calling application task.\n\n @param   connHandle - connection to use\n @param   pUUID - pointer to service UUID to look for\n @param   len - length of value\n @param   taskId - task to be notified of response\n\n @return  SUCCESS: Request was sent successfully.<BR>\n          INVALIDPARAMETER: Invalid connection handle or request field.<BR>\n          MSG_BUFFER_NOT_AVAIL: No HCI buffer is available.<BR>\n          bleNotConnected: Connection is down.<BR>\n          blePending: A response is pending with this server.<BR>\n          bleMemAllocError: Memory allocation error occurred.<BR>\n          bleTimeout: Previous transaction timed out.<BR>"]
+    pub fn GATT_DiscPrimaryServiceByUUID(connHandle: u16, pUUID: *mut u8, len: u8, taskId: u8) -> bStatus_t;
+}
+unsafe extern "C" {
+    #[doc = " @brief   This sub-procedure is used by a client to find include\n          service declarations within a service definition on a\n          server. The service specified is identified by the service\n          handle range.\n\n          The ATT Read By Type Request is used with the Attribute\n          Type parameter set to the UUID for \"Included Service\". The\n          Starting Handle is set to starting handle of the specified\n          service and the Ending Handle is set to the ending handle\n          of the specified service.\n\n          If the return status from this function is SUCCESS, the calling\n          application task will receive multiple tmos GATT_MSG_EVENT messages.\n          The type of the messages will be either ATT_READ_BY_TYPE_RSP\n          or ATT_ERROR_RSP (if an error occurred on the server).\n\n @note    This sub-procedure is complete when either ATT_READ_BY_TYPE_RSP\n          (with bleProcedureCompleteor bleTimeout status)or ATT_ERROR_RSP\n          (with SUCCESS status) is received by the calling application task.\n\n @param   connHandle - connection to use\n @param   startHandle - starting handle\n @param   endHandle - end handle\n @param   taskId - task to be notified of response\n\n @return  SUCCESS: Request was sent successfully.<BR>\n          INVALIDPARAMETER: Invalid connection handle or request field.<BR>\n          MSG_BUFFER_NOT_AVAIL: No HCI buffer is available.<BR>\n          bleNotConnected: Connection is down.<BR>\n          blePending: A response is pending with this server.<BR>\n          bleMemAllocError: Memory allocation error occurred.<BR>\n          bleTimeout: Previous transaction timed out.<BR>"]
+    pub fn GATT_FindIncludedServices(connHandle: u16, startHandle: u16, endHandle: u16, taskId: u8) -> bStatus_t;
+}
+unsafe extern "C" {
+    #[doc = " @brief   This sub-procedure is used by a client to find all the\n          characteristic declarations within a service definition on\n          a server when only the service handle range is known. The\n          service specified is identified by the service handle range.\n\n          The ATT Read By Type Request is used with the Attribute Type\n          parameter set to the UUID for \"Characteristic\". The Starting\n          Handle is set to starting handle of the specified service and\n          the Ending Handle is set to the ending handle of the specified\n          service.\n\n          If the return status from this function is SUCCESS, the calling\n          application task will receive multiple tmos GATT_MSG_EVENT messages.\n          The type of the messages will be either ATT_READ_BY_TYPE_RSP\n          or ATT_ERROR_RSP (if an error occurred on the server).\n\n @note    This sub-procedure is complete when either ATT_READ_BY_TYPE_RSP\n          (with bleProcedureComplete or bleTimeout status)or ATT_ERROR_RSP\n          (with SUCCESS status) is received by the calling application task.\n\n @param   connHandle - connection to use\n @param   startHandle - starting handle\n @param   endHandle - end handle\n @param   taskId - task to be notified of response\n\n @return  SUCCESS: Request was sent successfully.<BR>\n          INVALIDPARAMETER: Invalid connection handle or request field.<BR>\n          MSG_BUFFER_NOT_AVAIL: No HCI buffer is available.<BR>\n          bleNotConnected: Connection is down.<BR>\n          blePending: A response is pending with this server.<BR>\n          bleMemAllocError: Memory allocation error occurred.<BR>\n          bleTimeout: Previous transaction timed out.<BR>"]
+    pub fn GATT_DiscAllChars(connHandle: u16, startHandle: u16, endHandle: u16, taskId: u8) -> bStatus_t;
+}
+unsafe extern "C" {
+    #[doc = " @brief   This sub-procedure is used by a client to discover service\n          characteristics on a server when only the service handle\n          ranges are known and the characteristic UUID is known.\n          The specific service may exist multiple times on a server.\n          The characteristic being discovered is identified by the\n          characteristic UUID.\n\n          The ATT Read By Type Request is used with the Attribute Type\n          is set to the UUID for \"Characteristic\" and the Starting\n          Handle and Ending Handle parameters is set to the service\n          handle range.\n\n          If the return status from this function is SUCCESS, the calling\n          application task will receive multiple tmos GATT_MSG_EVENT messages.\n          The type of the messages will be either ATT_READ_BY_TYPE_RSP\n          or ATT_ERROR_RSP (if an error occurred on the server).\n\n @note    This sub-procedure is complete when either ATT_READ_BY_TYPE_RSP\n          (with bleProcedureComplete or bleTimeout status) or ATT_ERROR_RSP\n          (with SUCCESS status) is received by the calling application task.\n\n @param   connHandle - connection to use\n @param   pReq - pointer to request to be sent\n @param   taskId - task to be notified of response\n\n @return  SUCCESS: Request was sent successfully.<BR>\n          INVALIDPARAMETER: Invalid connection handle or request field.<BR>\n          MSG_BUFFER_NOT_AVAIL: No HCI buffer is available.<BR>\n          bleNotConnected: Connection is down.<BR>\n          blePending: A response is pending with this server.<BR>\n          bleMemAllocError: Memory allocation error occurred.<BR>\n          bleTimeout: Previous transaction timed out.<BR>"]
+    pub fn GATT_DiscCharsByUUID(connHandle: u16, pReq: *mut attReadByTypeReq_t, taskId: u8) -> bStatus_t;
+}
+unsafe extern "C" {
+    #[doc = " @brief   This sub-procedure is used by a client to find all the\n          characteristic descriptors Attribute Handles and Attribute\n          Types within a characteristic definition when only the\n          characteristic handle range is known. The characteristic\n          specified is identified by the characteristic handle range.\n\n          The ATT Find Information Request is used with the Starting\n          Handle set to starting handle of the specified characteristic\n          and the Ending Handle set to the ending handle of the specified\n          characteristic. The UUID Filter parameter is NULL (zero length).\n\n          If the return status from this function is SUCCESS, the calling\n          application task will receive multiple tmos GATT_MSG_EVENT messages.\n          The type of the messages will be either ATT_FIND_INFO_RSP or\n          ATT_ERROR_RSP (if an error occurred on the server).\n\n @note    This sub-procedure is complete when either ATT_FIND_INFO_RSP\n          (with bleProcedureComplete or bleTimeout status) or ATT_ERROR_RSP\n          (with SUCCESS status) is received by the calling application task.\n\n @param   connHandle - connection to use\n @param   startHandle - starting handle\n @param   endHandle - end handle\n @param   taskId - task to be notified of response\n\n @return  SUCCESS: Request was sent successfully.<BR>\n          INVALIDPARAMETER: Invalid connection handle or request field.<BR>\n          MSG_BUFFER_NOT_AVAIL: No HCI buffer is available.<BR>\n          bleNotConnected: Connection is down.<BR>\n          blePending: A response is pending with this server.<BR>\n          bleMemAllocError: Memory allocation error occurred.<BR>\n          bleTimeout: Previous transaction timed out.<BR>"]
+    pub fn GATT_DiscAllCharDescs(connHandle: u16, startHandle: u16, endHandle: u16, taskId: u8) -> bStatus_t;
+}
+unsafe extern "C" {
+    #[doc = " @brief   This sub-procedure is used to read a Characteristic Value\n          from a server when the client knows the Characteristic Value\n          Handle. The ATT Read Request is used with the Attribute Handle\n          parameter set to the Characteristic Value Handle. The Read\n          Response returns the Characteristic Value in the Attribute\n          Value parameter.\n\n          The Read Response only contains a Characteristic Value that\n          is less than or equal to (ATT_MTU ?1) octets in length. If\n          the Characteristic Value is greater than (ATT_MTU - 1) octets\n          in length, the Read Long Characteristic Value procedure may\n          be used if the rest of the Characteristic Value is required.\n\n          If the return status from this function is SUCCESS, the calling\n          application task will receive an tmos GATT_MSG_EVENT message.\n          The type of the message will be either ATT_READ_RSP or\n          ATT_ERROR_RSP (if an error occurred on the server).\n\n @note    This sub-procedure is complete when either ATT_READ_RSP\n          (with SUCCESS or bleTimeout status) or ATT_ERROR_RSP\n          (with SUCCESS status) is received by the calling application task.\n\n @param   connHandle - connection to use\n @param   pReq - pointer to request to be sent\n @param   taskId - task to be notified of response\n\n @return  SUCCESS: Request was sent successfully.<BR>\n          INVALIDPARAMETER: Invalid connection handle or request field.<BR>\n          MSG_BUFFER_NOT_AVAIL: No HCI buffer is available.<BR>\n          bleNotConnected: Connection is down.<BR>\n          blePending: A response is pending with this server.<BR>\n          bleMemAllocError: Memory allocation error occurred.<BR>\n          bleTimeout: Previous transaction timed out.<BR>"]
+    pub fn GATT_ReadCharValue(connHandle: u16, pReq: *mut attReadReq_t, taskId: u8) -> bStatus_t;
+}
+unsafe extern "C" {
+    #[doc = " @brief   This sub-procedure is used to read a Characteristic Value\n          from a server when the client only knows the characteristic\n          UUID and does not know the handle of the characteristic.\n\n          The ATT Read By Type Request is used to perform the sub-procedure.\n          The Attribute Type is set to the known characteristic UUID and\n          the Starting Handle and Ending Handle parameters shall be set\n          to the range over which this read is to be performed. This is\n          typically the handle range for the service in which the\n          characteristic belongs.\n\n          If the return status from this function is SUCCESS, the calling\n          application task will receive an tmos GATT_MSG_EVENT messages.\n          The type of the message will be either ATT_READ_BY_TYPE_RSP\n          or ATT_ERROR_RSP (if an error occurred on the server).\n\n @note    This sub-procedure is complete when either ATT_READ_BY_TYPE_RSP\n          (with SUCCESS or bleTimeout status) or ATT_ERROR_RSP\n          (with SUCCESS status) is received by the calling application task.\n\n @param   connHandle - connection to use\n @param   pReq - pointer to request to be sent\n @param   taskId - task to be notified of response\n\n @return  SUCCESS: Request was sent successfully.<BR>\n          INVALIDPARAMETER: Invalid connection handle or request field.<BR>\n          MSG_BUFFER_NOT_AVAIL: No HCI buffer is available.<BR>\n          bleNotConnected: Connection is down.<BR>\n          blePending: A response is pending with this server.<BR>\n          bleMemAllocError: Memory allocation error occurred.<BR>\n          bleTimeout: Previous transaction timed out.<BR>"]
+    pub fn GATT_ReadUsingCharUUID(connHandle: u16, pReq: *mut attReadByTypeReq_t, taskId: u8) -> bStatus_t;
+}
+unsafe extern "C" {
+    #[doc = " @brief   This sub-procedure is used to read a Characteristic Value from\n          a server when the client knows the Characteristic Value Handle\n          and the length of the Characteristic Value is longer than can\n          be sent in a single Read Response Attribute Protocol message.\n\n          The ATT Read Blob Request is used in this sub-procedure.\n\n          If the return status from this function is SUCCESS, the calling\n          application task will receive multiple tmos GATT_MSG_EVENT messages.\n          The type of the messages will be either ATT_READ_BLOB_RSP or\n          ATT_ERROR_RSP (if an error occurred on the server).\n\n @note    This sub-procedure is complete when either ATT_READ_BLOB_RSP\n          (with bleProcedureComplete or bleTimeout status) or ATT_ERROR_RSP\n          (with SUCCESS status) is received by the calling application task.\n\n @param   connHandle - connection to use\n @param   pReq - pointer to request to be sent\n @param   taskId - task to be notified of response\n\n @return  SUCCESS: Request was sent successfully.<BR>\n          INVALIDPARAMETER: Invalid connection handle or request field.<BR>\n          MSG_BUFFER_NOT_AVAIL: No HCI buffer is available.<BR>\n          bleNotConnected: Connection is down.<BR>\n          blePending: A response is pending with this server.<BR>\n          bleMemAllocError: Memory allocation error occurred.<BR>\n          bleTimeout: Previous transaction timed out.<BR>"]
+    pub fn GATT_ReadLongCharValue(connHandle: u16, pReq: *mut attReadBlobReq_t, taskId: u8) -> bStatus_t;
+}
+unsafe extern "C" {
+    #[doc = " @brief   This sub-procedure is used to read multiple Characteristic Values\n          from a server when the client knows the Characteristic Value\n          Handles. The Attribute Protocol Read Multiple Requests is used\n          with the Set Of Handles parameter set to the Characteristic Value\n          Handles. The Read Multiple Response returns the Characteristic\n          Values in the Set Of Values parameter.\n\n          The ATT Read Multiple Request is used in this sub-procedure.\n\n          If the return status from this function is SUCCESS, the calling\n          application task will receive an tmos GATT_MSG_EVENT message.\n          The type of the message will be either ATT_READ_MULTI_RSP\n          or ATT_ERROR_RSP (if an error occurred on the server).\n\n @note    This sub-procedure is complete when either ATT_READ_MULTI_RSP\n          (with SUCCESS or bleTimeout status) or ATT_ERROR_RSP\n          (with SUCCESS status) is received by the calling application task.\n\n @param   connHandle - connection to use\n @param   pReq - pointer to request to be sent\n @param   taskId - task to be notified of response\n\n @return  SUCCESS: Request was sent successfully.<BR>\n          INVALIDPARAMETER: Invalid connection handle or request field.<BR>\n          MSG_BUFFER_NOT_AVAIL: No HCI buffer is available.<BR>\n          bleNotConnected: Connection is down.<BR>\n          blePending: A response is pending with this server.<BR>\n          bleMemAllocError: Memory allocation error occurred.<BR>\n          bleTimeout: Previous transaction timed out.<BR>"]
+    pub fn GATT_ReadMultiCharValues(connHandle: u16, pReq: *mut attReadMultiReq_t, taskId: u8) -> bStatus_t;
+}
+unsafe extern "C" {
+    #[doc = " @brief   This sub-procedure is used to write a Characteristic Value\n          to a server when the client knows the Characteristic Value\n          Handle and the client does not need an acknowledgement that\n          the write was successfully performed. This sub-procedure\n          only writes the first (ATT_MTU ?3) octets of a Characteristic\n          Value. This sub-procedure can not be used to write a long\n          characteristic; instead the Write Long Characteristic Values\n          sub-procedure should be used.\n\n          The ATT Write Command is used for this sub-procedure. The\n          Attribute Handle parameter shall be set to the Characteristic\n          Value Handle. The Attribute Value parameter shall be set to\n          the new Characteristic Value.\n\n          No response will be sent to the calling application task for this\n          sub-procedure. If the Characteristic Value write request is the\n          wrong size, or has an invalid value as defined by the profile,\n          then the write will not succeed and no error will be generated\n          by the server.\n\n @param   connHandle - connection to use\n @param   pReq - pointer to command to be sent\n\n @return  SUCCESS: Request was sent successfully.<BR>\n          INVALIDPARAMETER: Invalid connection handle or request field.<BR>\n          MSG_BUFFER_NOT_AVAIL: No HCI buffer is available.<BR>\n          bleNotConnected: Connection is down.<BR>\n          bleMemAllocError: Memory allocation error occurred.<BR>\n          bleTimeout: Previous transaction timed out.<BR>"]
+    pub fn GATT_WriteNoRsp(connHandle: u16, pReq: *mut attWriteReq_t) -> bStatus_t;
+}
+unsafe extern "C" {
+    #[doc = " @brief   This sub-procedure is used to write a Characteristic Value\n          to a server when the client knows the Characteristic Value\n          Handle and the ATT Bearer is not encrypted. This sub-procedure\n          shall only be used if the Characteristic Properties authenticated\n          bit is enabled and the client and server device share a bond as\n          defined in the GAP.\n\n          This sub-procedure only writes the first (ATT_MTU ?15) octets\n          of an Attribute Value. This sub-procedure cannot be used to\n          write a long Attribute.\n\n          The ATT Write Command is used for this sub-procedure. The\n          Attribute Handle parameter shall be set to the Characteristic\n          Value Handle. The Attribute Value parameter shall be set to\n          the new Characteristic Value authenticated by signing the\n          value, as defined in the Security Manager.\n\n          No response will be sent to the calling application task for this\n          sub-procedure. If the authenticated Characteristic Value that is\n          written is the wrong size, or has an invalid value as defined by\n          the profile, or the signed value does not authenticate the client,\n          then the write will not succeed and no error will be generated by\n          the server.\n\n @param   connHandle - connection to use\n @param   pReq - pointer to command to be sent\n\n @return  SUCCESS: Request was sent successfully.<BR>\n          INVALIDPARAMETER: Invalid connection handle or request field.<BR>\n          MSG_BUFFER_NOT_AVAIL: No HCI buffer is available.<BR>\n          bleNotConnected: Connection is down.<BR>\n          bleMemAllocError: Memory allocation error occurred.<BR>\n          bleLinkEncrypted: Connection is already encrypted.<BR>\n          bleTimeout: Previous transaction timed out.<BR>"]
+    pub fn GATT_SignedWriteNoRsp(connHandle: u16, pReq: *mut attWriteReq_t) -> bStatus_t;
+}
+unsafe extern "C" {
+    #[doc = " @brief   This sub-procedure is used to write a characteristic value\n          to a server when the client knows the characteristic value\n          handle. This sub-procedure only writes the first (ATT_MTU-3)\n          octets of a characteristic value. This sub-procedure can not\n          be used to write a long attribute; instead the Write Long\n          Characteristic Values sub-procedure should be used.\n\n          The ATT Write Request is used in this sub-procedure. The\n          Attribute Handle parameter shall be set to the Characteristic\n          Value Handle. The Attribute Value parameter shall be set to\n          the new characteristic.\n\n          If the return status from this function is SUCCESS, the calling\n          application task will receive an tmos GATT_MSG_EVENT message.\n          The type of the message will be either ATT_WRITE_RSP\n          or ATT_ERROR_RSP (if an error occurred on the server).\n\n @note    This sub-procedure is complete when either ATT_WRITE_RSP\n          (with SUCCESS or bleTimeout status) or ATT_ERROR_RSP\n          (with SUCCESS status) is received by the calling application task.\n\n @param   connHandle - connection to use\n @param   pReq - pointer to request to be sent\n @param   taskId - task to be notified of response\n\n @return  SUCCESS: Request was sent successfully.<BR>\n          INVALIDPARAMETER: Invalid connection handle or request field.<BR>\n          MSG_BUFFER_NOT_AVAIL: No HCI buffer is available.<BR>\n          bleNotConnected: Connection is down.<BR>\n          blePending: A response is pending with this server.<BR>\n          bleMemAllocError: Memory allocation error occurred.<BR>\n          bleTimeout: Previous transaction timed out.<BR>"]
+    pub fn GATT_WriteCharValue(connHandle: u16, pReq: *mut attWriteReq_t, taskId: u8) -> bStatus_t;
+}
+unsafe extern "C" {
+    #[doc = " @brief   This sub-procedure is used to write a Characteristic Value to\n          a server when the client knows the Characteristic Value Handle\n          but the length of the Characteristic Value is longer than can\n          be sent in a single Write Request Attribute Protocol message.\n\n          The ATT Prepare Write Request and Execute Write Request are\n          used to perform this sub-procedure.\n\n          If the return status from this function is SUCCESS, the calling\n          application task will receive multiple tmos GATT_MSG_EVENT messages.\n          The type of the messages will be either ATT_PREPARE_WRITE_RSP,\n          ATT_EXECUTE_WRITE_RSP or ATT_ERROR_RSP (if an error occurred on\n          the server).\n\n @note    This sub-procedure is complete when either ATT_PREPARE_WRITE_RSP\n          (with bleTimeout status), ATT_EXECUTE_WRITE_RSP\n          (with SUCCESS or bleTimeout status), or ATT_ERROR_RSP\n          (with SUCCESS status) is received by the calling application task.\n\n @note    The 'pReq->pValue' pointer will be freed when the sub-procedure is complete.\n\n @param   connHandle - connection to use\n @param   pReq - pointer to request to be sent\n @param   taskId - task to be notified of response\n\n @return  SUCCESS: Request was sent successfully.<BR>\n          INVALIDPARAMETER: Invalid connection handle or request field.<BR>\n          MSG_BUFFER_NOT_AVAIL: No HCI buffer is available.<BR>\n          bleNotConnected: Connection is down.<BR>\n          blePending: A response is pending with this server.<BR>\n          bleMemAllocError: Memory allocation error occurred.<BR>\n          bleTimeout: Previous transaction timed out.<BR>"]
+    pub fn GATT_WriteLongCharValue(connHandle: u16, pReq: *mut attPrepareWriteReq_t, taskId: u8) -> bStatus_t;
+}
+unsafe extern "C" {
+    #[doc = " @brief   This sub-procedure is used to write a Characteristic Value to\n          a server when the client knows the Characteristic Value Handle,\n          and assurance is required that the correct Characteristic Value\n          is going to be written by transferring the Characteristic Value\n          to be written in both directions before the write is performed.\n          This sub-procedure can also be used when multiple values must\n          be written, in order, in a single operation.\n\n          The sub-procedure has two phases, the first phase prepares the\n          characteristic values to be written.  Once this is complete,\n          the second phase performs the execution of all of the prepared\n          characteristic value writes on the server from this client.\n\n          In the first phase, the ATT Prepare Write Request is used.\n          In the second phase, the attribute protocol Execute Write\n          Request is used.\n\n          If the return status from this function is SUCCESS, the calling\n          application task will receive multiple tmos GATT_MSG_EVENT messages.\n          The type of the messages will be either ATT_PREPARE_WRITE_RSP,\n          ATT_EXECUTE_WRITE_RSP or ATT_ERROR_RSP (if an error occurred on\n          the server).\n\n @note    This sub-procedure is complete when either ATT_PREPARE_WRITE_RSP\n          (with bleTimeout status), ATT_EXECUTE_WRITE_RSP\n          (with SUCCESS or bleTimeout status), or ATT_ERROR_RSP\n          (with SUCCESS status) is received by the calling application task.\n\n @note    The 'pReqs' pointer will be freed when the sub-procedure is complete.\n\n @param   connHandle - connection to use\n @param   pReqs - pointer to requests to be sent\n @param   numReqs - number of requests in pReq\n @param   flags - execute write request flags\n @param   taskId - task to be notified of response\n\n @return  SUCCESS: Request was sent successfully.<BR>\n          INVALIDPARAMETER: Invalid connection handle or request field.<BR>\n          MSG_BUFFER_NOT_AVAIL: No HCI buffer is available.<BR>\n          bleNotConnected: Connection is down.<BR>\n          blePending: A response is pending with this server.<BR>\n          bleMemAllocError: Memory allocation error occurred.<BR>\n          bleTimeout: Previous transaction timed out.<BR>"]
+    pub fn GATT_ReliableWrites(
+        connHandle: u16,
+        pReqs: *mut attPrepareWriteReq_t,
+        numReqs: u8,
+        flags: u8,
+        taskId: u8,
+    ) -> bStatus_t;
+}
+unsafe extern "C" {
+    #[doc = " @brief   This sub-procedure is used to read a characteristic descriptor\n          from a server when the client knows the characteristic descriptor\n          declaration's Attribute handle.\n\n          The ATT Read Request is used for this sub-procedure. The Read\n          Request is used with the Attribute Handle parameter set to the\n          characteristic descriptor handle. The Read Response returns the\n          characteristic descriptor value in the Attribute Value parameter.\n\n          If the return status from this function is SUCCESS, the calling\n          application task will receive an tmos GATT_MSG_EVENT message.\n          The type of the message will be either ATT_READ_RSP or\n          ATT_ERROR_RSP (if an error occurred on the server).\n\n @note    This sub-procedure is complete when either ATT_READ_RSP\n          (with SUCCESS or bleTimeout status) or ATT_ERROR_RSP\n          (with SUCCESS status) is received by the calling application task.\n\n @param   connHandle - connection to use\n @param   pReq - pointer to request to be sent\n @param   taskId - task to be notified of response\n\n @return  SUCCESS: Request was sent successfully.<BR>\n          INVALIDPARAMETER: Invalid connection handle or request field.<BR>\n          MSG_BUFFER_NOT_AVAIL: No HCI buffer is available.<BR>\n          bleNotConnected: Connection is down.<BR>\n          blePending: A response is pending with this server.<BR>\n          bleMemAllocError: Memory allocation error occurred.<BR>\n          bleTimeout: Previous transaction timed out.<BR>"]
+    pub fn GATT_ReadCharDesc(connHandle: u16, pReq: *mut attReadReq_t, taskId: u8) -> bStatus_t;
+}
+unsafe extern "C" {
+    #[doc = " @brief   This sub-procedure is used to read a characteristic descriptor\n          from a server when the client knows the characteristic descriptor\n          declaration's Attribute handle and the length of the characteristic\n          descriptor declaration is longer than can be sent in a single Read\n          Response attribute protocol message.\n\n          The ATT Read Blob Request is used to perform this sub-procedure.\n          The Attribute Handle parameter shall be set to the characteristic\n          descriptor handle. The Value Offset parameter shall be the offset\n          within the characteristic descriptor to be read.\n\n          If the return status from this function is SUCCESS, the calling\n          application task will receive multiple tmos GATT_MSG_EVENT messages.\n          The type of the messages will be either ATT_READ_BLOB_RSP or\n          ATT_ERROR_RSP (if an error occurred on the server).\n\n @note    This sub-procedure is complete when either ATT_READ_BLOB_RSP\n          (with bleProcedureComplete or bleTimeout status) or ATT_ERROR_RSP\n          (with SUCCESS status) is received by the calling application task.\n\n @param   connHandle - connection to use\n @param   pReq - pointer to request to be sent\n @param   taskId - task to be notified of response\n\n @return  SUCCESS: Request was sent successfully.<BR>\n          INVALIDPARAMETER: Invalid connection handle or request field.<BR>\n          MSG_BUFFER_NOT_AVAIL: No HCI buffer is available.<BR>\n          bleNotConnected: Connection is down.<BR>\n          blePending: A response is pending with this server.<BR>\n          bleMemAllocError: Memory allocation error occurred.<BR>\n          bleTimeout: Previous transaction timed out.<BR>"]
+    pub fn GATT_ReadLongCharDesc(connHandle: u16, pReq: *mut attReadBlobReq_t, taskId: u8) -> bStatus_t;
+}
+unsafe extern "C" {
+    #[doc = " @brief   This sub-procedure is used to write a characteristic\n          descriptor value to a server when the client knows the\n          characteristic descriptor handle.\n\n          The ATT Write Request is used for this sub-procedure. The\n          Attribute Handle parameter shall be set to the characteristic\n          descriptor handle. The Attribute Value parameter shall be\n          set to the new characteristic descriptor value.\n\n          If the return status from this function is SUCCESS, the calling\n          application task will receive an tmos GATT_MSG_EVENT message.\n          The type of the message will be either ATT_WRITE_RSP\n          or ATT_ERROR_RSP (if an error occurred on the server).\n\n @note    This sub-procedure is complete when either ATT_WRITE_RSP\n          (with SUCCESS or bleTimeout status) or ATT_ERROR_RSP\n          (with SUCCESS status) is received by the calling application task.\n\n @param   connHandle - connection to use\n @param   pReq - pointer to request to be sent\n @param   taskId - task to be notified of response\n\n @return  SUCCESS: Request was sent successfully.<BR>\n          INVALIDPARAMETER: Invalid connection handle or request field.<BR>\n          MSG_BUFFER_NOT_AVAIL: No HCI buffer is available.<BR>\n          bleNotConnected: Connection is down.<BR>\n          blePending: A response is pending with this server.<BR>\n          bleMemAllocError: Memory allocation error occurred.<BR>\n          bleTimeout: Previous transaction timed out.<BR>"]
+    pub fn GATT_WriteCharDesc(connHandle: u16, pReq: *mut attWriteReq_t, taskId: u8) -> bStatus_t;
+}
+unsafe extern "C" {
+    #[doc = " @brief   This sub-procedure is used to write a Characteristic Value to\n          a server when the client knows the Characteristic Value Handle\n          but the length of the Characteristic Value is longer than can\n          be sent in a single Write Request Attribute Protocol message.\n\n          The ATT Prepare Write Request and Execute Write Request are\n          used to perform this sub-procedure.\n\n          If the return status from this function is SUCCESS, the calling\n          application task will receive multiple tmos GATT_MSG_EVENT messages.\n          The type of the messages will be either ATT_PREPARE_WRITE_RSP,\n          ATT_EXECUTE_WRITE_RSP or ATT_ERROR_RSP (if an error occurred on\n          the server).\n\n @note    This sub-procedure is complete when either ATT_PREPARE_WRITE_RSP\n          (with bleTimeout status), ATT_EXECUTE_WRITE_RSP\n          (with SUCCESS or bleTimeout status), or ATT_ERROR_RSP\n          (with SUCCESS status) is received by the calling application task.\n\n @note    The 'pReq->pValue' pointer will be freed when the sub-procedure is complete.\n\n @param   connHandle - connection to use\n @param   pReq - pointer to request to be sent\n @param   taskId - task to be notified of response\n\n @return  SUCCESS: Request was sent successfully.<BR>\n          INVALIDPARAMETER: Invalid connection handle or request field.v\n          MSG_BUFFER_NOT_AVAIL: No HCI buffer is available.<BR>\n          bleNotConnected: Connection is down.<BR>\n          blePending: A response is pending with this server.<BR>\n          bleMemAllocError: Memory allocation error occurred.<BR>\n          bleTimeout: Previous transaction timed out.<BR>"]
+    pub fn GATT_WriteLongCharDesc(connHandle: u16, pReq: *mut attPrepareWriteReq_t, taskId: u8) -> bStatus_t;
+}
+unsafe extern "C" {
+    #[doc = " @brief   GATT implementation of the allocator functionality.\n\n @note    This function should only be called by GATT and the upper layer protocol/application.\n\n @param   connHandle - connection that message is to be sent on.\n @param   opcode - opcode of message that buffer to be allocated for.\n @param   size - number of bytes to allocate from the heap.\n @param   pSizeAlloc - number of bytes allocated for the caller from the heap.\n @param   flag - .\n\n @return  pointer to the heap allocation; NULL if error or failure."]
+    pub fn GATT_bm_alloc(
+        connHandle: u16,
+        opcode: u8,
+        size: u16,
+        pSizeAlloc: *mut u16,
+        flag: u8,
+    ) -> *mut ::core::ffi::c_void;
+}
+unsafe extern "C" {
+    #[doc = " @brief   GATT implementation of the de-allocator functionality.\n\n @param   pMsg - pointer to GATT message containing the memory to free.\n @param   opcode - opcode of the message\n\n @return  none"]
+    pub fn GATT_bm_free(pMsg: *mut gattMsg_t, opcode: u8);
+}
+unsafe extern "C" {
+    #[doc = " @brief   Register a service's attribute list and callback functions with\n          the GATT Server Application.\n\n @param   pAttrs - Array of attribute records to be registered\n @param   numAttrs - Number of attributes in array\n @param   encKeySize - Minimum encryption key size required by service (7-16 bytes)\n @param   pServiceCBs - Service callback function pointers\n\n @return  SUCCESS: Service registered successfully.<BR>\n          INVALIDPARAMETER: Invalid service fields.<BR>\n          FAILURE: Not enough attribute handles available.<BR>\n          bleMemAllocError: Memory allocation error occurred.<BR>\n          bleInvalidRange: Encryption key size's out of range.<BR>"]
+    pub fn GATTServApp_RegisterService(
+        pAttrs: *mut gattAttribute_t,
+        numAttrs: u16,
+        encKeySize: u8,
+        pServiceCBs: *mut gattServiceCBs_t,
+    ) -> bStatus_t;
+}
+unsafe extern "C" {
+    #[doc = " @brief   Add function for the GATT Service.\n\n @param   services - services to add. This is a bit map and can\n                     contain more than one service.\n\n @return  SUCCESS: Service added successfully.<BR>\n          INVALIDPARAMETER: Invalid service field.<BR>\n          FAILURE: Not enough attribute handles available.<BR>\n          bleMemAllocError: Memory allocation error occurred.<BR>"]
+    pub fn GATTServApp_AddService(services: u32) -> bStatus_t;
+}
+unsafe extern "C" {
+    #[doc = " @brief   Deregister a service's attribute list and callback functions from\n          the GATT Server Application.\n\n @note    It's the caller's responsibility to free the service attribute\n          list returned from this API.\n\n @param   handle - handle of service to be deregistered\n @param   p2pAttrs - pointer to array of attribute records (to be returned)\n\n @return  SUCCESS: Service deregistered successfully.<BR>\n          FAILURE: Service not found.<BR>"]
+    pub fn GATTServApp_DeregisterService(handle: u16, p2pAttrs: *mut *mut gattAttribute_t) -> bStatus_t;
+}
+unsafe extern "C" {
+    #[doc = " @brief   Initialize the client characteristic configuration table.\n\n @note    Each client has its own instantiation of the ClientCharacteristic Configuration.\n          Reads/Writes of the Client Characteristic Configuration only only affect the\n          configuration of that client.\n\n @param   connHandle - connection handle (0xFFFF for all connections).\n @param   charCfgTbl - client characteristic configuration table.\n\n @return  none"]
+    pub fn GATTServApp_InitCharCfg(connHandle: u16, charCfgTbl: *mut gattCharCfg_t);
+}
+unsafe extern "C" {
+    #[doc = " @brief   Send out a Service Changed Indication.\n\n @param   connHandle - connection to use\n @param   taskId - task to be notified of confirmation\n\n @return  SUCCESS: Indication was sent successfully.<BR>\n          FAILURE: Service Changed attribute not found.<BR>\n          INVALIDPARAMETER: Invalid connection handle or request field.<BR>\n          MSG_BUFFER_NOT_AVAIL: No HCI buffer is available.<BR>\n          bleNotConnected: Connection is down.<BR>\n          blePending: A confirmation is pending with this client.<BR>"]
+    pub fn GATTServApp_SendServiceChangedInd(connHandle: u16, taskId: u8) -> bStatus_t;
+}
+unsafe extern "C" {
+    #[doc = " @brief   Read the client characteristic configuration for a given client.\n\n @note    Each client has its own instantiation of the Client Characteristic Configuration.\n          Reads of the Client Characteristic Configuration only shows the configuration\n          for that client.\n\n @param   connHandle - connection handle.\n @param   charCfgTbl - client characteristic configuration table.\n\n @return  attribute value"]
+    pub fn GATTServApp_ReadCharCfg(connHandle: u16, charCfgTbl: *mut gattCharCfg_t) -> u16;
+}
+unsafe extern "C" {
+    #[doc = " @brief   Write the client characteristic configuration for a given client.\n\n @note    Each client has its own instantiation of the Client Characteristic Configuration.\n          Writes of the Client Characteristic Configuration only only affect the\n          configuration of that client.\n\n @param   connHandle - connection handle.\n @param   charCfgTbl - client characteristic configuration table.\n @param   value - attribute new value.\n\n @return  Success or Failure"]
+    pub fn GATTServApp_WriteCharCfg(connHandle: u16, charCfgTbl: *mut gattCharCfg_t, value: u16) -> u8;
+}
+unsafe extern "C" {
+    #[doc = " @brief   Process the client characteristic configuration\n          write request for a given client.\n\n @param   connHandle - connection message was received on.\n @param   pAttr - pointer to attribute.\n @param   pValue - pointer to data to be written.\n @param   len - length of data.\n @param   offset - offset of the first octet to be written.\n @param   validCfg - valid configuration.\n\n @return  Success or Failure"]
+    pub fn GATTServApp_ProcessCCCWriteReq(
+        connHandle: u16,
+        pAttr: *mut gattAttribute_t,
+        pValue: *mut u8,
+        len: u16,
+        offset: u16,
+        validCfg: u16,
+    ) -> bStatus_t;
+}
+unsafe extern "C" {
     #[doc = " @brief   Set a GAP GATT Server parameter.\n\n @param   param - Profile parameter ID<BR>\n @param   len - length of data to right\n @param   value - pointer to data to write.  This is dependent on\n          the parameter ID and WILL be cast to the appropriate\n          data type (example: data type of uint16_t will be cast to\n          uint16_t pointer).<BR>\n\n @return  bStatus_t"]
     pub fn GGS_SetParameter(param: u8, len: u8, value: *mut ::core::ffi::c_void) -> bStatus_t;
-
+}
+unsafe extern "C" {
     #[doc = " @brief   Get a GAP GATT Server parameter.\n\n @param   param - Profile parameter ID<BR>\n @param   value - pointer to data to put.  This is dependent on\n          the parameter ID and WILL be cast to the appropriate\n          data type (example: data type of uint16_t will be cast to\n          uint16_t pointer).<BR>\n\n @return  bStatus_t"]
     pub fn GGS_GetParameter(param: u8, value: *mut ::core::ffi::c_void) -> bStatus_t;
-
+}
+unsafe extern "C" {
     #[doc = " @brief   Add function for the GAP GATT Service.\n\n @param   services - services to add. This is a bit map and can\n                     contain more than one service.\n\n @return  SUCCESS: Service added successfully.<BR>\n          INVALIDPARAMETER: Invalid service field.<BR>\n          FAILURE: Not enough attribute handles available.<BR>\n          bleMemAllocError: Memory allocation error occurred.<BR>"]
     pub fn GGS_AddService(services: u32) -> bStatus_t;
 }
-
-// Special case connection handles
-/// Invalid connection handle, used for no connection handle
-pub const INVALID_CONNHANDLE: u16 = 0xFFFF;
-/// Loopback connection handle, used to loopback a message
-pub const LOOPBACK_CONNHANDLE: u16 = 0xFFFE;
+unsafe extern "C" {
+    #[doc = " @brief   Set a GAP Parameter value.  Use this function to change  the default GAP parameter values.\n\n @param   paramID - parameter ID: @ref GAP_PARAMETER_ID_DEFINES\n @param   paramValue - new param value\n\n @return  SUCCESS or INVALIDPARAMETER (invalid paramID)"]
+    pub fn GAP_SetParamValue(paramID: u16, paramValue: u16) -> bStatus_t;
+}
+unsafe extern "C" {
+    #[doc = " @brief   Get a GAP Parameter value.\n\n @param   paramID - parameter ID: @ref GAP_PARAMETER_ID_DEFINES\n\n @return  GAP Parameter value or 0xFFFF if invalid"]
+    pub fn GAP_GetParamValue(paramID: u16) -> u16;
+}
+unsafe extern "C" {
+    #[doc = " @brief   Setup the device's address type.  If ADDRTYPE_PRIVATE_RESOLVE is selected,\n          the address will change periodically.\n\n @param   addrType - @ref GAP_ADDR_TYPE_DEFINES\n @param   pStaticAddr - Only used with ADDRTYPE_STATIC or ADDRTYPE_PRIVATE_NONRESOLVE type\n                   NULL to auto generate otherwise the application can specify the address value\n\n @return  SUCCESS: address type updated,<BR>\n          bleNotReady: Can't be called until GAP_DeviceInit() is called\n                   and the init process is completed\n          bleIncorrectMode: can't change with an active connection,or INVALIDPARAMETER\n          If return value isn't SUCCESS, the address type remains the same as before this call."]
+    pub fn GAP_ConfigDeviceAddr(addrType: u8, pStaticAddr: *mut u8) -> bStatus_t;
+}
+unsafe extern "C" {
+    #[doc = " @brief   Resolves a private address against an IRK.\n\n @param(in)   pIRK - pointer to the IRK\n @param(in)   pAddr - pointer to the Resolvable Private address\n\n @param(out)  pIRK\n @param(out)  pAddr\n\n @return  SUCCESS: match,<BR>\n          FAILURE: don't match,<BR>\n          INVALIDPARAMETER: parameters invalid<BR>"]
+    pub fn GAP_ResolvePrivateAddr(pIRK: *mut u8, pAddr: *mut u8) -> bStatus_t;
+}
+unsafe extern "C" {
+    #[doc = " @brief   Setup or change advertising and scan response data.\n\n @note    if the return status from this function is SUCCESS,the task isn't complete\n          until the GAP_ADV_DATA_UPDATE_DONE_EVENT is sent to the calling application task.\n\n @param   taskID - task ID of the app requesting the change\n @param   adType - TRUE - advertisement data, FALSE  - scan response data\n @param   dataLen - Octet length of advertData\n @param   pAdvertData - advertising or scan response data\n\n @return  SUCCESS: data accepted\n          bleIncorrectMode: invalid profile role"]
+    pub fn GAP_UpdateAdvertisingData(taskID: u8, adType: u8, dataLen: u16, pAdvertData: *mut u8) -> bStatus_t;
+}
+unsafe extern "C" {
+    #[doc = " @brief       Set a GAP Bond Manager parameter.\n\n @note    You can call this function with a GAP Parameter ID and it will set the GAP Parameter.\n\n @param   param - Profile parameter ID: @ref GAPBOND_PROFILE_PARAMETERS\n @param   len - length of data to write\n @param   pValue - pointer to data to write.  This is dependent on\n          the parameter ID and WILL be cast to the appropriate\n          data type (example: data type of uint16_t will be cast to\n          uint16_t pointer).\n\n @return      SUCCESS or INVALIDPARAMETER (invalid paramID)"]
+    pub fn GAPBondMgr_SetParameter(param: u16, len: u8, pValue: *mut ::core::ffi::c_void) -> bStatus_t;
+}
+unsafe extern "C" {
+    #[doc = " @brief   Get a GAP Bond Manager parameter.\n\n @note    You can call this function with a GAP Parameter ID and it will get a GAP Parameter.\n\n @param   param - Profile parameter ID: @ref GAPBOND_PROFILE_PARAMETERS\n @param   pValue - pointer to location to get the value.  This is dependent on\n          the parameter ID and WILL be cast to the appropriate data type.\n          (example: data type of uint16_t will be cast to uint16_t pointer)\n\n @return      SUCCESS or INVALIDPARAMETER (invalid paramID)"]
+    pub fn GAPBondMgr_GetParameter(param: u16, pValue: *mut ::core::ffi::c_void) -> bStatus_t;
+}
+unsafe extern "C" {
+    #[doc = " @brief   Respond to a passcode request.\n\n @param   connectionHandle - connection handle of the connected device or 0xFFFF if all devices in database.\n @param   status - SUCCESS if passcode is available, otherwise see @ref SMP_PAIRING_FAILED_DEFINES.\n @param   passcode - integer value containing the passcode.\n\n @return  SUCCESS - bond record found and changed\n          bleIncorrectMode - Link not found."]
+    pub fn GAPBondMgr_PasscodeRsp(connectionHandle: u16, status: u8, passcode: u32) -> bStatus_t;
+}
+unsafe extern "C" {
+    #[doc = " @brief   Respond to a passcode request.\n\n @param   connHandle - connection handle of the connected device or 0xFFFF if all devices in database.\n @param   status - SUCCESS if oob data is available, otherwise see @ref SMP_PAIRING_FAILED_DEFINES.\n @param   oob - containing the oob data.\n @param   c_peer - containing the peer confirm.\n\n @return  SUCCESS - bond record found and changed\n          bleIncorrectMode - Link not found."]
+    pub fn GAPBondMgr_OobRsp(connHandle: u16, status: u8, oob: *mut u8, c_peer: *mut u8) -> bStatus_t;
+}
+unsafe extern "C" {
+    #[doc = " @brief   Initialization function for the ecc-function callback.\n\n @param   pEcc - callback registration Structure @ref gapEccCBs_t.\n\n @return  null."]
+    pub fn GAPBondMgr_EccInit(pEcc: *mut gapEccCBs_t);
+}
+unsafe extern "C" {
+    #[doc = " @brief   Send a security request\n\n @param   connHandle - connection handle\n\n @return  SUCCESS: will send\n          bleNotConnected: Link not found\n          bleIncorrectMode: wrong GAP role, must be a Peripheral Role"]
+    pub fn GAPBondMgr_PeriSecurityReq(connHandle: u16) -> bStatus_t;
+}
+unsafe extern "C" {
+    #[doc = " @brief   Set a GAP Role parameter.\n\n @note    You can call this function with a GAP Parameter ID and it will set a GAP Parameter.\n\n @param   param - Profile parameter ID: @ref GAPROLE_PROFILE_PARAMETERS\n @param   len - length of data to write\n @param   pValue - pointer to data to write.  This is dependent on the parameter ID and\n                   WILL be cast to the appropriate data type (example: data type of uint16_t\n                   will be cast to uint16_t pointer).\n\n @return  SUCCESS or INVALIDPARAMETER (invalid paramID)"]
+    pub fn GAPRole_SetParameter(param: u16, len: u16, pValue: *mut ::core::ffi::c_void) -> bStatus_t;
+}
+unsafe extern "C" {
+    #[doc = " @brief   Get a GAP Role parameter.\n\n @note    You can call this function with a GAP Parameter ID and it will get a GAP Parameter.\n\n @param   param - Profile parameter ID: @ref GAPROLE_PROFILE_PARAMETERS\n @param   pValue - pointer to location to get the value.  This is dependent on\n          the parameter ID and WILL be cast to the appropriate\n          data type (example: data type of uint16_t will be cast to\n          uint16_t pointer).\n\n @return      SUCCESS or INVALIDPARAMETER (invalid paramID)"]
+    pub fn GAPRole_GetParameter(param: u16, pValue: *mut ::core::ffi::c_void) -> bStatus_t;
+}
+unsafe extern "C" {
+    #[doc = " @brief       Terminates the existing connection.\n\n @return      SUCCESS or bleIncorrectMode"]
+    pub fn GAPRole_TerminateLink(connHandle: u16) -> bStatus_t;
+}
+unsafe extern "C" {
+    #[doc = " @brief   Read Rssi Cmd.\n\n @param   connHandle - connection handle\n\n @return  bStatus_t: HCI Error Code.<BR>\n"]
+    pub fn GAPRole_ReadRssiCmd(connHandle: u16) -> bStatus_t;
+}
+unsafe extern "C" {
+    #[doc = " @brief   used to synchronize with a periodic advertising train from an advertiser and\n          begin receiving periodic advertising packets.\n\n @param   pSync - sync parameters@ gapCreateSync_t\n\n @return  bStatus_t: HCI Error Code.<BR>\n"]
+    pub fn GAPRole_CreateSync(pSync: *mut gapCreateSync_t) -> bStatus_t;
+}
+unsafe extern "C" {
+    #[doc = " @brief   used to cancel the HCI_LE_Periodic_Advertising_Create_Sync command while\n          it is pending.\n\n @param   None.\n\n @return  bStatus_t: HCI Error Code.<BR>\n"]
+    pub fn GAPRole_CancelSync() -> bStatus_t;
+}
+unsafe extern "C" {
+    #[doc = " @brief   used to stop reception of the periodic advertising train identified\n          by the Sync_Handle parameter.\n\n @param   syncHandle-identifying the periodic advertising train\n\n @return  bStatus_t: HCI Error Code.<BR>\n"]
+    pub fn GAPRole_TerminateSync(syncHandle: u16) -> bStatus_t;
+}
+unsafe extern "C" {
+    #[doc = " @brief   Update the link connection parameters.\n\n @param   connHandle - connection handle\n @param   connIntervalMin - minimum connection interval in 1.25ms units\n @param   connIntervalMax - maximum connection interval in 1.25ms units\n @param   connLatency - number of LL latency connection events\n @param   connTimeout - connection timeout in 10ms units\n\n @return  SUCCESS: Connection update started started.<BR>\n          bleIncorrectMode: No connection to update.<BR>"]
+    pub fn GAPRole_UpdateLink(
+        connHandle: u16,
+        connIntervalMin: u16,
+        connIntervalMax: u16,
+        connLatency: u16,
+        connTimeout: u16,
+    ) -> bStatus_t;
+}
+unsafe extern "C" {
+    #[doc = " @brief   Update the connection phy.\n\n @param   connHandle - connection handle\n @param   all_phys - a bit field that  allows the Host to specify, for each direction\n                     set BIT0:The Host has no preference among the transmitter PHYs supported by the Controller\n                     set BIT1:The Host has no preference among the receiver PHYs supported by the Controller\n @param   tx_phys - a bit field that indicates the transmitter PHYs.(GAP_PHY_BIT_TYPE)\n @param   rx_phys - a bit field that indicates the receiver PHYs.(GAP_PHY_BIT_TYPE)\n @param   phy_options - resv\n\n @return  SUCCESS: PHY update started started .<BR>\n          bleIncorrectMode: No connection to update.<BR>"]
+    pub fn GAPRole_UpdatePHY(connHandle: u16, all_phys: u8, tx_phys: u8, rx_phys: u8, phy_options: u16) -> bStatus_t;
+}
+unsafe extern "C" {
+    #[doc = " @brief   used to allow the Host to specify the privacy mode to be used  for a given entry on the resolving list.\n\n @note    This command shall not be used when address resolution is enabled in the Controller and:\n          Advertising (other than periodic advertising) is enabled,\n          Scanning is enabled, or\n          an GAPRole_CentralEstablishLink, or GAPRole_CreateSync command is pending.\n\n @param   addrTypePeer - 0x00:Public Identity Address 0x01:Random (static) Identity Address\n @param   peerAddr - Public Identity Address or Random (static) Identity Address of the advertiser\n @param   privacyMode - 0x00:Use Network Privacy Mode for this peer device (default)\n                        0x01:Use Device Privacy Mode for this peer device\n\n @return  Command Status.\n"]
+    pub fn GAPRole_SetPrivacyMode(addrTypePeer: u8, peerAddr: *mut u8, privacyMode: u8) -> bStatus_t;
+}
+unsafe extern "C" {
+    #[doc = " @brief   used to set the path loss threshold reporting parameters.\n\n @param   pParm - set path loss parameters@ gapRoleSetPathLossReporting_t\n\n @return  Command Status.\n"]
+    pub fn GAPRole_SetPathLossReporting(pParm: *mut gapRoleSetPathLossReporting_t) -> bStatus_t;
+}
+unsafe extern "C" {
+    #[doc = " @brief   used to set power level management.\n\n @param   pParm - set power level parameters@ gapRolePowerlevelManagement_t\n\n @return  Command Status.\n"]
+    pub fn GAPRole_SetPowerlevel(pParm: *mut gapRolePowerlevelManagement_t) -> bStatus_t;
+}
+unsafe extern "C" {
+    #[doc = " @brief   Initialization function for the GAP Role Task.\n\n @param   None.\n\n @return  SUCCESS,bleInvalidRange"]
+    pub fn GAPRole_BroadcasterInit() -> bStatus_t;
+}
+unsafe extern "C" {
+    #[doc = " @brief   Does the device initialization.  Only call this function once.\n\n @param   pAppCallbacks - pointer to application callbacks.\n\n @return  SUCCESS or bleAlreadyInRequestedMode"]
+    pub fn GAPRole_BroadcasterStartDevice(pAppCallbacks: *mut gapRolesBroadcasterCBs_t) -> bStatus_t;
+}
+unsafe extern "C" {
+    #[doc = " @brief   Does the Broadcaster receive scan request call initialization.\n\n @param   pAppCallbacks - pointer to application callbacks.\n\n @return  None"]
+    pub fn GAPRole_BroadcasterSetCB(pAppCallbacks: *mut gapRolesBroadcasterCBs_t);
+}
+unsafe extern "C" {
+    #[doc = " @internal\n\n @brief   Observer Profile Task initialization function.\n\n @param   None.\n\n @return  SUCCESS,bleInvalidRange"]
+    pub fn GAPRole_ObserverInit() -> bStatus_t;
+}
+unsafe extern "C" {
+    #[doc = " @brief   Start the device in Observer role.  This function is typically\n          called once during system startup.\n\n @param   pAppCallbacks - pointer to application callbacks\n\n @return  SUCCESS: Operation successful.<BR>\n          bleAlreadyInRequestedMode: Device already started.<BR>"]
+    pub fn GAPRole_ObserverStartDevice(pAppCallbacks: *mut gapRoleObserverCB_t) -> bStatus_t;
+}
+unsafe extern "C" {
+    #[doc = " @brief   Start a device discovery scan.\n\n @param   mode - discovery mode: @ref GAP_DEVDISC_MODE_DEFINES\n @param   activeScan - TRUE to perform active scan\n @param   whiteList - TRUE to only scan for devices in the white list\n\n @return  SUCCESS: Discovery scan started.<BR>\n          bleIncorrectMode: Invalid profile role.<BR>\n          bleAlreadyInRequestedMode: Not available.<BR>"]
+    pub fn GAPRole_ObserverStartDiscovery(mode: u8, activeScan: u8, whiteList: u8) -> bStatus_t;
+}
+unsafe extern "C" {
+    #[doc = " @brief   Cancel a device discovery scan.\n\n @return  SUCCESS: Cancel started.<BR>\n          bleInvalidTaskID: Not the task that started discovery.<BR>\n          bleIncorrectMode: Not in discovery mode.<BR>"]
+    pub fn GAPRole_ObserverCancelDiscovery() -> bStatus_t;
+}
+unsafe extern "C" {
+    #[doc = " @internal\n\n @brief   Initialization function for the GAP Role Task.\n          This is called during initialization and should contain\n          any application specific initialization (ie. hardware\n          initialization/setup, table initialization, power up\n          notificaiton ... ).\n\n @param   None.\n\n @return  SUCCESS,bleInvalidRange"]
+    pub fn GAPRole_PeripheralInit() -> bStatus_t;
+}
+unsafe extern "C" {
+    #[doc = " @brief   Does the device initialization.  Only call this function once.\n\n @param   pAppCallbacks - pointer to application callbacks.\n\n @return  SUCCESS or bleAlreadyInRequestedMode"]
+    pub fn GAPRole_PeripheralStartDevice(
+        taskid: u8,
+        pCB: *mut gapBondCBs_t,
+        pAppCallbacks: *mut gapRolesCBs_t,
+    ) -> bStatus_t;
+}
+unsafe extern "C" {
+    #[doc = " @brief   Update the parameters of an existing connection\n\n @param   connHandle - the connection Handle\n @param   connIntervalMin - minimum connection interval in 1.25ms units\n @param   connIntervalMax - maximum connection interval in 1.25ms units\n @param   latency - the new slave latency\n @param   connTimeout - the new timeout value\n @param   taskId - taskID will recv L2CAP_SIGNAL_EVENT message\n\n @return  SUCCESS, bleNotConnected or bleInvalidRange"]
+    pub fn GAPRole_PeripheralConnParamUpdateReq(
+        connHandle: u16,
+        connIntervalMin: u16,
+        connIntervalMax: u16,
+        latency: u16,
+        connTimeout: u16,
+        taskId: u8,
+    ) -> bStatus_t;
+}
+unsafe extern "C" {
+    #[doc = " @internal\n\n @brief   Central Profile Task initialization function.\n\n @param   None.\n\n @return  SUCCESS,bleInvalidRange"]
+    pub fn GAPRole_CentralInit() -> bStatus_t;
+}
+unsafe extern "C" {
+    #[doc = " @brief   Start the device in Central role.  This function is typically\n          called once during system startup.\n\n @param   pAppCallbacks - pointer to application callbacks\n\n @return  SUCCESS: Operation successful.<BR>\n          bleAlreadyInRequestedMode: Device already started.<BR>"]
+    pub fn GAPRole_CentralStartDevice(
+        taskid: u8,
+        pCB: *mut gapBondCBs_t,
+        pAppCallbacks: *mut gapCentralRoleCB_t,
+    ) -> bStatus_t;
+}
+unsafe extern "C" {
+    #[doc = " @brief   Start a device discovery scan.\n\n @param   mode - discovery mode: @ref GAP_DEVDISC_MODE_DEFINES\n @param   activeScan - TRUE to perform active scan\n @param   whiteList - TRUE to only scan for devices in the white list\n\n @return  SUCCESS: Discovery scan started.<BR>\n          bleIncorrectMode: Invalid profile role.<BR>\n          bleAlreadyInRequestedMode: Not available.<BR>"]
+    pub fn GAPRole_CentralStartDiscovery(mode: u8, activeScan: u8, whiteList: u8) -> bStatus_t;
+}
+unsafe extern "C" {
+    #[doc = " @brief   Cancel a device discovery scan.\n\n @return  SUCCESS: Cancel started.<BR>\n          bleInvalidTaskID: Not the task that started discovery.<BR>\n          bleIncorrectMode: Not in discovery mode.<BR>"]
+    pub fn GAPRole_CentralCancelDiscovery() -> bStatus_t;
+}
+unsafe extern "C" {
+    #[doc = " @brief   This API is called by the Central to update the Host data channels\n          initiating an Update Data Channel control procedure.\n\n @note    While it isn't specified,it is assumed that the Host expects an\n          update channel map on all active connections and periodic advertise.\n\n input parameters\n\n @param  chanMap - A five byte array containing one bit per data channel\n                   where a 1 means the channel is \"used\".\n\n @return  SUCCESS"]
+    pub fn GAPRole_SetHostChanClassification(chanMap: *mut u8);
+}
+unsafe extern "C" {
+    #[doc = " @brief   Establish a link to a peer device.\n\n @param   highDutyCycle -  TRUE to high duty cycle scan, FALSE if not\n @param   whiteList - determines use of the white list: TRUE-enable\n @param   addrTypePeer - address type of the peer device: @ref GAP_ADDR_TYPE_DEFINES\n @param   peerAddr - peer device address\n\n @return  SUCCESS: started establish link process.<BR>\n          bleIncorrectMode: invalid profile role.<BR>\n          bleNotReady: a scan is in progress.<BR>\n          bleAlreadyInRequestedMode: can't process now.<BR>\n          bleNoResources: too many links.<BR>"]
+    pub fn GAPRole_CentralEstablishLink(
+        highDutyCycle: u8,
+        whiteList: u8,
+        addrTypePeer: u8,
+        peerAddr: *mut u8,
+    ) -> bStatus_t;
+}
+unsafe extern "C" {
+    #[doc = " @brief   RF_PHY Profile Task initialization function.\n\n @param   None.\n\n @return  0 - success."]
+    pub fn RF_RoleInit() -> bStatus_t;
+}
+unsafe extern "C" {
+    #[doc = " @brief   rf config.\n\n @param   pConfig - rf config parameters\n\n @return  0 - success."]
+    pub fn RF_Config(pConfig: *mut rfConfig_t) -> bStatus_t;
+}
+unsafe extern "C" {
+    #[doc = " @brief   rx mode.\n\n @param   txBuf - rx mode tx data\n @param   txLen - rx mode tx length(0-251)\n @param   pktRxType - rx mode rx package type\n                      broadcast type(0xFF):receive all matching types,\n                      others:receive match type or broadcast type\n @param   pktTxType - rx mode tx package type(auto mode)\n                      broadcast type(0xFF):received by all matching types;\n                      others:only received by matching type\n\n @return  0 - success. 1-access address error 2-busy"]
+    pub fn RF_Rx(txBuf: *mut u8, txLen: u8, pktRxType: u8, pktTxType: u8) -> bStatus_t;
+}
+unsafe extern "C" {
+    #[doc = " @brief   tx mode.\n\n @param   txBuf - tx mode tx data\n @param   txLen - tx mode tx length(0-251)\n @param   pktTxType - tx mode tx package type\n                      broadcast type(0xFF):received by all matching types;\n                      others:only received by matching type\n @param   pktRxType - tx mode rx package type(auto mode)\n                      broadcast type(0xFF):receive all matching types,\n                      others:receive match type or broadcast type\n\n @return  0 - success. 1-access address error 2-busy"]
+    pub fn RF_Tx(txBuf: *mut u8, txLen: u8, pktTxType: u8, pktRxType: u8) -> bStatus_t;
+}
+unsafe extern "C" {
+    #[doc = " @brief   shut down,stop tx/rx mode.\n\n @param   None.\n\n @return  0 - success."]
+    pub fn RF_Shut() -> bStatus_t;
+}
+unsafe extern "C" {
+    #[doc = " @brief   rf mode set radio channel/frequency.\n\n @param   channel.\n\n @return  0 - success."]
+    pub fn RF_SetChannel(channel: u32);
+}
+unsafe extern "C" {
+    #[doc = " @brief   rf mode set radio frequency and whitening channel index\n  note: LLEMode bit6 set 1\n\n @param   frequency -\n @param   ch - the whitening channel index\n\n @return  0 - success."]
+    pub fn RF_SetFrequency(frequency: u32, ch: u8) -> bStatus_t;
+}
+unsafe extern "C" {
+    #[doc = " @brief   shut down rf frequency hopping\n\n @param   None.\n\n @return  None."]
+    pub fn RF_FrequencyHoppingShut();
+}
+unsafe extern "C" {
+    #[doc = " @brief\n\n @param   resendCount - Maximum count of sending HOP_TX pdu,0 = unlimited.\n\n @return  0 - success."]
+    pub fn RF_FrequencyHoppingTx(resendCount: u8) -> u8;
+}
+unsafe extern "C" {
+    #[doc = " @brief\n\n @param   timeoutMS - Maximum time to wait for receiving HOP_TX pdu(Time = n * 1mSec),0 = unlimited.\n\n @return  0 - success.1-fail.2-LLEMode error(shall AUTO)"]
+    pub fn RF_FrequencyHoppingRx(timeoutMS: u32) -> u8;
+}
+unsafe extern "C" {
+    #[doc = " @brief   Erase FH bonded device\n\n @param   None.\n\n @return  None."]
+    pub fn RF_BondingErase();
+}
+unsafe extern "C" {
+    #[doc = " @brief   single channel mode.\n\n @param   ch - rf channel,f=2402+ch*2 MHz, ch=0,...,39\n\n @return  0 - success."]
+    pub fn LL_SingleChannel(ch: u8) -> bStatus_t;
+}
+unsafe extern "C" {
+    #[doc = " @brief   used to stop any test which is in progress.\n\n @param(in)   pPktNum - null\n\n @param(out)  the number of received packets.\n\n @return  0 - success."]
+    pub fn LL_TestEnd(pPktNum: *mut u8) -> bStatus_t;
+}
+unsafe extern "C" {
+    #[doc = " @brief   used to start a test where the DUT receives test reference packets at a fixed interval\n\n input parameters\n\n @param   opcode = 0x201D\n              pParm0 - RX_Channel\n\n          opcode = 0x2033\n              pParm0 - RX_Channel\n              pParm1 - PHY\n              pParm2 - Modulation_Index\n\n @return  0 - success."]
+    pub fn API_LE_ReceiverTestCmd(pParm: *mut u8, opcode: u16) -> bStatus_t;
+}
+unsafe extern "C" {
+    #[doc = " @brief   used to start a test where the DUT generates test reference packets at a fixed interval\n\n @param   opcode = 0x201E\n              pParm 0 - TX_Channel\n              pParm 1 - Test_Data_Length\n              pParm 2 - Packet_Payload\n\n          opcode = 0x2034\n              pParm 0 - TX_Channel\n              pParm 1 - Test_Data_Length\n              pParm 2 - Packet_Payload\n              pParm 3 - PHY\n\n @return  0 - success."]
+    pub fn API_LE_TransmitterTestCmd(pParm: *mut u8, opcode: u16) -> bStatus_t;
+}
+unsafe extern "C" {
+    #[doc = " @brief   used to stop any test which is in progress\n\n @param   None\n\n @return  0 - success."]
+    pub fn API_LE_TestEndCmd() -> bStatus_t;
+}
+unsafe extern "C" {
+    #[doc = " @brief   resv\n\n @param   None\n\n @return  None."]
+    pub fn RFEND_SetSensitivity();
+}
+unsafe extern "C" {
+    #[doc = " @brief   used to set rf TxCtune value\n\n @param   pParm(in) - Must provide length of parameter followed by 6 bytes parameter\n\n @return  Command Status."]
+    pub fn RFEND_TXCtuneSet(pParm: *mut u8) -> bStatus_t;
+}
+unsafe extern "C" {
+    #[doc = " @brief   used to get rf TxCtune value\n\n @param   pParm(out) - length of parameter(6) followed by 6 bytes parameter\n\n @return  Command Status."]
+    pub fn RFEND_TXCtuneGet(pParm: *mut u8) -> bStatus_t;
+}

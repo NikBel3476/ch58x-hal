@@ -56,7 +56,8 @@ const ROM_CFG_MAC_ADDR: u32 = 0x7F018;
 /// address for BOOT information
 const ROM_CFG_BOOT_INFO: u32 = 0x7DFF8;
 
-#[link(name = "ISP583")]
+// #[link(name = "ISP583")]
+#[link(name = "ISP592")]
 extern "C" {
     /**
      * @brief   execute Flash/EEPROM command, caller from FlashROM or RAM
